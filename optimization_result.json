@@ -1,8 +1,157 @@
 {
-  "status": "INFEASIBLE",
-  "solver_status_message": "Problem \u00e7\u00f6z\u00fclemez (k\u0131s\u0131tlar kar\u015f\u0131lanam\u0131yor).",
-  "processing_time_seconds": 0.1022188663482666,
-  "objective_value": null,
-  "solution": null,
+  "status": "OPTIMAL",
+  "solver_status_message": "Optimal çözüm bulundu.",
+  "processing_time_seconds": 0.2325458526611328,
+  "objective_value": -19.0,
+  "solution": {
+    "assignments": [
+      {
+        "employee_id": "E001",
+        "shift_id": "S0013"
+      },
+      {
+        "employee_id": "E001",
+        "shift_id": "S0018"
+      },
+      {
+        "employee_id": "E002",
+        "shift_id": "S0010"
+      },
+      {
+        "employee_id": "E002",
+        "shift_id": "S0013"
+      },
+      {
+        "employee_id": "E003",
+        "shift_id": "S0016"
+      },
+      {
+        "employee_id": "E003",
+        "shift_id": "S0018"
+      },
+      {
+        "employee_id": "E004",
+        "shift_id": "S0002"
+      },
+      {
+        "employee_id": "E004",
+        "shift_id": "S0016"
+      },
+      {
+        "employee_id": "E005",
+        "shift_id": "S0007"
+      },
+      {
+        "employee_id": "E005",
+        "shift_id": "S0008"
+      },
+      {
+        "employee_id": "E006",
+        "shift_id": "S0011"
+      },
+      {
+        "employee_id": "E006",
+        "shift_id": "S0012"
+      },
+      {
+        "employee_id": "E007",
+        "shift_id": "S0004"
+      },
+      {
+        "employee_id": "E012",
+        "shift_id": "S0015"
+      },
+      {
+        "employee_id": "E015",
+        "shift_id": "S0006"
+      },
+      {
+        "employee_id": "E017",
+        "shift_id": "S0014"
+      },
+      {
+        "employee_id": "E017",
+        "shift_id": "S0015"
+      },
+      {
+        "employee_id": "E018",
+        "shift_id": "S0014"
+      },
+      {
+        "employee_id": "E019",
+        "shift_id": "S0009"
+      },
+      {
+        "employee_id": "E022",
+        "shift_id": "S0011"
+      },
+      {
+        "employee_id": "E022",
+        "shift_id": "S0017"
+      },
+      {
+        "employee_id": "E023",
+        "shift_id": "S0001"
+      },
+      {
+        "employee_id": "E023",
+        "shift_id": "S0017"
+      },
+      {
+        "employee_id": "E025",
+        "shift_id": "S0009"
+      },
+      {
+        "employee_id": "E028",
+        "shift_id": "S0019"
+      },
+      {
+        "employee_id": "E030",
+        "shift_id": "S0003"
+      },
+      {
+        "employee_id": "E030",
+        "shift_id": "S0017"
+      },
+      {
+        "employee_id": "E039",
+        "shift_id": "S0013"
+      },
+      {
+        "employee_id": "E041",
+        "shift_id": "S0012"
+      },
+      {
+        "employee_id": "E045",
+        "shift_id": "S0005"
+      },
+      {
+        "employee_id": "E047",
+        "shift_id": "S0012"
+      },
+      {
+        "employee_id": "E049",
+        "shift_id": "S0015"
+      },
+      {
+        "employee_id": "E049",
+        "shift_id": "S0019"
+      }
+    ]
+  },
+  "metrics": {
+    "total_understaffing": 0,
+    "total_overstaffing": 14,
+    "min_staffing_coverage_ratio": 1.0,
+    "skill_coverage_ratio": 1.0,
+    "positive_preferences_met_count": 17,
+    "negative_preferences_assigned_count": 0,
+    "total_preference_score_achieved": 17,
+    "workload_distribution_std_dev": 0.8151073548925932,
+    "bad_shift_distribution_std_dev": 0.6974238309665077,
+    "system_adaptability_score": 8.0,
+    "config_complexity_score": 8.0,
+    "rule_count": 5
+  },
   "error_details": null
 }

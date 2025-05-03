@@ -2,6 +2,7 @@ import logging
 import yaml
 import os
 import time
+import json
 from typing import Any, Dict, List, Optional, Tuple
 from fastapi import FastAPI, HTTPException, Body, Request
 from fastapi.exceptions import RequestValidationError
@@ -74,13 +75,27 @@ class OptimizationSolution(BaseModel):
 
 # +++ Yeni Metrik Modeli +++
 class MetricsOutput(BaseModel):
+    # Operasyonel Metrikler
     total_understaffing: Optional[int] = None
     total_overstaffing: Optional[int] = None
+    min_staffing_coverage_ratio: Optional[float] = None  # Yeni: Minimum personel karşılama oranı
+    skill_coverage_ratio: Optional[float] = None  # Yeni: Yetenek gereksinimi karşılama oranı
+
+    # Çalışan Memnuniyeti Metrikleri
     positive_preferences_met_count: Optional[int] = None
     negative_preferences_assigned_count: Optional[int] = None
     total_preference_score_achieved: Optional[int] = None
+
+    # Adalet Metrikleri
+    workload_distribution_std_dev: Optional[float] = None  # Yeni: İş yükü dağılımı adaleti
+    bad_shift_distribution_std_dev: Optional[float] = None  # Yeni: "Kötü" vardiya dağılımı adaleti
+
+    # Sistem Esnekliği ve Uyarlanabilirlik Metrikleri
+    system_adaptability_score: Optional[float] = None  # Yeni: Sistem esnekliği ve uyarlanabilirlik skoru
+    config_complexity_score: Optional[float] = None  # Yeni: Konfigürasyon karmaşıklık skoru
+    rule_count: Optional[int] = None  # Yeni: Toplam kural sayısı
+
     # Gelecekteki metrikler buraya eklenecek
-    # work_distribution_std_dev: Optional[float] = None
 
 class OptimizationResponse(BaseModel):
     status: str
@@ -212,19 +227,40 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
             try:
                 # Hesaplanan metrikleri alıp Pydantic modeline dönüştür
                 metrics_data = MetricsOutput(
+                    # Operasyonel Metrikler
                     total_understaffing=result['metrics'].get('total_understaffing'),
                     total_overstaffing=result['metrics'].get('total_overstaffing'),
+                    min_staffing_coverage_ratio=result['metrics'].get('min_staffing_coverage_ratio'),
+                    skill_coverage_ratio=result['metrics'].get('skill_coverage_ratio'),
+
+                    # Çalışan Memnuniyeti Metrikleri
                     positive_preferences_met_count=result['metrics'].get('positive_preferences_met_count'),
                     negative_preferences_assigned_count=result['metrics'].get('negative_preferences_assigned_count'),
-                    total_preference_score_achieved=result['metrics'].get('total_preference_score_achieved')
+                    total_preference_score_achieved=result['metrics'].get('total_preference_score_achieved'),
+
+                    # Adalet Metrikleri
+                    workload_distribution_std_dev=result['metrics'].get('workload_distribution_std_dev'),
+                    bad_shift_distribution_std_dev=result['metrics'].get('bad_shift_distribution_std_dev'),
+
+                    # Sistem Esnekliği ve Uyarlanabilirlik Metrikleri
+                    system_adaptability_score=result['metrics'].get('system_adaptability_score'),
+                    config_complexity_score=result['metrics'].get('config_complexity_score'),
+                    rule_count=result['metrics'].get('rule_count')
                 )
                 # Log mesajını da güncelleyelim
                 metric_log_parts = [
                     f"Understaffing={metrics_data.total_understaffing}",
                     f"Overstaffing={metrics_data.total_overstaffing}",
+                    f"Min Personel Karşılama Oranı={metrics_data.min_staffing_coverage_ratio:.2f}" if metrics_data.min_staffing_coverage_ratio is not None else None,
+                    f"Yetenek Karşılama Oranı={metrics_data.skill_coverage_ratio:.2f}" if metrics_data.skill_coverage_ratio is not None else None,
                     f"Pozitif Tercih Sayısı={metrics_data.positive_preferences_met_count}",
                     f"Negatif Tercih Sayısı={metrics_data.negative_preferences_assigned_count}",
-                    f"Toplam Tercih Skoru={metrics_data.total_preference_score_achieved}"
+                    f"Toplam Tercih Skoru={metrics_data.total_preference_score_achieved}",
+                    f"İş Yükü Dağılımı StdDev={metrics_data.workload_distribution_std_dev:.2f}" if metrics_data.workload_distribution_std_dev is not None else None,
+                    f"Kötü Vardiya Dağılımı StdDev={metrics_data.bad_shift_distribution_std_dev:.2f}" if metrics_data.bad_shift_distribution_std_dev is not None else None,
+                    f"Sistem Uyarlanabilirlik Skoru={metrics_data.system_adaptability_score:.2f}" if metrics_data.system_adaptability_score is not None else None,
+                    f"Konfigürasyon Karmaşıklık Skoru={metrics_data.config_complexity_score:.2f}" if metrics_data.config_complexity_score is not None else None,
+                    f"Kural Sayısı={metrics_data.rule_count}" if metrics_data.rule_count is not None else None
                 ]
                 logger.info(f"Hesaplanan Metrikler: {', '.join(part for part in metric_log_parts if part)}")
             except Exception as e:
@@ -240,10 +276,41 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
             solution=solution_data,
             metrics=metrics_data # +++ Metrikleri yanıta ekle +++
         )
+
+        # Sonuçları optimization_result.json dosyasına kaydet
+        try:
+            script_dir = os.path.dirname(os.path.dirname(__file__))
+            result_path = os.path.join(script_dir, "optimization_result.json")
+            with open(result_path, 'w', encoding='utf-8') as f:
+                json.dump(response.model_dump(), f, indent=2, ensure_ascii=False)
+            logger.info(f"Optimizasyon sonuçları {result_path} dosyasına kaydedildi.")
+        except Exception as e:
+            logger.error(f"Sonuçlar dosyaya kaydedilirken hata: {e}", exc_info=True)
+
         logger.info(f"Optimizasyon tamamlandı. Durum: {status}, İşlem Süresi: {result.get('processing_time_seconds'):.2f}s")
 
     except Exception as e:
         logger.error(f"Optimizasyon sırasında kritik hata: {e}", exc_info=True)
+
+        # Hata durumunda da sonuçları dosyaya kaydet
+        try:
+            error_response = OptimizationResponse(
+                status="ERROR",
+                solver_status_message=None,
+                processing_time_seconds=None,
+                objective_value=None,
+                solution=None,
+                metrics=None,
+                error_details=str(e)
+            )
+            script_dir = os.path.dirname(os.path.dirname(__file__))
+            result_path = os.path.join(script_dir, "optimization_result.json")
+            with open(result_path, 'w', encoding='utf-8') as f:
+                json.dump(error_response.model_dump(), f, indent=2, ensure_ascii=False)
+            logger.info(f"Hata durumu optimization_result.json dosyasına kaydedildi.")
+        except Exception as save_error:
+            logger.error(f"Hata durumu dosyaya kaydedilirken ikincil hata: {save_error}", exc_info=True)
+
         # Hata durumunda istemciye detaylı hata mesajı gönderme (güvenlik)
         # Sadece genel bir hata mesajı ve loglarda detay kalsın
         raise HTTPException(status_code=500, detail="An internal error occurred during optimization.")

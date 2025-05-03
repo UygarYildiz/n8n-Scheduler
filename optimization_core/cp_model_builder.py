@@ -163,20 +163,224 @@ class ShiftSchedulingModelBuilder:
                             negative_prefs_assigned += 1
                         total_pref_score_achieved += pref_score # Atanan tüm vardiyaların skorlarını topla
 
+                # --- Minimum Personel Karşılama Oranı Hesaplaması ---
+                total_shifts = len(self.shifts_dict)
+                shifts_meeting_min_staff = 0
+
+                for shift_id, assigned_var in self.shift_employee_counts.items():
+                    shift_info = self.shifts_dict.get(shift_id)
+                    if not shift_info:
+                        continue
+
+                    required_staff = int(shift_info.get('required_staff', 1))
+                    if required_staff <= 0:
+                        continue
+
+                    assigned_staff = self.solver.Value(assigned_var)
+                    if assigned_staff >= required_staff:
+                        shifts_meeting_min_staff += 1
+
+                min_staffing_coverage_ratio = shifts_meeting_min_staff / total_shifts if total_shifts > 0 else 1.0
+
+                # --- Yetenek Gereksinimi Karşılama Oranı Hesaplaması ---
+                skill_requirements = self.config.get('rules', {}).get('skill_requirements', [])
+                total_skill_requirements = 0
+                met_skill_requirements = 0
+
+                for rule in skill_requirements:
+                    shift_pattern = rule.get('shift_pattern', '*')
+                    skill_name = rule.get('skill')
+                    min_count = rule.get('min_count', 0)
+
+                    if not skill_name or min_count <= 0:
+                        continue
+
+                    # Kural ile eşleşen vardiyaları bul
+                    import fnmatch
+                    matching_shift_ids = [s_id for s_id, s_info in self.shifts_dict.items()
+                                         if fnmatch.fnmatch(s_info.get('name', ''), shift_pattern)]
+
+                    for shift_id in matching_shift_ids:
+                        total_skill_requirements += 1
+
+                        # Bu vardiyaya atanan ve bu yeteneğe sahip çalışanları bul
+                        skilled_employees_assigned = 0
+                        for (emp_id, s_id), var in self.assignment_vars.items():
+                            if s_id != shift_id or self.solver.Value(var) != 1:
+                                continue
+
+                            # Çalışanın bu yeteneğe sahip olup olmadığını kontrol et
+                            has_skill = False
+                            for skill_data in self.input_data.get('skills', []):
+                                if skill_data.get('employee_id') == emp_id and skill_data.get('skill') == skill_name:
+                                    has_skill = True
+                                    break
+
+                            if has_skill:
+                                skilled_employees_assigned += 1
+
+                        if skilled_employees_assigned >= min_count:
+                            met_skill_requirements += 1
+
+                skill_coverage_ratio = met_skill_requirements / total_skill_requirements if total_skill_requirements > 0 else 1.0
+
+                # --- İş Yükü Dağılımı Adaleti Hesaplaması ---
+                workload_by_employee = {}
+                for employee_id, count_var in self.employee_shift_counts.items():
+                    workload_by_employee[employee_id] = self.solver.Value(count_var)
+
+                # Standart sapma hesapla
+                if workload_by_employee:
+                    workload_values = list(workload_by_employee.values())
+                    mean_workload = sum(workload_values) / len(workload_values)
+                    variance = sum((x - mean_workload) ** 2 for x in workload_values) / len(workload_values)
+                    workload_distribution_std_dev = variance ** 0.5
+                else:
+                    workload_distribution_std_dev = 0.0
+
+                # --- "Kötü" Vardiya Dağılımı Adaleti Hesaplaması ---
+                # "Kötü" vardiyaları tanımla (örn: gece vardiyaları, hafta sonu vardiyaları)
+                bad_shifts = []
+                for shift_id, shift_info in self.shifts_dict.items():
+                    shift_name = shift_info.get('name', '').lower()
+                    start_time = shift_info.get('start_time', '')
+
+                    # Gece vardiyaları
+                    is_night_shift = False
+                    if 'gece' in shift_name:
+                        is_night_shift = True
+                    elif start_time:
+                        # start_time bir string veya datetime.time nesnesi olabilir
+                        if isinstance(start_time, str):
+                            # String ise startswith kullan
+                            if start_time.startswith(('20:', '21:', '22:', '23:', '00:', '01:', '02:', '03:', '04:', '05:')):
+                                is_night_shift = True
+                        elif isinstance(start_time, dt_time):
+                            # datetime.time nesnesi ise saat değerini kontrol et
+                            if start_time.hour >= 20 or start_time.hour <= 5:
+                                is_night_shift = True
+
+                    if is_night_shift:
+                        bad_shifts.append(shift_id)
+
+                    # Hafta sonu vardiyaları
+                    date_str = shift_info.get('date')
+                    if date_str:
+                        try:
+                            shift_date = date.fromisoformat(str(date_str))
+                            if shift_date.weekday() >= 5:  # 5=Cumartesi, 6=Pazar
+                                bad_shifts.append(shift_id)
+                        except (ValueError, TypeError):
+                            pass
+
+                # Her çalışan için "kötü" vardiya sayısını hesapla
+                bad_shifts_by_employee = {emp_id: 0 for emp_id in self.employee_shift_counts.keys()}
+
+                for (emp_id, shift_id), var in self.assignment_vars.items():
+                    if self.solver.Value(var) == 1 and shift_id in bad_shifts:
+                        bad_shifts_by_employee[emp_id] += 1
+
+                # Standart sapma hesapla
+                if bad_shifts_by_employee:
+                    bad_shift_values = list(bad_shifts_by_employee.values())
+                    mean_bad_shifts = sum(bad_shift_values) / len(bad_shift_values)
+                    variance = sum((x - mean_bad_shifts) ** 2 for x in bad_shift_values) / len(bad_shift_values)
+                    bad_shift_distribution_std_dev = variance ** 0.5
+                else:
+                    bad_shift_distribution_std_dev = 0.0
+
+                # --- Sistem Esnekliği ve Uyarlanabilirlik Metrikleri Hesaplaması ---
+                # Kural sayısını hesapla
+                rule_count = 0
+
+                # min_staffing_requirements kuralları
+                min_staffing_rules = self.config.get('rules', {}).get('min_staffing_requirements', [])
+                rule_count += len(min_staffing_rules)
+
+                # skill_requirements kuralları
+                skill_rules = self.config.get('rules', {}).get('skill_requirements', [])
+                rule_count += len(skill_rules)
+
+                # Diğer kurallar
+                if 'max_consecutive_shifts' in self.config.get('rules', {}):
+                    rule_count += 1
+                if 'min_rest_time_hours' in self.config.get('rules', {}) or 'min_rest_time_minutes' in self.config.get('rules', {}):
+                    rule_count += 1
+
+                # Konfigürasyon karmaşıklık skoru hesapla
+                # (0-10 arası bir skor, 10 en karmaşık)
+                config_complexity = 0
+
+                # Kural sayısına göre karmaşıklık
+                if rule_count <= 2:
+                    config_complexity += 2
+                elif rule_count <= 5:
+                    config_complexity += 4
+                elif rule_count <= 10:
+                    config_complexity += 6
+                else:
+                    config_complexity += 8
+
+                # Kural türlerine göre karmaşıklık
+                if 'min_staffing_requirements' in self.config.get('rules', {}):
+                    config_complexity += 1
+                if 'skill_requirements' in self.config.get('rules', {}):
+                    config_complexity += 1
+                if 'min_rest_time_hours' in self.config.get('rules', {}) or 'min_rest_time_minutes' in self.config.get('rules', {}):
+                    config_complexity += 1
+                if 'max_consecutive_shifts' in self.config.get('rules', {}):
+                    config_complexity += 1
+
+                # Maksimum 10 olacak şekilde normalize et
+                config_complexity_score = min(10, config_complexity)
+
+                # Sistem uyarlanabilirlik skoru hesapla
+                # (0-10 arası bir skor, 10 en uyarlanabilir)
+                # Uyarlanabilirlik, konfigürasyon karmaşıklığı ile ters orantılıdır
+                # Ancak sıfır kuralın olması da düşük uyarlanabilirlik anlamına gelir
+                if rule_count == 0:
+                    system_adaptability_score = 3.0  # Çok az kural = düşük uyarlanabilirlik
+                else:
+                    # Karmaşıklık arttıkça uyarlanabilirlik azalır
+                    system_adaptability_score = 10.0 - (config_complexity_score * 0.5)
+
+                    # Ancak belirli bir kural sayısı uyarlanabilirliği artırır
+                    if 2 <= rule_count <= 8:
+                        system_adaptability_score += 2.0
+
+                    # 0-10 aralığında sınırla
+                    system_adaptability_score = max(0, min(10, system_adaptability_score))
+
+                # Tüm metrikleri birleştir
                 calculated_metrics = {
                     "total_understaffing": total_understaffing,
                     "total_overstaffing": total_overstaffing,
+                    "min_staffing_coverage_ratio": min_staffing_coverage_ratio,
+                    "skill_coverage_ratio": skill_coverage_ratio,
                     "positive_preferences_met_count": positive_prefs_met,
                     "negative_preferences_assigned_count": negative_prefs_assigned,
-                    "total_preference_score_achieved": total_pref_score_achieved
+                    "total_preference_score_achieved": total_pref_score_achieved,
+                    "workload_distribution_std_dev": workload_distribution_std_dev,
+                    "bad_shift_distribution_std_dev": bad_shift_distribution_std_dev,
+                    "system_adaptability_score": system_adaptability_score,
+                    "config_complexity_score": config_complexity_score,
+                    "rule_count": rule_count
                 }
+
                 # Log mesajını da güncelleyelim
                 metric_log_parts = [
                     f"Understaffing={total_understaffing}",
                     f"Overstaffing={total_overstaffing}",
+                    f"Min Personel Karşılama Oranı={min_staffing_coverage_ratio:.2f}",
+                    f"Yetenek Karşılama Oranı={skill_coverage_ratio:.2f}",
                     f"Pozitif Tercih Sayısı={positive_prefs_met}",
                     f"Negatif Tercih Sayısı={negative_prefs_assigned}",
-                    f"Toplam Tercih Skoru={total_pref_score_achieved}"
+                    f"Toplam Tercih Skoru={total_pref_score_achieved}",
+                    f"İş Yükü Dağılımı StdDev={workload_distribution_std_dev:.2f}",
+                    f"Kötü Vardiya Dağılımı StdDev={bad_shift_distribution_std_dev:.2f}",
+                    f"Sistem Uyarlanabilirlik Skoru={system_adaptability_score:.2f}",
+                    f"Konfigürasyon Karmaşıklık Skoru={config_complexity_score:.2f}",
+                    f"Kural Sayısı={rule_count}"
                 ]
                 logger.info(f"Metrik hesaplama tamamlandı: {', '.join(part for part in metric_log_parts if part is not None)}")
 
@@ -761,6 +965,52 @@ class ShiftSchedulingModelBuilder:
                     # Ağırlıkla çarparken dikkat: weight * sum(...) = sum(weight * term)
                     self._add_objective_term(weight * sum(preference_terms))
                     logger.info(f"Hedef: Tercih maksimizasyonu (veya ağırlığa göre minimizasyonu) eklendi (ağırlık: {weight}).")
+
+        # 4. İş Yükünü Eşit Dağıtmak (YENİ)
+        if 'balance_workload' in objective_config:
+            weight = float(objective_config['balance_workload'])
+            if weight > 0:
+                # Çalışanların vardiya sayılarını al
+                employee_shift_counts_list = list(self.employee_shift_counts.values())
+                if len(employee_shift_counts_list) > 1:  # En az 2 çalışan olmalı
+                    # Maksimum ve minimum vardiya sayısı arasındaki farkı minimize et
+                    max_shifts = self.model.NewIntVar(0, len(self.shifts_dict), "max_shifts")
+                    min_shifts = self.model.NewIntVar(0, len(self.shifts_dict), "min_shifts")
+
+                    # Maksimum vardiya sayısını bul
+                    self.model.AddMaxEquality(max_shifts, employee_shift_counts_list)
+
+                    # Minimum vardiya sayısını bul
+                    self.model.AddMinEquality(min_shifts, employee_shift_counts_list)
+
+                    # Farkı hesapla
+                    workload_range = self.model.NewIntVar(0, len(self.shifts_dict), "workload_range")
+                    self.model.Add(workload_range == max_shifts - min_shifts)
+
+                    # Farkı minimize et
+                    self._add_objective_term(weight * workload_range)
+                    logger.info(f"Hedef: İş yükü dengeleme eklendi (ağırlık: {weight}).")
+                else:
+                    logger.info("İş yükü dengeleme için yeterli çalışan yok.")
+
+        # 5. Vardiya Doluluğunu Maksimize Etmek (YENİ)
+        if 'maximize_shift_coverage' in objective_config:
+            weight = float(objective_config['maximize_shift_coverage'])
+            if weight > 0:
+                # Boş vardiyaları minimize et
+                empty_shift_terms = []
+                for shift_id, count_var in self.shift_employee_counts.items():
+                    # Vardiya boş mu? (0 çalışan atanmış)
+                    is_empty = self.model.NewBoolVar(f"is_empty_{shift_id}")
+                    self.model.Add(count_var == 0).OnlyEnforceIf(is_empty)
+                    self.model.Add(count_var > 0).OnlyEnforceIf(is_empty.Not())
+
+                    empty_shift_terms.append(is_empty)
+
+                if len(empty_shift_terms) > 0:  # Boş liste kontrolü
+                    # Boş vardiya sayısını minimize et
+                    self._add_objective_term(weight * sum(empty_shift_terms))
+                    logger.info(f"Hedef: Vardiya doluluğu maksimizasyonu eklendi (ağırlık: {weight}).")
 
         # Eklenen tüm yumuşak kısıt cezaları ve diğer hedef terimlerini birleştir
         if len(self._objective_terms_list) > 0:  # Boş liste kontrolü

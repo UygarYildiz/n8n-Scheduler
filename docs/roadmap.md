@@ -19,22 +19,23 @@ Bu belge, projenin 5 haftalık geliştirme sürecini ve her haftanın hedeflerin
 *   **Odak Alanı:** Yapay veri oluşturma, n8n ile temel veri akışı, CP-SAT ile basit model kodlama.
 *   **Hedefler:**
     *   ✅ **(Tamamlandı)** Test ve geliştirme için yapay veri üreten bir mekanizma (Python script) oluşturma (`generate_synthetic_data.py`).
-    *   ⏳ **(Beklemede)** n8n'de yapay veriyi okuyup standart [Veri Modeli](data_model.md) formatına dönüştüren temel bir iş akışı oluşturma.
+    *   ✅ **(Tamamlandı)** n8n'de yapay veriyi okuyup standart [Veri Modeli](data_model.md) formatına dönüştüren temel bir iş akışı oluşturma.
     *   ✅ **(Tamamlandı)** Optimizasyon Çekirdeği için temel Python proje yapısının (API iskeleti) oluşturulması (`optimization_core/main.py`).
-    *   ⏳ **(Beklemede)** Basit bir senaryo (az sayıda kısıt ile) için CP-SAT modelinin ilk kodlaması (Python).
-    *   ⏳ **(Beklemede)** n8n'in Optimizasyon Çekirdeği'ni (API/CLI) tetikleyebilmesi ve basit bir "başarılı/başarısız" yanıt alabilmesi.
-*   **Çıktılar:** Yapay veri üretici betiği, Python optimizasyon projesi iskeleti, n8n veri hazırlama akışı (taslak), temel CP-SAT model kodu (taslak), n8n-Python tetikleme mekanizması (taslak). **(Kısmen Tamamlandı ⏳)**
+    *   ✅ **(Tamamlandı)** Basit bir senaryo (az sayıda kısıt ile) için CP-SAT modelinin ilk kodlaması (Python) (`optimization_core/cp_model_builder.py`).
+    *   ✅ **(Tamamlandı)** n8n'in Optimizasyon Çekirdeği'ni (API/CLI) tetikleyebilmesi ve basit bir "başarılı/başarısız" yanıt alabilmesi.
+*   **Çıktılar:** Yapay veri üretici betiği, Python optimizasyon projesi iskeleti, n8n veri hazırlama akışı, temel CP-SAT model kodu, n8n-Python tetikleme mekanizması. **(✅ Tamamlandı)**
 
 ## 3. Hafta: CP-SAT ile Çekirdek Optimizasyon Mantığı ve Soyutlama
 
 *   **Odak Alanı:** CP-SAT modelini tamamlama, konfigürasyon entegrasyonu, sonuç işleme.
 *   **Hedefler:**
-    *   1. Hafta'da belirlenen temel kısıtların ve hedef fonksiyonlarının CP-SAT modeline eklenmesi.
-    *   [Konfigürasyon](configuration.md) dosyasından okunan parametrelere göre modelin dinamik olarak kısıt ekleyebilmesi (örn. minimum personel sayısı).
-    *   CP-SAT çözücüsünü çağıran ve çözüm durumunu (OPTIMAL, FEASIBLE vb.) yakalayan kodun yazılması.
-    *   Çözümün (örn. atamaların) [Veri Modeli](data_model.md)'nde tanımlanan standart JSON formatında dışarı aktarılması.
-    *   Gerekliyse, farklı model varyasyonlarını yönetmek için basit bir soyutlama yapısının (örn. fonksiyonlar veya sınıflar) implementasyonu.
-*   **Çıktılar:** Tamamlanmış (temel set için) CP-SAT modeli kodu, konfigürasyon okuma ve dinamik kısıt ekleme mantığı, standart formatta sonuç üreten kod, (varsa) soyutlama yapısının ilk versiyonu.
+    *   ✅ **(Tamamlandı)** 1. Hafta'da belirlenen temel kısıtların ve hedef fonksiyonlarının CP-SAT modeline eklenmesi.
+    *   ✅ **(Tamamlandı)** [Konfigürasyon](configuration.md) dosyasından okunan parametrelere göre modelin dinamik olarak kısıt ekleyebilmesi (örn. minimum personel sayısı).
+    *   ✅ **(Tamamlandı)** CP-SAT çözücüsünü çağıran ve çözüm durumunu (OPTIMAL, FEASIBLE vb.) yakalayan kodun yazılması.
+    *   ✅ **(Tamamlandı)** Çözümün (örn. atamaların) [Veri Modeli](data_model.md)'nde tanımlanan standart JSON formatında dışarı aktarılması.
+    *   ✅ **(Tamamlandı)** Farklı model varyasyonlarını yönetmek için basit bir soyutlama yapısının (örn. fonksiyonlar veya sınıflar) implementasyonu (`ShiftSchedulingModelBuilder` sınıfı).
+    *   ✅ **(Tamamlandı)** Temel metrik hesaplama mantığının eklenmesi (`MetricsOutput` sınıfı).
+*   **Çıktılar:** Tamamlanmış (temel set için) CP-SAT modeli kodu, konfigürasyon okuma ve dinamik kısıt ekleme mantığı, standart formatta sonuç üreten kod, soyutlama yapısının ilk versiyonu. **(✅ Tamamlandı)**
 
 ## 4. Hafta: n8n ile Uçtan Uca Otomasyon Akışları
 
@@ -58,4 +59,4 @@ Bu belge, projenin 5 haftalık geliştirme sürecini ve her haftanın hedeflerin
     *   Hata ayıklama ve kod temizliği.
     *   Projenin farklı kurumlara nasıl kurulacağı, nasıl konfigüre edileceği ve veri entegrasyonunun nasıl yapılacağına dair detaylı bir "Kurumsal Uyarlanabilirlik Rehberi" veya dokümantasyon hazırlama.
     *   Projenin esneklik avantajlarını (açık kaynak CP-SAT kullanımı, modüler yapı, konfigüre edilebilirlik) vurgulama.
-*   **Çıktılar:** Kapsamlı test raporları, iyileştirilmiş proje kodu ve n8n akışları, detaylı kurumsal uyarlanabilirlik dokümantasyonu. 
+*   **Çıktılar:** Kapsamlı test raporları, iyileştirilmiş proje kodu ve n8n akışları, detaylı kurumsal uyarlanabilirlik dokümantasyonu.

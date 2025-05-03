@@ -75,14 +75,40 @@ Bu metrikler, modelin kurumun temel operasyonel gereksinimlerini ne ölçüde ka
 
 Bu metrikler, optimizasyonun çalışanlar üzerindeki etkisini ve adalet algısını değerlendirir.
 
-### 2.1. Karşılanan Tercih Oranı/Skoru
+### 2.1. Tercih Karşılama Metrikleri
+
+#### 2.1.1. Karşılanan Tercih Oranı
 
 *   **Ne Ölçer:** Çalışanların belirttiği pozitif vardiya tercihlerinin ne kadarının yerine getirildiğini.
-*   **Nasıl Hesaplanır:** `(Atanan ve pozitif tercih edilen vardiya sayısı / Toplam pozitif tercih sayısı) * 100` veya optimizasyon sonucundaki hedef fonksiyonunun tercihlerle ilgili bileşeninin değeri.
+*   **Nasıl Hesaplanır:** `(Atanan ve pozitif tercih edilen vardiya sayısı / Toplam pozitif tercih sayısı) * 100`
 *   **Neden Önemli:** Çalışan memnuniyetini, motivasyonu ve bağlılığı artırmaya yardımcı olur. Modelin sadece operasyonel değil, insan odaklı olduğunu gösterir.
 *   **Sunum Notu:** Modelin çalışanları ne ölçüde dikkate aldığını gösterir. Tercihlerin ağırlığının değiştirildiği senaryolarla karşılaştırma yapmak etkili olabilir.
 *   **Görselleştirme:** Pasta grafik kullanılarak karşılanan ve karşılanmayan tercihler gösterilebilir. Ayrıca, çalışan gruplarına (rol, departman vb.) göre tercih karşılama oranları çubuk grafik ile karşılaştırılabilir.
 *   **Kullanıcı Deneyimi Etkisi:** Bu metrik, çalışan memnuniyet anketleriyle ilişkilendirilebilir. Örneğin: "Tercih karşılama oranındaki %10'luk artış, çalışan memnuniyetinde %X'lik artışa karşılık gelmektedir."
+
+#### 2.1.2. Pozitif Tercih Sayısı
+
+*   **Ne Ölçer:** Çalışanların pozitif tercih belirttiği vardiyalardan kaç tanesine atama yapıldığını.
+*   **Nasıl Hesaplanır:** Pozitif tercih skoruna sahip olup atama yapılan `(çalışan, vardiya)` çiftlerinin sayısı.
+*   **Neden Önemli:** Çalışan memnuniyetini doğrudan etkiler ve modelin çalışan tercihlerini ne kadar dikkate aldığını gösterir.
+*   **Sunum Notu:** Toplam pozitif tercih sayısıyla birlikte sunularak karşılama oranı hesaplanabilir. Yüksek olması hedeflenir.
+*   **Görselleştirme:** Çubuk grafik kullanılarak farklı parametre ayarları altında karşılanan pozitif tercih sayıları karşılaştırılabilir.
+
+#### 2.1.3. Negatif Tercih Sayısı
+
+*   **Ne Ölçer:** Çalışanların negatif tercih belirttiği vardiyalardan kaç tanesine atama yapıldığını.
+*   **Nasıl Hesaplanır:** Negatif tercih skoruna sahip olup atama yapılan `(çalışan, vardiya)` çiftlerinin sayısı.
+*   **Neden Önemli:** Çalışan memnuniyetsizliğini ve potansiyel tükenmişliği gösterir. Modelin istenmeyen atamaları ne kadar minimize ettiğini ölçer.
+*   **Sunum Notu:** Düşük olması hedeflenir, ideal olarak sıfır. Operasyonel kısıtlar nedeniyle bazen istenmeyen vardiyalara atama yapılması gerekebileceği, ancak modelin bunu minimize etmeye çalıştığı vurgulanabilir.
+*   **Görselleştirme:** Çubuk grafik kullanılarak farklı parametre ayarları altında atanan negatif tercih sayıları karşılaştırılabilir.
+
+#### 2.1.4. Toplam Tercih Skoru
+
+*   **Ne Ölçer:** Tüm atamaların toplam tercih skorunu.
+*   **Nasıl Hesaplanır:** Atama yapılan tüm `(çalışan, vardiya)` çiftleri için tercih skorlarının toplamı.
+*   **Neden Önemli:** Çözümün genel çalışan memnuniyeti üzerindeki etkisini tek bir sayıyla ifade eder. Hedef fonksiyonunun tercihlerle ilgili bileşenini doğrudan yansıtır.
+*   **Sunum Notu:** Yüksek olması hedeflenir. Farklı hedef ağırlıkları altında nasıl değiştiği gösterilerek, tercih ağırlığının etkisi vurgulanabilir.
+*   **Görselleştirme:** Çizgi grafik kullanılarak tercih ağırlığının değişimine göre toplam tercih skorunun nasıl değiştiği gösterilebilir.
 
 ### 2.2. Atanan İstenmeyen Vardiya Sayısı
 
@@ -115,11 +141,11 @@ Bu metrikler, optimizasyonun çalışanlar üzerindeki etkisini ve adalet algıs
 
 Bu metrikler, çözümün teknik kalitesini, hızını ve esnekliğini değerlendirir.
 
-### n8n Entegrasyonu ve Kullanıcı Deneyimi Metrikleri
+### 3.1. n8n Entegrasyonu ve Kullanıcı Deneyimi Metrikleri
 
 Bu bölüm, n8n entegrasyonunun etkinliğini ve kullanıcı deneyimini değerlendiren ek metrikler içerir.
 
-#### n8n İş Akışı Tamamlanma Süresi
+#### 3.1.1. n8n İş Akışı Tamamlanma Süresi
 
 *   **Ne Ölçer:** n8n iş akışının veri hazırlama, API çağrısı ve sonuçların işlenmesi dahil toplam çalışma süresini.
 *   **Nasıl Hesaplanır:** n8n iş akışı çalışma loglarından alınır.
@@ -127,15 +153,78 @@ Bu bölüm, n8n entegrasyonunun etkinliğini ve kullanıcı deneyimini değerlen
 *   **Görselleştirme:** Çizgi grafik kullanılarak farklı veri boyutları için iş akışı tamamlanma süreleri gösterilebilir.
 *   **Kullanıcı Deneyimi Etkisi:** Manuel süreçle karşılaştırmalı zaman tasarrufu hesaplanabilir.
 
-#### Sistem Esnekliği ve Uyarlanabilirlik
+### 3.2. Sistem Esnekliği ve Uyarlanabilirlik Metrikleri
+
+Bu metrikler, sistemin farklı kurumlara ve veri yapılarına ne kadar kolay uyarlanabildiğini ölçer.
+
+#### 3.2.1. Sistem Uyarlanabilirlik Skoru
 
 *   **Ne Ölçer:** Sistemin farklı kurumlara ve veri yapılarına ne kadar kolay uyarlanabildiğini.
-*   **Nasıl Hesaplanır:** Yeni bir kuruma veya veri yapısına uyarlama için gereken konfigürasyon değişikliği sayısı ve süresi.
-*   **Neden Önemli:** Çözümün farklı sektörlerde ve kurumlarda kullanılabilirliğini gösterir.
-*   **Görselleştirme:** Farklı kurumlar için uyarlama süreçlerini karşılaştıran çubuk grafik kullanılabilir.
-*   **Vaka Çalışması:** Farklı sektörlerden (sağlık, eğitim, perakende vb.) kurumlar için uyarlama örnekleri sunulabilir.
+*   **Nasıl Hesaplanır:** 0-10 arası bir skor (10 en uyarlanabilir). Konfigürasyon karmaşıklığı ve kural sayısına dayalı bir formül kullanılır:
+    ```
+    Eğer kural_sayısı == 0:
+        skor = 3.0  # Çok az kural = düşük uyarlanabilirlik
+    Değilse:
+        skor = 10.0 - (konfigürasyon_karmaşıklık_skoru * 0.5)
 
-### 3.1. Çözüm Süresi (Solver Time)
+        # Belirli bir kural sayısı uyarlanabilirliği artırır
+        Eğer 2 <= kural_sayısı <= 8:
+            skor += 2.0
+
+        # 0-10 aralığında sınırla
+        skor = max(0, min(10, skor))
+    ```
+*   **Neden Önemli:** Çözümün farklı sektörlerde ve kurumlarda kullanılabilirliğini gösterir. Yüksek uyarlanabilirlik, sistemin daha geniş bir kullanıcı tabanına hitap edebileceği anlamına gelir.
+*   **Sunum Notu:** Yüksek skor (7-10), sistemin farklı kurumlara kolayca uyarlanabileceğini gösterir. Orta skor (4-6), bazı özelleştirmeler gerekebileceğini, düşük skor (0-3) ise önemli değişiklikler gerekebileceğini gösterir.
+*   **Görselleştirme:** Farklı konfigürasyonlar için uyarlanabilirlik skorlarını gösteren radar grafik kullanılabilir.
+*   **Vaka Çalışması:** Farklı sektörlerden (sağlık, eğitim, perakende vb.) kurumlar için uyarlanabilirlik skorlarının karşılaştırması yapılabilir.
+
+#### 3.2.2. Konfigürasyon Karmaşıklık Skoru
+
+*   **Ne Ölçer:** Konfigürasyonun ne kadar karmaşık olduğunu.
+*   **Nasıl Hesaplanır:** 0-10 arası bir skor (10 en karmaşık). Kural sayısı ve kural türlerine göre hesaplanır:
+    ```
+    # Kural sayısına göre karmaşıklık
+    Eğer kural_sayısı <= 2:
+        karmaşıklık += 2
+    Eğer 2 < kural_sayısı <= 5:
+        karmaşıklık += 4
+    Eğer 5 < kural_sayısı <= 10:
+        karmaşıklık += 6
+    Eğer kural_sayısı > 10:
+        karmaşıklık += 8
+
+    # Kural türlerine göre karmaşıklık
+    Eğer 'min_staffing_requirements' varsa: karmaşıklık += 1
+    Eğer 'skill_requirements' varsa: karmaşıklık += 1
+    Eğer 'min_rest_time_hours' veya 'min_rest_time_minutes' varsa: karmaşıklık += 1
+    Eğer 'max_consecutive_shifts' varsa: karmaşıklık += 1
+
+    # Maksimum 10 olacak şekilde normalize et
+    karmaşıklık_skoru = min(10, karmaşıklık)
+    ```
+*   **Neden Önemli:** Konfigürasyonun karmaşıklığı, sistemin anlaşılabilirliğini ve bakım kolaylığını etkiler. Daha karmaşık konfigürasyonlar, daha fazla uzmanlık gerektirir ve hata riski daha yüksektir.
+*   **Sunum Notu:** Düşük skor (0-3), basit ve anlaşılır bir konfigürasyon olduğunu gösterir. Orta skor (4-6), makul bir karmaşıklık seviyesini, yüksek skor (7-10) ise karmaşık ve potansiyel olarak bakımı zor bir konfigürasyon olduğunu gösterir.
+*   **Görselleştirme:** Farklı konfigürasyonların karmaşıklık skorlarını karşılaştıran çubuk grafik kullanılabilir.
+*   **Vaka Çalışması:** Farklı kural kombinasyonlarının karmaşıklık skorları üzerindeki etkisi analiz edilebilir.
+
+#### 3.2.3. Kural Sayısı
+
+*   **Ne Ölçer:** Sistemde tanımlı toplam kural sayısını.
+*   **Nasıl Hesaplanır:** Konfigürasyonda tanımlı tüm kuralların sayısı:
+    ```
+    kural_sayısı = len(min_staffing_rules) + len(skill_rules)
+
+    # Diğer kurallar
+    Eğer 'max_consecutive_shifts' varsa: kural_sayısı += 1
+    Eğer 'min_rest_time_hours' veya 'min_rest_time_minutes' varsa: kural_sayısı += 1
+    ```
+*   **Neden Önemli:** Kural sayısı, sistemin karmaşıklığını ve esnekliğini etkiler. Çok az kural, sistemin yetersiz kısıtlara sahip olabileceğini, çok fazla kural ise sistemin çok katı olabileceğini gösterir.
+*   **Sunum Notu:** Optimal kural sayısı (2-8 arası), sistemin hem esnek hem de güçlü olduğunu gösterir. Çok az kural (0-1), sistemin çok basit olabileceğini, çok fazla kural (>10) ise sistemin çok karmaşık olabileceğini gösterir.
+*   **Görselleştirme:** Farklı konfigürasyonların kural sayılarını karşılaştıran çubuk grafik kullanılabilir.
+*   **Vaka Çalışması:** Farklı sektörlerde optimal kural sayısının nasıl değiştiği analiz edilebilir.
+
+### 3.3. Çözüm Süresi (Solver Time)
 
 *   **Ne Ölçer:** Optimizasyon motorunun (CP-SAT) bir çözüm bulmak için harcadığı süre.
 *   **Nasıl Hesaplanır:** API loglarından alınır.
@@ -144,7 +233,7 @@ Bu bölüm, n8n entegrasyonunun etkinliğini ve kullanıcı deneyimini değerlen
 *   **Görselleştirme:** Çizgi grafik kullanılarak farklı problem boyutları (çalışan sayısı, vardiya sayısı) için çözüm süresinin değişimi gösterilebilir.
 *   **Kullanıcı Deneyimi Etkisi:** Manuel planlamaya göre zaman tasarrufu hesaplanabilir. Örneğin: "Manuel planlama süreci ortalama X saat sürerken, optimizasyon çözümü Y saniyede sonuç üretmektedir."
 
-### 3.2. Çözüm Durumu (OPTIMAL, FEASIBLE, INFEASIBLE)
+### 3.4. Çözüm Durumu (OPTIMAL, FEASIBLE, INFEASIBLE)
 
 *   **Ne Ölçer:** Modelin verilen kısıtlar altında matematiksel olarak en iyi (OPTIMAL), geçerli (FEASIBLE) veya çözümsüz (INFEASIBLE) bir durum bulup bulmadığını belirtir.
 *   **Neden Önemli:** Modelin sağlamlığını ve kısıtları karşılama yeteneğini gösterir.
@@ -152,7 +241,7 @@ Bu bölüm, n8n entegrasyonunun etkinliğini ve kullanıcı deneyimini değerlen
 *   **Görselleştirme:** Farklı senaryolarda çözüm durumlarının dağılımını gösteren pasta grafik kullanılabilir.
 *   **Vaka Çalışması:** Çeşitli kısıt kombinasyonları altında modelin çözüm durumlarının analizi yapılabilir. Örneğin: "Hangi kısıt kombinasyonları INFEASIBLE sonuçlara yol açıyor?"
 
-### 3.3. Hedef Fonksiyon Değeri
+### 3.5. Hedef Fonksiyon Değeri
 
 *   **Ne Ölçer:** Bulunan çözümün genel kalitesini, tanımlanan ağırlıklara göre sayısal olarak ifade eder.
 *   **Nasıl Hesaplanır:** API sonucundan alınır (`objective_value`).
@@ -160,3 +249,77 @@ Bu bölüm, n8n entegrasyonunun etkinliğini ve kullanıcı deneyimini değerlen
 *   **Sunum Notu:** Tek başına mutlak değeri yerine, farklı senaryolarda (örn. ağırlık değişiklikleri) nasıl değiştiğini veya manuel plana göre ne kadar iyileştiğini göstermek daha anlamlıdır. Negatif değerlerin nasıl yorumlanacağı (tercihlerin ağır basması) açıklanabilir.
 *   **Görselleştirme:** Radar grafik kullanılarak farklı hedef ağırlıkları altında çözüm kalitesinin çeşitli boyutları (eksik personel, fazla personel, tercih karşılama) gösterilebilir.
 *   **Ekonomik Etki:** Hedef fonksiyon değerindeki iyileşmenin ekonomik karşılığı hesaplanabilir. Örneğin: "Hedef fonksiyon değerindeki X birimlik iyileşme, yaklaşık Y TL'lik maliyet tasarrufu ve Z TL'lik hizmet kalitesi artışına karşılık gelmektedir."
+
+## 4. Gelecek Çalışmalar: Ekonomik Etki Analizi Metrikleri
+
+Bu bölüm, projenin ilerleyen aşamalarında uygulanması planlanan ekonomik etki analizi metriklerini içermektedir. Bu metrikler, optimizasyon çözümünün kuruma sağladığı ekonomik faydaları somut olarak ölçmeyi amaçlamaktadır.
+
+### 4.1. Manuel Plan Olmadan Ekonomik Etki Analizi Yaklaşımları
+
+Manuel planlama verisi olmadığı durumlarda ekonomik etki analizini gerçekleştirmek için aşağıdaki yaklaşımlar kullanılabilir:
+
+#### 4.1.1. Doğrudan Ölçülebilen Ekonomik Metrikler
+
+*   **Planlama Süreci Tasarrufu**: Optimizasyon çözümünün planlama sürecinde sağladığı zaman tasarrufu.
+    *   **Hesaplama**: `(Tahmini manuel planlama süresi - Optimizasyon çözüm süresi) * Planlayıcı saatlik ücreti`
+    *   **Veri Kaynağı**: Optimizasyon çözüm süresi doğrudan ölçülebilir, manuel planlama için sektör ortalamaları kullanılabilir.
+
+*   **Fazla Personel Maliyeti Optimizasyonu**: Optimizasyon çözümünün fazla personel atamalarını minimize ederek sağladığı tasarruf.
+    *   **Hesaplama**: `Toplam fazla personel saati * Ortalama personel saatlik maliyeti`
+    *   **Veri Kaynağı**: Optimizasyon sonucunda hesaplanan `total_overstaffing` değeri.
+
+*   **Eksik Personel Maliyeti Optimizasyonu**: Eksik personelin neden olduğu hizmet aksaması maliyetlerinin azaltılması.
+    *   **Hesaplama**: `Toplam eksik personel saati * Tahmini hizmet aksaması maliyeti/saat`
+    *   **Veri Kaynağı**: Optimizasyon sonucunda hesaplanan `total_understaffing` değeri.
+
+#### 4.1.2. Dolaylı Ekonomik Etki Metrikleri
+
+*   **Yetenek Eşleştirme Ekonomik Değeri**: Doğru yeteneklere sahip çalışanların doğru vardiyalara atanmasının ekonomik değeri.
+    *   **Hesaplama**: `Yetenek karşılama oranı * Tahmini hizmet kalitesi ekonomik değeri`
+    *   **Veri Kaynağı**: Optimizasyon sonucunda hesaplanan `skill_coverage_ratio` değeri.
+
+*   **Çalışan Memnuniyeti Ekonomik Değeri**: Tercih karşılama oranının çalışan memnuniyeti ve verimliliği üzerindeki ekonomik etkisi.
+    *   **Hesaplama**: `Karşılanan pozitif tercih sayısı * Tahmini çalışan memnuniyeti birim değeri`
+    *   **Veri Kaynağı**: Optimizasyon sonucunda hesaplanan `positive_preferences_met_count` değeri.
+
+*   **İş Yükü Dengesi Ekonomik Değeri**: Dengeli iş yükü dağılımının çalışan tükenmişliği ve devir hızı üzerindeki ekonomik etkisi.
+    *   **Hesaplama**: `(1 - Normalize edilmiş iş yükü standart sapması) * Tahmini iş yükü dengesi ekonomik değeri`
+    *   **Veri Kaynağı**: Optimizasyon sonucunda hesaplanan `workload_distribution_std_dev` değeri.
+
+### 4.2. Uygulama Planı
+
+Ekonomik etki analizi metriklerinin uygulanması için aşağıdaki adımlar izlenecektir:
+
+1. **Ekonomik Parametre Tanımları**: Kuruma özgü ekonomik parametrelerin (ortalama saatlik maliyet, hizmet aksaması maliyeti vb.) belirlenmesi ve konfigürasyon dosyasına eklenmesi.
+
+2. **Metrik Hesaplama Modülü**: Ekonomik etki metriklerini hesaplayan bir Python modülünün geliştirilmesi ve `cp_model_builder.py` dosyasına entegre edilmesi.
+
+3. **Sonuç Raporlama**: Ekonomik etki metriklerinin API yanıtına ve raporlara dahil edilmesi.
+
+4. **Görselleştirme**: Ekonomik etki metriklerini görselleştiren grafiklerin oluşturulması.
+
+Bu gelecek çalışma, optimizasyon çözümünün kuruma sağladığı ekonomik faydaları somut olarak göstermeyi ve karar vericilere daha kapsamlı bilgi sunmayı amaçlamaktadır.
+
+### 4.3. Diğer Gelecek Metrik Geliştirmeleri
+
+#### 4.3.1. Karşılanan Tercih Oranı Metriği
+
+Mevcut sistemde pozitif tercih sayısı (`positive_preferences_met_count`) hesaplanmaktadır, ancak toplam pozitif tercih sayısına oranı hesaplanmamaktadır. Bu metriğin geliştirilmesi planlanmaktadır:
+
+*   **Ne Ölçer:** Çalışanların belirttiği pozitif vardiya tercihlerinin ne kadarının yerine getirildiğini.
+*   **Nasıl Hesaplanır:** `(Atanan ve pozitif tercih edilen vardiya sayısı / Toplam pozitif tercih sayısı) * 100`
+*   **Uygulama Planı:**
+    1. Toplam pozitif tercih sayısını hesaplayan kod eklenecek: `total_positive_prefs = sum(1 for p in preferences if p.get('preference_score', 0) > 0)`
+    2. Oran hesaplanacak: `preference_ratio = positive_prefs_met / total_positive_prefs if total_positive_prefs > 0 else 0`
+    3. Sonuç metriklerine eklenecek: `"preference_satisfaction_ratio": preference_ratio`
+
+#### 4.3.2. n8n İş Akışı Tamamlanma Süresi Metriği
+
+n8n entegrasyonu tamamlandığında, iş akışı performansını ölçmek için bu metriğin uygulanması planlanmaktadır:
+
+*   **Ne Ölçer:** n8n iş akışının veri hazırlama, API çağrısı ve sonuçların işlenmesi dahil toplam çalışma süresini.
+*   **Nasıl Hesaplanır:** n8n iş akışı çalışma loglarından alınır.
+*   **Uygulama Planı:**
+    1. n8n iş akışına başlangıç ve bitiş zamanlarını kaydeden adımlar eklenecek
+    2. Bu zamanlar arasındaki fark hesaplanacak
+    3. Sonuçlar raporlara dahil edilecek

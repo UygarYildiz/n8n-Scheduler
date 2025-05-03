@@ -10,6 +10,8 @@ optimization_core:
     minimize_overstaffing: 1
     minimize_understaffing: 10  # Eksik personelin cezası daha yüksek
     maximize_preferences: 2
+    balance_workload: 0.5       # İş yükünü eşit dağıtma (yeni)
+    maximize_shift_coverage: 1  # Vardiya doluluğunu maksimize etme (yeni)
 
 # Modele Eklenecek Dinamik Kısıtlar ve Kurallar
 rules:
