@@ -1,0 +1,266 @@
+import logging
+import yaml
+import os
+import time
+from typing import Any, Dict, List, Optional, Tuple
+from fastapi import FastAPI, HTTPException, Body, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field, validator, ValidationError
+from datetime import date, datetime, time as dt_time # time ile çakışmaması için dt_time
+
+# CP-SAT Model Builder'ı içe aktar
+try:
+    from optimization_core.cp_model_builder import ShiftSchedulingModelBuilder
+except ImportError:
+    # Doğrudan çalıştırıldığında (development) farklı import yolu
+    from cp_model_builder import ShiftSchedulingModelBuilder
+
+# --- Logging Kurulumu ---
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# --- Detaylı Pydantic Modelleri ---
+
+class Employee(BaseModel):
+    employee_id: str
+    name: Optional[str] = None
+    role: Optional[str] = None
+    department: Optional[str] = None
+    specialty: Optional[str] = None
+    # ... diğer çalışan özellikleri
+
+class Shift(BaseModel):
+    shift_id: str
+    name: Optional[str] = None
+    date: date
+    start_time: dt_time # Örnek: "08:00:00"
+    end_time: dt_time   # Örnek: "16:00:00"
+    required_staff: int = Field(default=1, ge=0) # Varsayılan 1, negatif olamaz
+    # ... diğer vardiya özellikleri
+
+class Skill(BaseModel):
+    employee_id: str
+    skill: str
+
+class Availability(BaseModel):
+    employee_id: str
+    date: date
+    is_available: bool = True # Varsayılan True (1 yerine bool kullanalım)
+
+class Preference(BaseModel):
+    employee_id: str
+    shift_id: str
+    preference_score: int = Field(default=0) # Pozitif veya negatif olabilir
+
+class InputData(BaseModel):
+    employees: List[Employee] = Field(default_factory=list)
+    shifts: List[Shift] = Field(default_factory=list)
+    skills: List[Skill] = Field(default_factory=list)
+    availability: List[Availability] = Field(default_factory=list)
+    preferences: List[Preference] = Field(default_factory=list)
+
+class OptimizationRequest(BaseModel):
+    configuration_ref: Optional[str] = None # Örn: "hospital_config.yaml"
+    configuration: Optional[Dict[str, Any]] = None
+    input_data: InputData
+
+class Assignment(BaseModel):
+    employee_id: str
+    shift_id: str
+
+class OptimizationSolution(BaseModel):
+    assignments: List[Assignment] = Field(default_factory=list)
+
+# +++ Yeni Metrik Modeli +++
+class MetricsOutput(BaseModel):
+    total_understaffing: Optional[int] = None
+    total_overstaffing: Optional[int] = None
+    positive_preferences_met_count: Optional[int] = None
+    negative_preferences_assigned_count: Optional[int] = None
+    total_preference_score_achieved: Optional[int] = None
+    # Gelecekteki metrikler buraya eklenecek
+    # work_distribution_std_dev: Optional[float] = None
+
+class OptimizationResponse(BaseModel):
+    status: str
+    solver_status_message: Optional[str] = None
+    processing_time_seconds: Optional[float] = None
+    objective_value: Optional[float] = None
+    solution: Optional[OptimizationSolution] = None
+    metrics: Optional[MetricsOutput] = None # +++ Metrikler alanı eklendi +++
+    error_details: Optional[str] = None
+
+# --- FastAPI Uygulaması ---
+app = FastAPI(
+    title="Optimizasyon Çekirdeği API",
+    description="n8n ile entegre çalışacak CP-SAT optimizasyon servisi.",
+    version="0.2.0" # Versiyon güncellendi
+)
+
+# --- Hata Yönetimi (Validation Errors için) ---
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logger.error(f"Girdi verisi validasyon hatası: {exc.errors()}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors(), "body": exc.body},
+    )
+
+# --- Konfigürasyon Yükleme (İyileştirilmiş) ---
+CONFIG_DIR = "configs" # Proje kök dizinindeki konfig klasörü
+
+def load_config(config_ref: Optional[str], config_data: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Konfigürasyon verisini yükler (öncelik: doğrudan veri, sonra dosya)."""
+    if config_data:
+        logger.info("Doğrudan gönderilen konfigürasyon kullanılıyor.")
+        return config_data
+    elif config_ref:
+        # Proje kök dizinine göre yolu oluştur
+        # Not: Bu API'nin proje kök dizininden çalıştırıldığı varsayılır.
+        script_dir = os.path.dirname(os.path.dirname(__file__)) # optimization_core -> proje_koku
+        if not script_dir: # Eğer doğrudan çalıştırılıyorsa (örn. main.py)
+             script_dir = "." # Geçerli dizin proje kökü olsun
+        config_path = os.path.join(script_dir, CONFIG_DIR, config_ref)
+        logger.info(f"Konfigürasyon dosyası yükleniyor: {config_path}")
+        if not os.path.exists(config_path):
+             # Alternatif olarak sadece config_ref'i dene (eğer mutlak yol ise)
+             if os.path.exists(config_ref):
+                  config_path = config_ref
+             else:
+                  logger.error(f"Konfigürasyon dosyası bulunamadı: {config_path} veya {config_ref}")
+                  raise HTTPException(status_code=400, detail=f"Configuration file not found: {config_ref}")
+
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                loaded_config = yaml.safe_load(f)
+                if loaded_config is None: # Boş dosya durumu
+                     logger.warning(f"Konfigürasyon dosyası boş: {config_path}")
+                     return {}
+                return loaded_config
+        except yaml.YAMLError as e:
+            logger.error(f"Konfigürasyon dosyası YAML format hatası: {e}")
+            raise HTTPException(status_code=500, detail=f"Error parsing configuration file YAML: {e}")
+        except Exception as e:
+            logger.error(f"Konfigürasyon dosyası okunurken hata: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Error reading configuration file: {e}")
+    else:
+        logger.warning("Konfigürasyon bilgisi sağlanmadı. Varsayılanlar kullanılacak (eğer modelde tanımlıysa).")
+        return {} # Veya varsayılan bir konfig dön
+
+# --- Ana Optimizasyon Endpoint'i ---
+@app.post("/optimize", response_model=OptimizationResponse)
+async def run_optimization(request_data: OptimizationRequest = Body(...)):
+    """
+    Gelen veriyi ve konfigürasyonu alır, optimizasyonu çalıştırır
+    ve sonucu döner.
+    """
+    start_time = time.time()
+    logger.info("Optimizasyon isteği alındı.")
+
+    # 1. Konfigürasyonu Yükle
+    try:
+        config = load_config(request_data.configuration_ref, request_data.configuration)
+        logger.info(f"Yüklenen konfigürasyon anahtarları: {list(config.keys())}")
+    except HTTPException as http_exc:
+        logger.error(f"Konfigürasyon yükleme hatası: {http_exc.detail}")
+        raise http_exc # Hatayı tekrar yükselt FastAPI halletsin
+    except Exception as e:
+        logger.error(f"Konfigürasyon yüklenirken beklenmedik hata: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal error loading configuration.")
+
+    # 2. Girdi Verisini Al (Pydantic zaten doğruladı)
+    input_data = request_data.input_data
+    logger.info(f"Alınan çalışan sayısı: {len(input_data.employees)}")
+    logger.info(f"Alınan vardiya sayısı: {len(input_data.shifts)}")
+    logger.info(f"Alınan yetenek kaydı sayısı: {len(input_data.skills)}")
+    logger.info(f"Alınan uygunluk kaydı sayısı: {len(input_data.availability)}")
+    logger.info(f"Alınan tercih kaydı sayısı: {len(input_data.preferences)}")
+
+
+    # 3. Optimizasyon Mantığını Çalıştır
+    logger.info("CP-SAT modeli oluşturuluyor ve çözülüyor...")
+    try:
+        # ShiftSchedulingModelBuilder sınıfını kullanarak modeli oluştur
+        # input_data'yı dict olarak gönderelim, builder tarafı daha kolay işler
+        model_builder = ShiftSchedulingModelBuilder(
+            config=config,
+            input_data=input_data.model_dump() # Pydantic modellerini dict'e çevir
+        )
+
+        # Modeli oluştur
+        model_builder.build_model()
+
+        # Modeli çöz
+        status, result = model_builder.solve_model()
+
+        # Sonuçları API yanıtına dönüştür
+        solution_data = None
+        if result.get('solution') and result['solution'].get('assignments'):
+            try:
+                 # Gelen assignments listesini Pydantic modeli ile doğrula/dönüştür
+                 validated_assignments = [Assignment(**a) for a in result['solution']['assignments']]
+                 solution_data = OptimizationSolution(assignments=validated_assignments)
+            except ValidationError as e:
+                 logger.error(f"Çözüm (assignments) validasyon hatası: {e}")
+                 # Çözümü gönderme ama hata verme, log yeterli
+                 solution_data = None
+
+        # +++ Metrikleri Ayıkla ve Hazırla +++
+        metrics_data = None
+        if status in ["OPTIMAL", "FEASIBLE"] and result.get('metrics'):
+            try:
+                # Hesaplanan metrikleri alıp Pydantic modeline dönüştür
+                metrics_data = MetricsOutput(
+                    total_understaffing=result['metrics'].get('total_understaffing'),
+                    total_overstaffing=result['metrics'].get('total_overstaffing'),
+                    positive_preferences_met_count=result['metrics'].get('positive_preferences_met_count'),
+                    negative_preferences_assigned_count=result['metrics'].get('negative_preferences_assigned_count'),
+                    total_preference_score_achieved=result['metrics'].get('total_preference_score_achieved')
+                )
+                # Log mesajını da güncelleyelim
+                metric_log_parts = [
+                    f"Understaffing={metrics_data.total_understaffing}",
+                    f"Overstaffing={metrics_data.total_overstaffing}",
+                    f"Pozitif Tercih Sayısı={metrics_data.positive_preferences_met_count}",
+                    f"Negatif Tercih Sayısı={metrics_data.negative_preferences_assigned_count}",
+                    f"Toplam Tercih Skoru={metrics_data.total_preference_score_achieved}"
+                ]
+                logger.info(f"Hesaplanan Metrikler: {', '.join(part for part in metric_log_parts if part)}")
+            except Exception as e:
+                logger.error(f"Metrikler işlenirken hata: {e}", exc_info=True)
+                metrics_data = None # Hata durumunda metrikleri gönderme
+
+
+        response = OptimizationResponse(
+            status=status,
+            solver_status_message=result.get('solver_status_message'),
+            processing_time_seconds=result.get('processing_time_seconds'),
+            objective_value=result.get('objective_value'),
+            solution=solution_data,
+            metrics=metrics_data # +++ Metrikleri yanıta ekle +++
+        )
+        logger.info(f"Optimizasyon tamamlandı. Durum: {status}, İşlem Süresi: {result.get('processing_time_seconds'):.2f}s")
+
+    except Exception as e:
+        logger.error(f"Optimizasyon sırasında kritik hata: {e}", exc_info=True)
+        # Hata durumunda istemciye detaylı hata mesajı gönderme (güvenlik)
+        # Sadece genel bir hata mesajı ve loglarda detay kalsın
+        raise HTTPException(status_code=500, detail="An internal error occurred during optimization.")
+
+
+    end_time = time.time()
+    total_api_time = end_time - start_time
+    logger.info(f"Optimizasyon isteği tamamlandı. Toplam API süresi: {total_api_time:.2f}s")
+    return response
+
+# Uygulamayı çalıştırmak için (terminalden):
+# uvicorn optimization_core.main:app --reload --port 8000
+
+if __name__ == "__main__":
+    # Bu kısım genellikle doğrudan çalıştırılmaz, uvicorn kullanılır.
+    import uvicorn
+    logger.info("API'yi başlatmak için terminalde şunu çalıştırın:")
+    logger.info("uvicorn optimization_core.main:app --reload --port 8000")
+    # Örnek çalıştırma (debug için):
+    # uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
