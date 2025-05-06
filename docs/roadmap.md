@@ -41,8 +41,8 @@ Bu belge, projenin 5 haftalık geliştirme sürecini ve her haftanın hedeflerin
 
 *   **Odak Alanı:** n8n iş akışlarını tamamlama, veri almadan sonuç dağıtımına kadar tüm süreci otomatikleştirme.
 *   **Hedefler:**
-    *   n8n veri toplama/hazırlama akışının tamamlanması.
-    *   Optimizasyon Çekirdeği'ni tetikleyen ve dönen standart sonucu yakalayan n8n adımlarının tamamlanması.
+    *   n8n veri toplama/hazırlama akışının tamamlanması.   
+    *   Opti    mizasyon Çekirdeği'ni tetikleyen ve dönen standart sonucu yakalayan n8n adımlarının tamamlanması.
     *   Optimizasyon sonuçlarını işleyen (örn. basit raporlama veya belirli alanları ayıklama) n8n akışının oluşturulması.
     *   Sonuçların örnek hedef sistemlere (örn. bir veritabanı tablosuna yazma, e-posta ile gönderme) n8n aracılığıyla iletilmesi.
     *   Temel hata yönetimi mekanizmalarının (örn. optimizasyon başarısız olursa bildirim) n8n akışına eklenmesi.

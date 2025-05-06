@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from fastapi import FastAPI, HTTPException, Body, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field, validator, ValidationError
 from datetime import date, datetime, time as dt_time # time ile çakışmaması için dt_time
 
@@ -38,6 +39,7 @@ class Shift(BaseModel):
     start_time: dt_time # Örnek: "08:00:00"
     end_time: dt_time   # Örnek: "16:00:00"
     required_staff: int = Field(default=1, ge=0) # Varsayılan 1, negatif olamaz
+    department: Optional[str] = None # Departman bilgisi eklendi
     # ... diğer vardiya özellikleri
 
 class Skill(BaseModel):
@@ -206,8 +208,8 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
         # Modeli oluştur
         model_builder.build_model()
 
-        # Modeli çöz
-        status, result = model_builder.solve_model()
+        # Modeli çöz (thread havuzunda)
+        status, result = await run_in_threadpool(model_builder.solve_model)
 
         # Sonuçları API yanıtına dönüştür
         solution_data = None

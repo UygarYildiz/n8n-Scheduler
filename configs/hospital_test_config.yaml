@@ -16,21 +16,66 @@ optimization_core:
 # Modele Eklenecek Dinamik Kısıtlar ve Kurallar
 rules:
   min_staffing_requirements:
-    - shift_pattern: "Gece*"  # Gece ile başlayan tüm vardiyalar
+    # Acil Servis Gereksinimleri - Joker karakterli desenler
+    - shift_pattern: "*Gece*Hafta*İçi*"
       role: "Hemşire"
-      min_count: 2
-    - shift_pattern: "Gündüz*"
+      department: "Acil"
+      min_count: 1  # 2'den 1'e düşürüldü
+      penalty_if_violated: 100  # Yumuşak kısıt eklendi
+    - shift_pattern: "*Gündüz*Hafta*İçi*"
       role: "Doktor"
+      department: "Acil"
       min_count: 1
+    - shift_pattern: "*Gündüz*Hafta*Sonu*"
+      role: "Doktor"
+      department: "Acil"
+      min_count: 1
+
+    # Yoğun Bakım Gereksinimleri - Joker karakterli desenler
+    - shift_pattern: "*Gece*Hafta*İçi*"
+      role: "Hemşire"
+      department: "Yoğun Bakım"
+      min_count: 2
+      penalty_if_violated: 100  # Yumuşak kısıt eklendi
+    - shift_pattern: "*Gündüz*Hafta*İçi*"
+      role: "Doktor"
+      department: "Yoğun Bakım"
+      min_count: 1
+      penalty_if_violated: 100  # Yumuşak kısıt eklendi
+
+    # Kardiyoloji Gereksinimleri - Joker karakterli desenler
+    - shift_pattern: "*Gündüz*Hafta*İçi*"
+      role: "Doktor"
+      department: "Kardiyoloji"
+      min_count: 1
+      penalty_if_violated: 100  # Yumuşak kısıt eklendi
+
+    # Pediatri Gereksinimleri - Joker karakterli desenler
+    - shift_pattern: "*Gündüz*Hafta*İçi*"
+      role: "Hemşire"
+      department: "Pediatri"
+      min_count: 1
+      penalty_if_violated: 100  # Yumuşak kısıt eklendi
+    - shift_pattern: "*Gündüz*Hafta*Sonu*"
+      role: "Hemşire"
+      department: "Pediatri"
+      min_count: 1
+      penalty_if_violated: 100  # Yumuşak kısıt eklendi
 
   max_consecutive_shifts: 3
   min_rest_time_hours: 10
 
-  # Yetenek/Sertifika Gereksinimleri
+  # Yetenek/Sertifika Gereksinimleri - Joker karakterli desenler
   skill_requirements:
-    - shift_pattern: "*Hafta Sonu*"  # Hafta sonu vardiyaları
+    - shift_pattern: "*Gündüz*Hafta*Sonu*"
       skill: "Acil Servis Deneyimi"
+      department: "Acil"
       min_count: 1
+    - shift_pattern: "*Gece*Hafta*İçi*"
+      skill: "Yoğun Bakım Sertifikası"
+      department: "Yoğun Bakım"
+      min_count: 1
+      penalty_if_violated: 100  # Yumuşak kısıt eklendi
 
 # n8n Parametreleri
 n8n_parameters:

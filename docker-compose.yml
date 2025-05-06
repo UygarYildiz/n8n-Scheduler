@@ -8,15 +8,17 @@ services:
       - "5678:5678"
     environment:
       # Set the timezone for n8n (Optional - find yours here: https://momentjs.com/timezone/)
-      - GENERIC_TIMEZONE=Europe/Istanbul 
+      - GENERIC_TIMEZONE=Europe/Istanbul
     volumes:
       # Mount local directory for n8n configuration and data persistence
       - ./n8n_data:/home/node/.n8n
       # Mount local synthetic_data directory to /data inside the container
       - ./synthetic_data:/data
+      # Mount configs directory for configuration files
+      - ./configs:/configs
     # Wait for database to be ready (if you were using one)
     # depends_on:
     #   - postgres # Example if using PostgreSQL
 
 volumes:
-  n8n_data: # Define the volume if not using local path mapping above 
+  n8n_data: # Define the volume if not using local path mapping above

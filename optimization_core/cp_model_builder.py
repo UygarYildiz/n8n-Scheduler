@@ -191,15 +191,39 @@ class ShiftSchedulingModelBuilder:
                     shift_pattern = rule.get('shift_pattern', '*')
                     skill_name = rule.get('skill')
                     min_count = rule.get('min_count', 0)
+                    rule_department = rule.get('department', '')
 
                     if not skill_name or min_count <= 0:
                         continue
 
                     # Kural ile eşleşen vardiyaları bul
                     import fnmatch
-                    matching_shift_ids = [s_id for s_id, s_info in self.shifts_dict.items()
-                                         if fnmatch.fnmatch(s_info.get('name', ''), shift_pattern)]
+                    matching_shift_ids = []
 
+                    # Vardiya adı ve departman bilgisini kullanarak eşleştirme yap
+                    for s_id, s_info in self.shifts_dict.items():
+                        shift_name = s_info.get('name', '')
+                        shift_department = s_info.get('department', '')
+
+                        # Vardiya adı ile desen eşleştirmesi yap
+                        name_match = fnmatch.fnmatch(shift_name, shift_pattern)
+
+                        # Departman kontrolü yap
+                        dept_match = True
+                        if rule_department and shift_department:
+                            # Eğer hem kural hem de vardiya departman bilgisi varsa, eşleşmeleri gerekir
+                            dept_match = (rule_department == shift_department)
+                        elif rule_department:
+                            # Kural departman belirtiyorsa ama vardiya departmanı yoksa, eşleşme olmaz
+                            dept_match = False
+
+                        # Eşleştirme sonucunu belirle (hem isim hem departman eşleşmeli)
+                        match_result = name_match and dept_match
+
+                        if match_result:
+                            matching_shift_ids.append(s_id)
+
+                    # Eşleşen vardiyalar için yetenek gereksinimlerini kontrol et
                     for shift_id in matching_shift_ids:
                         total_skill_requirements += 1
 
@@ -614,9 +638,46 @@ class ShiftSchedulingModelBuilder:
                 continue # Geçersiz kural
 
             # Kural ile eşleşen vardiyaları bul
-            matching_shift_ids = [s['shift_id'] for s in shifts
-                                  if s.get('shift_id') and
-                                  fnmatch.fnmatch(s.get('name', ''), shift_pattern)]
+            matching_shift_ids = []
+
+            # Sadece ilk kural için debug logları göster
+            debug_log = (i == 0)
+
+            # Kural departman bilgisini al
+            rule_department = rule.get('department', '')
+
+            for s in shifts:
+                if not s.get('shift_id'):
+                    continue
+
+                # Vardiya adı ve departman bilgisini al
+                shift_name = s.get('name', '')
+                shift_department = s.get('department', '')
+
+                # Vardiya verilerini logla (debug için)
+                if debug_log:
+                    logger.info(f"Vardiya: ID={s.get('shift_id')}, Name={shift_name}, Department={shift_department}")
+
+                # Vardiya adı ile desen eşleştirmesi yap
+                name_match = fnmatch.fnmatch(shift_name, shift_pattern)
+
+                # Departman kontrolü yap
+                dept_match = True
+                if rule_department and shift_department:
+                    # Eğer hem kural hem de vardiya departman bilgisi varsa, eşleşmeleri gerekir
+                    dept_match = (rule_department == shift_department)
+                elif rule_department:
+                    # Kural departman belirtiyorsa ama vardiya departmanı yoksa, eşleşme olmaz
+                    dept_match = False
+
+                # Eşleştirme sonucunu belirle (hem isim hem departman eşleşmeli)
+                match_result = name_match and dept_match
+
+                if debug_log:
+                    logger.info(f"Desen eşleştirme: Pattern={shift_pattern}, Name={shift_name}, Rule Department={rule_department}, Shift Department={shift_department}, Match={match_result}")
+
+                if match_result:
+                    matching_shift_ids.append(s['shift_id'])
 
             if not matching_shift_ids:
                 logger.warning(f"Min personel kuralı #{i} için eşleşen vardiya bulunamadı (pattern: {shift_pattern})")
@@ -822,55 +883,83 @@ class ShiftSchedulingModelBuilder:
         total_constraints_added = 0
         # Her yetenek gereksinimi için kısıtları ekle
         for i, requirement in enumerate(skill_requirements):
-            shift_pattern = requirement.get('shift_pattern', '*')
-            required_skill = requirement.get('skill')
-            min_count = requirement.get('min_count', 1)
+            # --- Her kural için pattern, skill, count ve rule_department'ı DÖNGÜNÜN BAŞINDA al ---
+            current_shift_pattern = requirement.get('shift_pattern', '*')
+            current_required_skill = requirement.get('skill')
+            current_min_count = requirement.get('min_count', 1)
+            current_rule_department_filter = requirement.get('department', '') # Kuralın kendi departman filtresi
             # penalty = requirement.get('penalty_if_violated') # Yetenek için yumuşak kısıt? Şimdilik sert.
 
-            if not required_skill or min_count <= 0:
+            if not current_required_skill or current_min_count <= 0:
                 logger.warning(f"Geçersiz yetenek kuralı #{i}: {requirement}")
                 continue
 
-            # Kural ile eşleşen vardiyaları bul
-            matching_shift_ids = [s['shift_id'] for s in shifts
-                                  if s.get('shift_id') and
-                                  fnmatch.fnmatch(s.get('name', ''), shift_pattern)]
+            # Kural ile eşleşen vardiyaları bulmak için TEMİZ bir liste ile başla
+            matching_shift_ids_for_this_rule = []
 
-            if not matching_shift_ids:
-                logger.warning(f"Yetenek kuralı #{i} ({required_skill}) için eşleşen vardiya bulunamadı (pattern: {shift_pattern})")
+            # Sadece ilk kural için debug logları göster (isteğe bağlı, ayarlanabilir)
+            # debug_log = (i == 0)
+            # Daha iyi bir loglama için: Her kuralın ilk birkaç vardiyasını logla veya belirli bir flag ile
+            # Şimdilik tüm vardiyalar için desen eşleştirme loglarını (gerekiyorsa) basitleştirelim
+
+            for s in shifts: # Tüm vardiyalar üzerinde dön
+                shift_id = s.get('shift_id')
+                if not shift_id:
+                    continue
+
+                shift_name = s.get('name', '')
+                shift_department = s.get('department', '') # Vardiyanın kendi departmanı
+
+                # Vardiya adı ile MEVCUT KURALIN shift_pattern'ını eşleştir
+                name_match = fnmatch.fnmatch(shift_name, current_shift_pattern)
+
+                # Departman kontrolü yap (MEVCUT KURALIN departman filtresi ile vardiyanın departmanı)
+                dept_match = True # Varsayılan olarak true (eğer kuralda departman filtresi yoksa)
+                if current_rule_department_filter: # Eğer kural bir departman belirtiyorsa
+                    if shift_department: # ve vardiyanın da bir departmanı varsa
+                        dept_match = (current_rule_department_filter == shift_department)
+                    else: # Kural departman belirtiyor ama vardiyada yoksa, eşleşmez
+                        dept_match = False
+
+                match_result = name_match and dept_match
+
+                # if debug_log or True: # Geçici olarak tüm eşleştirmeleri logla
+                # logger.info(f"Yetenek Kuralı #{i} ({current_required_skill}) için Vardiya ID={shift_id}, Name='{shift_name}', Dep='{shift_department}' Eşleştirme: Pattern='{current_shift_pattern}', RuleDep='{current_rule_department_filter}', Match={match_result}")
+
+                if match_result:
+                    matching_shift_ids_for_this_rule.append(shift_id)
+
+            if not matching_shift_ids_for_this_rule:
+                logger.warning(f"Yetenek kuralı #{i} ({current_required_skill}, Pattern: {current_shift_pattern}, RuleDep: {current_rule_department_filter}) için eşleşen vardiya bulunamadı.")
                 continue
 
-            # Gerekli yeteneğe sahip çalışanları bul
+            # Gerekli yeteneğe sahip çalışanları bul (bu kısım kuraldan bağımsız, genel bir küme)
+            # Bu küme her kural için aynı kalır, sadece current_required_skill değişir.
+            # Ancak performans için dışarıda bir kere hesaplamak yerine burada her kural için yeniden oluşturmak daha temiz olabilir.
             skilled_employee_ids = {emp_id for emp_id, emp_skills in employee_skills_map.items()
-                                    if required_skill in emp_skills}
+                                    if current_required_skill in emp_skills}
 
-            if not skilled_employee_ids:
-                 logger.error(f"SERT KISIT İHLALİ MÜMKÜN: Kural #{i} için gerekli '{required_skill}' yeteneğine sahip hiç çalışan yok!")
-                 # Eşleşen vardiyalara 0 >= min_count ekleyerek çözümsüzlüğü garantileyebiliriz.
-                 for shift_id in matching_shift_ids:
-                      self.model.Add(0 >= min_count)
-                 total_constraints_added += len(matching_shift_ids)
+            if not skilled_employee_ids and current_min_count > 0:
+                 logger.error(f"SERT KISIT İHLALİ MÜMKÜN: Kural #{i} için gerekli '{current_required_skill}' yeteneğine sahip hiç çalışan yok!")
+                 for sid in matching_shift_ids_for_this_rule:
+                      self.model.Add(0 >= current_min_count)
+                 total_constraints_added += len(matching_shift_ids_for_this_rule)
                  continue
 
-            # Her eşleşen vardiya için kısıt ekle
-            for shift_id in matching_shift_ids:
+            # Her eşleşen vardiya için (bu kurala göre filtrelenmiş) kısıt ekle
+            for shift_id_for_constraint in matching_shift_ids_for_this_rule:
                 # Bu vardiyaya atanan YETENEKLİ çalışanların sayısını hesapla
-                skilled_assignment_vars = [self.assignment_vars[(emp_id, shift_id)]
+                skilled_assignment_vars = [self.assignment_vars[(emp_id, shift_id_for_constraint)]
                                          for emp_id in skilled_employee_ids
-                                         if (emp_id, shift_id) in self.assignment_vars]
+                                         if (emp_id, shift_id_for_constraint) in self.assignment_vars]
 
-                if len(skilled_assignment_vars) > 0:  # Boş liste kontrolü
-                    # Toplam atanan yetenekli çalışan sayısı
+                if len(skilled_assignment_vars) > 0:
                     total_skilled_assigned = sum(skilled_assignment_vars)
-
-                    # Minimum sayı kısıtını ekle (şimdilik sert)
-                    self.model.Add(total_skilled_assigned >= min_count)
+                    self.model.Add(total_skilled_assigned >= current_min_count)
                     total_constraints_added += 1
-                elif min_count > 0: # Yetenekli çalışan yok ama atanması gerekiyor
-                     # Bu durumda vardiyaya kimse atanmasa bile kısıt ihlal edilir.
-                     # Modeli infeasible yapmak için 0 >= min_count ekleyebiliriz.
-                     logger.warning(f"Vardiya {shift_id} için '{required_skill}' yetenekli çalışan gerekli ({min_count}) ama uygun çalışan yok veya atanmamış.")
-                     self.model.Add(0 >= min_count)
+                elif current_min_count > 0: # Yetenekli çalışan yok ama atanması gerekiyor
+                     logger.warning(f"Vardiya {shift_id_for_constraint} için '{current_required_skill}' yetenekli çalışan gerekli ({current_min_count}) ama bu yeteneğe sahip kimse yok veya atama değişkeni bulunamadı.")
+                     self.model.Add(0 >= current_min_count) # Modeli infeasible yap
                      total_constraints_added += 1
         logger.info(f"Yetenek gereksinimleri: {total_constraints_added} kısıt eklendi.")
 
