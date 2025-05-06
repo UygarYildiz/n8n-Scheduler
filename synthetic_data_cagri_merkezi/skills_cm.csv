@@ -1,0 +1,242 @@
+employee_id,skill
+CM_E001,Hızlı Klavye Kullanımı
+CM_E001,Etkili İletişim
+CM_E001,Problem Çözme
+CM_E002,Sistem Arıza Tespiti
+CM_E002,Ağ Temelleri
+CM_E002,Yazılım Güncelleme
+CM_E002,Veritabanı Yönetimi (Temel)
+CM_E002,Siber Güvenlik Farkındalığı
+CM_E003,Hızlı Klavye Kullanımı
+CM_E003,Etkili İletişim
+CM_E003,Problem Çözme
+CM_E004,Sistem Arıza Tespiti
+CM_E004,Ağ Temelleri
+CM_E004,Yazılım Güncelleme
+CM_E005,Hızlı Klavye Kullanımı
+CM_E005,Etkili İletişim
+CM_E005,Problem Çözme
+CM_E006,Hızlı Klavye Kullanımı
+CM_E006,Etkili İletişim
+CM_E006,Problem Çözme
+CM_E006,Yabancı Dil (Almanca)
+CM_E006,Coğrafi Bilgi Sistemleri Kullanımı
+CM_E007,Sistem Arıza Tespiti
+CM_E007,Ağ Temelleri
+CM_E007,Yazılım Güncelleme
+CM_E007,Veritabanı Yönetimi (Temel)
+CM_E007,Siber Güvenlik Farkındalığı
+CM_E008,Hızlı Klavye Kullanımı
+CM_E008,Etkili İletişim
+CM_E008,Problem Çözme
+CM_E009,Hızlı Klavye Kullanımı
+CM_E009,Etkili İletişim
+CM_E009,Problem Çözme
+CM_E009,Stres Yönetimi Teknikleri
+CM_E010,Sistem Arıza Tespiti
+CM_E010,Ağ Temelleri
+CM_E010,Yazılım Güncelleme
+CM_E011,Hızlı Klavye Kullanımı
+CM_E011,Etkili İletişim
+CM_E011,Problem Çözme
+CM_E012,Acil Durum Kodları Bilgisi
+CM_E012,Karar Verme Yeteneği
+CM_E012,Harita Okuma
+CM_E013,Hızlı Klavye Kullanımı
+CM_E013,Etkili İletişim
+CM_E013,Problem Çözme
+CM_E014,Acil Durum Kodları Bilgisi
+CM_E014,Karar Verme Yeteneği
+CM_E014,Harita Okuma
+CM_E014,Temel Tıbbi Terminoloji
+CM_E014,Çoklu Görev Yönetimi
+CM_E015,Acil Durum Kodları Bilgisi
+CM_E015,Karar Verme Yeteneği
+CM_E015,Harita Okuma
+CM_E015,Detay Odaklılık
+CM_E016,Hızlı Klavye Kullanımı
+CM_E016,Etkili İletişim
+CM_E016,Problem Çözme
+CM_E017,Acil Durum Kodları Bilgisi
+CM_E017,Karar Verme Yeteneği
+CM_E017,Harita Okuma
+CM_E017,Afet Yönetimi Temel Bilgileri
+CM_E017,Detay Odaklılık
+CM_E018,Acil Durum Kodları Bilgisi
+CM_E018,Karar Verme Yeteneği
+CM_E018,Harita Okuma
+CM_E018,Yangın Güvenliği Bilgisi
+CM_E019,Sistem Arıza Tespiti
+CM_E019,Ağ Temelleri
+CM_E019,Yazılım Güncelleme
+CM_E019,Veritabanı Yönetimi (Temel)
+CM_E019,Çağrı Merkezi Donanımları
+CM_E020,Hızlı Klavye Kullanımı
+CM_E020,Etkili İletişim
+CM_E020,Problem Çözme
+CM_E020,Kriz Yönetimi Temel Bilgisi
+CM_E020,Coğrafi Bilgi Sistemleri Kullanımı
+CM_E021,Hızlı Klavye Kullanımı
+CM_E021,Etkili İletişim
+CM_E021,Problem Çözme
+CM_E022,Hızlı Klavye Kullanımı
+CM_E022,Etkili İletişim
+CM_E022,Problem Çözme
+CM_E022,Yabancı Dil (Almanca)
+CM_E023,Acil Durum Kodları Bilgisi
+CM_E023,Karar Verme Yeteneği
+CM_E023,Harita Okuma
+CM_E023,Ambulans Yönetim Sistemi Kullanımı
+CM_E023,Detay Odaklılık
+CM_E024,Acil Durum Kodları Bilgisi
+CM_E024,Karar Verme Yeteneği
+CM_E024,Harita Okuma
+CM_E024,Polis Telsiz Prosedürleri
+CM_E024,Çoklu Görev Yönetimi
+CM_E025,Hızlı Klavye Kullanımı
+CM_E025,Etkili İletişim
+CM_E025,Problem Çözme
+CM_E025,Stres Yönetimi Teknikleri
+CM_E026,Hızlı Klavye Kullanımı
+CM_E026,Etkili İletişim
+CM_E026,Problem Çözme
+CM_E026,Kriz Yönetimi Temel Bilgisi
+CM_E026,Coğrafi Bilgi Sistemleri Kullanımı
+CM_E027,Hızlı Klavye Kullanımı
+CM_E027,Etkili İletişim
+CM_E027,Problem Çözme
+CM_E027,Yabancı Dil (Almanca)
+CM_E028,Hızlı Klavye Kullanımı
+CM_E028,Etkili İletişim
+CM_E028,Problem Çözme
+CM_E028,Yabancı Dil (Almanca)
+CM_E029,Hızlı Klavye Kullanımı
+CM_E029,Etkili İletişim
+CM_E029,Problem Çözme
+CM_E030,Liderlik ve Motivasyon
+CM_E030,Operasyonel Planlama
+CM_E030,Raporlama Teknikleri
+CM_E030,Üst Düzey Kriz Yönetimi
+CM_E031,Hızlı Klavye Kullanımı
+CM_E031,Etkili İletişim
+CM_E031,Problem Çözme
+CM_E032,Hızlı Klavye Kullanımı
+CM_E032,Etkili İletişim
+CM_E032,Problem Çözme
+CM_E032,Yabancı Dil (İngilizce)
+CM_E033,Acil Durum Kodları Bilgisi
+CM_E033,Karar Verme Yeteneği
+CM_E033,Harita Okuma
+CM_E033,Detay Odaklılık
+CM_E034,Hızlı Klavye Kullanımı
+CM_E034,Etkili İletişim
+CM_E034,Problem Çözme
+CM_E034,Kriz Yönetimi Temel Bilgisi
+CM_E034,Coğrafi Bilgi Sistemleri Kullanımı
+CM_E035,Hızlı Klavye Kullanımı
+CM_E035,Etkili İletişim
+CM_E035,Problem Çözme
+CM_E035,Kriz Yönetimi Temel Bilgisi
+CM_E035,Stres Yönetimi Teknikleri
+CM_E036,Acil Durum Kodları Bilgisi
+CM_E036,Karar Verme Yeteneği
+CM_E036,Harita Okuma
+CM_E036,Çoklu Görev Yönetimi
+CM_E037,Acil Durum Kodları Bilgisi
+CM_E037,Karar Verme Yeteneği
+CM_E037,Harita Okuma
+CM_E037,Güvenlik Protokolleri
+CM_E038,Hızlı Klavye Kullanımı
+CM_E038,Etkili İletişim
+CM_E038,Problem Çözme
+CM_E038,Yabancı Dil (İngilizce)
+CM_E038,Yabancı Dil (Almanca)
+CM_E039,Hızlı Klavye Kullanımı
+CM_E039,Etkili İletişim
+CM_E039,Problem Çözme
+CM_E040,Liderlik ve Motivasyon
+CM_E040,Operasyonel Planlama
+CM_E040,Raporlama Teknikleri
+CM_E040,Ekip Yönetimi Yazılımları
+CM_E041,Hızlı Klavye Kullanımı
+CM_E041,Etkili İletişim
+CM_E041,Problem Çözme
+CM_E042,Hızlı Klavye Kullanımı
+CM_E042,Etkili İletişim
+CM_E042,Problem Çözme
+CM_E043,Hızlı Klavye Kullanımı
+CM_E043,Etkili İletişim
+CM_E043,Problem Çözme
+CM_E044,Acil Durum Kodları Bilgisi
+CM_E044,Karar Verme Yeteneği
+CM_E044,Harita Okuma
+CM_E044,Detay Odaklılık
+CM_E045,Hızlı Klavye Kullanımı
+CM_E045,Etkili İletişim
+CM_E045,Problem Çözme
+CM_E045,Kriz Yönetimi Temel Bilgisi
+CM_E046,Sistem Arıza Tespiti
+CM_E046,Ağ Temelleri
+CM_E046,Yazılım Güncelleme
+CM_E046,Siber Güvenlik Farkındalığı
+CM_E047,Hızlı Klavye Kullanımı
+CM_E047,Etkili İletişim
+CM_E047,Problem Çözme
+CM_E048,Liderlik ve Motivasyon
+CM_E048,Operasyonel Planlama
+CM_E048,Raporlama Teknikleri
+CM_E049,Acil Durum Kodları Bilgisi
+CM_E049,Karar Verme Yeteneği
+CM_E049,Harita Okuma
+CM_E049,Polis Telsiz Prosedürleri
+CM_E050,Acil Durum Kodları Bilgisi
+CM_E050,Karar Verme Yeteneği
+CM_E050,Harita Okuma
+CM_E050,Yangın Güvenliği Bilgisi
+CM_E050,Detay Odaklılık
+CM_E051,Hızlı Klavye Kullanımı
+CM_E051,Etkili İletişim
+CM_E051,Problem Çözme
+CM_E052,Hızlı Klavye Kullanımı
+CM_E052,Etkili İletişim
+CM_E052,Problem Çözme
+CM_E052,Stres Yönetimi Teknikleri
+CM_E052,Coğrafi Bilgi Sistemleri Kullanımı
+CM_E053,Liderlik ve Motivasyon
+CM_E053,Operasyonel Planlama
+CM_E053,Raporlama Teknikleri
+CM_E054,Hızlı Klavye Kullanımı
+CM_E054,Etkili İletişim
+CM_E054,Problem Çözme
+CM_E054,Yabancı Dil (İngilizce)
+CM_E054,Coğrafi Bilgi Sistemleri Kullanımı
+CM_E055,Hızlı Klavye Kullanımı
+CM_E055,Etkili İletişim
+CM_E055,Problem Çözme
+CM_E055,Stres Yönetimi Teknikleri
+CM_E056,Acil Durum Kodları Bilgisi
+CM_E056,Karar Verme Yeteneği
+CM_E056,Harita Okuma
+CM_E057,Hızlı Klavye Kullanımı
+CM_E057,Etkili İletişim
+CM_E057,Problem Çözme
+CM_E057,Coğrafi Bilgi Sistemleri Kullanımı
+CM_E057,Stres Yönetimi Teknikleri
+CM_E058,Liderlik ve Motivasyon
+CM_E058,Operasyonel Planlama
+CM_E058,Raporlama Teknikleri
+CM_E058,Üst Düzey Kriz Yönetimi
+CM_E058,Performans Değerlendirme
+CM_E059,Hızlı Klavye Kullanımı
+CM_E059,Etkili İletişim
+CM_E059,Problem Çözme
+CM_E059,Stres Yönetimi Teknikleri
+CM_E060,Acil Durum Kodları Bilgisi
+CM_E060,Karar Verme Yeteneği
+CM_E060,Harita Okuma
+CM_E060,Güvenlik Protokolleri
+CM_E015,Polis Kriz Protokolleri
+CM_E001,İleri Düzey Stres Yönetimi
+CM_E003,İleri Düzey Stres Yönetimi
+CM_E012,Temel Tıbbi Triyaj Bilgisi
+CM_E030,Liderlik ve Koordinasyon

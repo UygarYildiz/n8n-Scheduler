@@ -1,0 +1,61 @@
+employee_id,name,role,department
+CM_E001,Çağrı Alıcı 1,Çağrı Alıcı,Genel Çağrı
+CM_E002,Teknik Destek 2,Teknik Destek,Teknik Operasyonlar
+CM_E003,Çağrı Alıcı 3,Çağrı Alıcı,Genel Çağrı
+CM_E004,Teknik Destek 4,Teknik Destek,Teknik Operasyonlar
+CM_E005,Çağrı Alıcı 5,Çağrı Alıcı,Genel Çağrı
+CM_E006,Çağrı Alıcı 6,Çağrı Alıcı,Genel Çağrı
+CM_E007,Teknik Destek 7,Teknik Destek,Teknik Operasyonlar
+CM_E008,Çağrı Alıcı 8,Çağrı Alıcı,Genel Çağrı
+CM_E009,Çağrı Alıcı 9,Çağrı Alıcı,Genel Çağrı
+CM_E010,Teknik Destek 10,Teknik Destek,Teknik Operasyonlar
+CM_E011,Çağrı Alıcı 11,Çağrı Alıcı,Genel Çağrı
+CM_E012,Yönlendirici 12,Yönlendirici,Sağlık Yönlendirme
+CM_E013,Çağrı Alıcı 13,Çağrı Alıcı,Genel Çağrı
+CM_E014,Yönlendirici 14,Yönlendirici,Sağlık Yönlendirme
+CM_E015,Yönlendirici 15,Yönlendirici,Polis Yönlendirme
+CM_E016,Çağrı Alıcı 16,Çağrı Alıcı,Genel Çağrı
+CM_E017,Yönlendirici 17,Yönlendirici,İtfaiye Yönlendirme
+CM_E018,Yönlendirici 18,Yönlendirici,İtfaiye Yönlendirme
+CM_E019,Teknik Destek 19,Teknik Destek,Teknik Operasyonlar
+CM_E020,Çağrı Alıcı 20,Çağrı Alıcı,Genel Çağrı
+CM_E021,Çağrı Alıcı 21,Çağrı Alıcı,Genel Çağrı
+CM_E022,Çağrı Alıcı 22,Çağrı Alıcı,Genel Çağrı
+CM_E023,Yönlendirici 23,Yönlendirici,Sağlık Yönlendirme
+CM_E024,Yönlendirici 24,Yönlendirici,Polis Yönlendirme
+CM_E025,Çağrı Alıcı 25,Çağrı Alıcı,Genel Çağrı
+CM_E026,Çağrı Alıcı 26,Çağrı Alıcı,Genel Çağrı
+CM_E027,Çağrı Alıcı 27,Çağrı Alıcı,Genel Çağrı
+CM_E028,Çağrı Alıcı 28,Çağrı Alıcı,Genel Çağrı
+CM_E029,Çağrı Alıcı 29,Çağrı Alıcı,Genel Çağrı
+CM_E030,Vardiya Amiri 30,Vardiya Amiri,Yönetim
+CM_E031,Çağrı Alıcı 31,Çağrı Alıcı,Genel Çağrı
+CM_E032,Çağrı Alıcı 32,Çağrı Alıcı,Genel Çağrı
+CM_E033,Yönlendirici 33,Yönlendirici,İtfaiye Yönlendirme
+CM_E034,Çağrı Alıcı 34,Çağrı Alıcı,Genel Çağrı
+CM_E035,Çağrı Alıcı 35,Çağrı Alıcı,Genel Çağrı
+CM_E036,Yönlendirici 36,Yönlendirici,İtfaiye Yönlendirme
+CM_E037,Yönlendirici 37,Yönlendirici,Polis Yönlendirme
+CM_E038,Çağrı Alıcı 38,Çağrı Alıcı,Genel Çağrı
+CM_E039,Çağrı Alıcı 39,Çağrı Alıcı,Genel Çağrı
+CM_E040,Vardiya Amiri 40,Vardiya Amiri,Yönetim
+CM_E041,Çağrı Alıcı 41,Çağrı Alıcı,Genel Çağrı
+CM_E042,Çağrı Alıcı 42,Çağrı Alıcı,Genel Çağrı
+CM_E043,Çağrı Alıcı 43,Çağrı Alıcı,Genel Çağrı
+CM_E044,Yönlendirici 44,Yönlendirici,Sağlık Yönlendirme
+CM_E045,Çağrı Alıcı 45,Çağrı Alıcı,Genel Çağrı
+CM_E046,Teknik Destek 46,Teknik Destek,Teknik Operasyonlar
+CM_E047,Çağrı Alıcı 47,Çağrı Alıcı,Genel Çağrı
+CM_E048,Vardiya Amiri 48,Vardiya Amiri,Yönetim
+CM_E049,Yönlendirici 49,Yönlendirici,Polis Yönlendirme
+CM_E050,Yönlendirici 50,Yönlendirici,İtfaiye Yönlendirme
+CM_E051,Çağrı Alıcı 51,Çağrı Alıcı,Genel Çağrı
+CM_E052,Çağrı Alıcı 52,Çağrı Alıcı,Genel Çağrı
+CM_E053,Vardiya Amiri 53,Vardiya Amiri,Yönetim
+CM_E054,Çağrı Alıcı 54,Çağrı Alıcı,Genel Çağrı
+CM_E055,Çağrı Alıcı 55,Çağrı Alıcı,Genel Çağrı
+CM_E056,Yönlendirici 56,Yönlendirici,İtfaiye Yönlendirme
+CM_E057,Çağrı Alıcı 57,Çağrı Alıcı,Genel Çağrı
+CM_E058,Vardiya Amiri 58,Vardiya Amiri,Yönetim
+CM_E059,Çağrı Alıcı 59,Çağrı Alıcı,Genel Çağrı
+CM_E060,Yönlendirici 60,Yönlendirici,Polis Yönlendirme
