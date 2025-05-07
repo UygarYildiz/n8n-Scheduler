@@ -54,7 +54,6 @@ Bu belge, projenin 6 haftalık geliştirme sürecini ve her haftanın hedeflerin
 *   **Odak Alanı:** Son kullanıcılar için web tabanlı kullanıcı arayüzü tasarımı ve geliştirme.
 *   **Hedefler:**
     *   **Aşama 1: Tasarım ve Prototipleme (İlk Yarı)**
-        *   Kullanıcı arayüzü için teknoloji seçimi (React.js, Material-UI/Ant Design, Chart.js/D3.js).
         *   UI/UX tasarım şablonlarının oluşturulması.
         *   Temel bileşenlerin prototiplenmesi.
         *   Kullanıcı akışlarının doğrulanması.

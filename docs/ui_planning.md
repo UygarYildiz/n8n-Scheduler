@@ -29,23 +29,15 @@ Bu belge, Kurumsal Optimizasyon ve Otomasyon Çözümü için kullanıcı arayü
 
 ## 2. Teknoloji Seçimi ve Mimari
 
-### 2.1. Önerilen Teknolojiler
 
-#### Frontend
-- **Framework:** React.js
-  - *Gerekçe:* Komponent tabanlı yapısı, geniş ekosistemi ve yeniden kullanılabilir UI bileşenleri oluşturma kolaylığı
-- **UI Kütüphanesi:** Material-UI veya Ant Design
-  - *Gerekçe:* Hazır komponentler, tutarlı tasarım dili ve responsive tasarım desteği
-- **Grafik/Görselleştirme:** Chart.js veya D3.js
-  - *Gerekçe:* Metrik görselleştirmeleri ve raporlar için esnek ve güçlü grafik oluşturma yetenekleri
-- **Çizelge Görünümü:** FullCalendar veya React Big Calendar
-  - *Gerekçe:* Vardiya çizelgelerini takvim formatında göstermek için özelleştirilebilir bileşenler
+
+
 
 #### Backend (API Entegrasyonu)
 - **Mevcut API:** FastAPI (Optimizasyon Çekirdeği)
 - **n8n Entegrasyonu:** Webhook tabanlı iletişim
 
-### 2.2. Mimari Yaklaşım
+### 2.1. Mimari Yaklaşım
 
 ```
 +-------------------+      +-------------------+      +-------------------+
