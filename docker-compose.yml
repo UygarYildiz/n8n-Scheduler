@@ -7,18 +7,20 @@ services:
     ports:
       - "5678:5678"
     environment:
-      # Set the timezone for n8n (Optional - find yours here: https://momentjs.com/timezone/)
       - GENERIC_TIMEZONE=Europe/Istanbul
+      # Webhook'ların dışarıdan erişilebilir olması için
+      - N8N_EDITOR_BASE_URL=http://localhost:5678
+      # JSON ve YAML işleme için gerekli kütüphaneleri etkinleştir
+      - NODE_FUNCTION_ALLOW_EXTERNAL=yaml,fs-extra
     volumes:
-      # Mount local directory for n8n configuration and data persistence
       - ./n8n_data:/home/node/.n8n
-      # Mount local synthetic_data directory to /data inside the container
-      - ./synthetic_data:/data
-      # Mount configs directory for configuration files
+      # Veri kaynaklarını tek bir ana klasör altında organize et
+      - ./synthetic_data:/veri_kaynaklari/hastane
+      - ./synthetic_data_cagri_merkezi:/veri_kaynaklari/cagri_merkezi
+      # Konfigürasyon dosyaları
       - ./configs:/configs
-    # Wait for database to be ready (if you were using one)
-    # depends_on:
-    #   - postgres # Example if using PostgreSQL
+      # Kurallar için ayrı bir klasör (opsiyonel)
+      - ./configs/kurallar:/configs/kurallar
 
 volumes:
   n8n_data: # Define the volume if not using local path mapping above

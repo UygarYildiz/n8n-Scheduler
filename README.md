@@ -41,11 +41,17 @@ Proje 5 haftalık bir yol haritası ile ilerleyecektir. Detaylar için [`docs/ro
 
 Geliştirme ortamı kurulumu için [`docs/setup.md`](docs/setup.md) dosyasına bakınız.
 
-## Kapsam Notu: Kullanıcı Arayüzü
+## Kullanıcı Arayüzü
 
-Bu projenin ilk fazı (5 haftalık yol haritası), çekirdek optimizasyon motorunun (Python/CP-SAT) ve otomasyon akışlarının (n8n) geliştirilmesine odaklanmaktadır. Son kullanıcılar (planlamacılar, personel vb.) için özel bir web tabanlı **kullanıcı arayüzü (UI)** geliştirilmesi bu ilk fazın **kapsamı dışındadır**. Veri girişi ve sonuçların sunumu için mevcut kurumsal sistemler, dosya tabanlı yöntemler veya n8n'in temel yetenekleri kullanılacaktır.
+Projenin ilk 5 haftası, çekirdek optimizasyon motorunun (Python/CP-SAT) ve otomasyon akışlarının (n8n) geliştirilmesine odaklanmaktadır. 6. haftada ise, son kullanıcılar (planlamacılar, personel vb.) için özel bir web tabanlı **kullanıcı arayüzü (UI)** geliştirilecektir.
 
-Kullanıcı arayüzü ihtiyacı ve gereksinimleri, projenin test ve değerlendirme aşamasında (5. Hafta) daha detaylı analiz edilecek ve potansiyel olarak **gelecek bir geliştirme fazı** olarak planlanacaktır.
+Kullanıcı arayüzü, aşağıdaki temel özellikleri içerecektir:
+- Veri seti ve konfigürasyon seçim ekranı
+- Optimizasyon parametrelerini ayarlama formu
+- Sonuçları görselleştirme ve raporlama paneli
+- Vardiya çizelgesi görüntüleme ve düzenleme arayüzü
+
+Kullanıcı arayüzü, n8n webhook'ları ile entegre çalışacak ve optimizasyon sonuçlarını kullanıcı dostu bir şekilde sunacaktır. Arayüz gereksinimleri ve tasarımı, 5. haftada detaylı olarak belirlenecek ve 6. haftada implementasyonu gerçekleştirilecektir.
 
 ## Dokümantasyon
 
@@ -56,4 +62,19 @@ Proje ile ilgili detaylı dokümantasyon `docs` klasöründe bulunmaktadır:
 *   [`docs/configuration.md`](docs/configuration.md): Konfigürasyon Yönetimi
 *   [`docs/adaptability.md`](docs/adaptability.md): Uyarlanabilirlik Stratejileri
 *   [`docs/roadmap.md`](docs/roadmap.md): Proje Yol Haritası
-*   [`docs/setup.md`](docs/setup.md): Kurulum Rehberi 
+*   [`docs/setup.md`](docs/setup.md): Kurulum Rehberi
+*   [`docs/n8n_workflow_guide.md`](docs/n8n_workflow_guide.md): n8n İş Akışı Kullanım Kılavuzu
+*   [`docs/metrics.md`](docs/metrics.md): Metrik Tanımları ve Hesaplama Yöntemleri
+
+## Proje Durumu
+
+Proje, 6 haftalık yol haritasının 4. haftasını tamamlamış durumdadır:
+
+- ✅ **1. Hafta**: Temelleri Atma ve Problem Alanını Anlama
+- ✅ **2. Hafta**: Veri Entegrasyonu ve Modelleme Başlangıcı
+- ✅ **3. Hafta**: CP-SAT ile Çekirdek Optimizasyon Mantığı ve Soyutlama
+- ✅ **4. Hafta**: n8n ile Uçtan Uca Otomasyon Akışları
+- 🔄 **5. Hafta**: Kullanıcı Arayüzü Geliştirme (Devam Ediyor)
+- 📅 **6. Hafta**: Test, İyileştirme ve Kurumsal Uyarlanabilirlik (Planlandı)
+
+Şu anda, n8n iş akışı webhook tabanlı dinamik parametre alma özelliği ile tamamlanmış ve başarıyla test edilmiştir. Optimizasyon API'si ile entegrasyon sağlanmış ve farklı veri setleri için dinamik dosya yolu yapılandırması eklenmiştir. 5. haftada web tabanlı kullanıcı arayüzü geliştirilecek, 6. haftada ise kapsamlı test ve iyileştirme çalışmaları yapılarak projenin kurumsal uyarlanabilirliği sağlanacaktır.

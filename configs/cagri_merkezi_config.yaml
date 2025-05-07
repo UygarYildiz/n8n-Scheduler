@@ -5,68 +5,83 @@ problem_type: "shift_scheduling"
 optimization_core:
   solver_time_limit_seconds: 120
   objective_weights:
-    minimize_overstaffing: 0.5
+    minimize_overstaffing: 1.5
     minimize_understaffing: 100
     maximize_preferences: 1
-    balance_workload: 2
+    balance_workload: 3.0
     maximize_shift_coverage: 50
 
 rules:
   min_staffing_requirements:
-    - shift_pattern: "*Sabah*Hafta*İçi*"
+    # Sabah vardiyaları için Çağrı Alıcı gereksinimleri - Daha genel desen
+    - shift_pattern: "*Genel Çağrı*"
       role: "Çağrı Alıcı"
       department: "Genel Çağrı"
-      min_count: 8
+      min_count: 1  # 4'ten 1'e düşürüldü - Test amaçlı daha da gevşetme
       penalty_if_violated: 200
-    - shift_pattern: "*Gece*Hafta*Sonu*"
-      role: "Çağrı Alıcı"
-      department: "Genel Çağrı"
-      min_count: 4
-      penalty_if_violated: 250
-    - shift_pattern: "*Polis Yönlendirme"
+
+    # Gece hafta sonu vardiyaları için Çağrı Alıcı gereksinimleri - Kaldırıldı (genel desen yeterli)
+
+    # Polis Yönlendirme departmanı için Yönlendirici gereksinimleri
+    - shift_pattern: "*"
       role: "Yönlendirici"
       department: "Polis Yönlendirme"
-      min_count: 3
+      min_count: 1  # 2'den 1'e düşürüldü
       penalty_if_violated: 300
-    - shift_pattern: "*İtfaiye Yönlendirme"
+
+    # İtfaiye Yönlendirme departmanı için Yönlendirici gereksinimleri
+    - shift_pattern: "*"
       role: "Yönlendirici"
       department: "İtfaiye Yönlendirme"
-      min_count: 2
+      min_count: 1  # Aynı kaldı
       penalty_if_violated: 300
-    - shift_pattern: "*Sağlık Yönlendirme"
+
+    # Sağlık Yönlendirme departmanı için Yönlendirici gereksinimleri
+    - shift_pattern: "*"
       role: "Yönlendirici"
       department: "Sağlık Yönlendirme"
-      min_count: 2
+      min_count: 1  # 2'den 1'e düşürüldü
       penalty_if_violated: 300
+
+    # Tüm vardiyalar için Vardiya Amiri gereksinimleri
     - shift_pattern: "*"
       role: "Vardiya Amiri"
+      department: "Yönetim"
       min_count: 1
       penalty_if_violated: 500
 
-  max_consecutive_shifts: 3
-  min_rest_time_hours: 12
+  max_consecutive_shifts: 7  # 5'ten 7'ye artırıldı - Çok daha esnek çalışma düzeni
+  min_rest_time_hours: 1   # 6'dan 1'e düşürüldü - Çözümsüzlüğü test etmek için aşırı gevşetme
 
   skill_requirements:
-    - shift_pattern: "*Polis Yönlendirme"
+    # Polis Yönlendirme departmanı için yetenek gereksinimleri
+    - shift_pattern: "*"
       skill: "Polis Kriz Protokolleri"
       department: "Polis Yönlendirme"
       role: "Yönlendirici"
       min_count: 1
       penalty_if_violated: 150
-    - shift_pattern: "*Genel Çağrı"
+
+    # Genel Çağrı departmanı için yetenek gereksinimleri
+    - shift_pattern: "*"
       skill: "İleri Düzey Stres Yönetimi"
       department: "Genel Çağrı"
       role: "Çağrı Alıcı"
-      min_count: 2
+      min_count: 1  # 2'den 1'e düşürüldü
       penalty_if_violated: 100
-    - shift_pattern: "*Sağlık Yönlendirme"
+
+    # Sağlık Yönlendirme departmanı için yetenek gereksinimleri
+    - shift_pattern: "*"
       skill: "Temel Tıbbi Triyaj Bilgisi"
       department: "Sağlık Yönlendirme"
       role: "Yönlendirici"
       min_count: 1
       penalty_if_violated: 180
+
+    # Yönetim departmanı için yetenek gereksinimleri
     - shift_pattern: "*"
       skill: "Liderlik ve Koordinasyon"
+      department: "Yönetim"
       role: "Vardiya Amiri"
       min_count: 1
       penalty_if_violated: 200

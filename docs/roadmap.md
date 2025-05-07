@@ -1,6 +1,6 @@
-# Proje Yol Haritası (5 Hafta)
+# Proje Yol Haritası (6 Hafta)
 
-Bu belge, projenin 5 haftalık geliştirme sürecini ve her haftanın hedeflerini özetlemektedir.
+Bu belge, projenin 6 haftalık geliştirme sürecini ve her haftanın hedeflerini özetlemektedir.
 
 ## 1. Hafta: Temelleri Atma ve Problem Alanını Anlama (✅ Tamamlandı)
 
@@ -37,26 +37,44 @@ Bu belge, projenin 5 haftalık geliştirme sürecini ve her haftanın hedeflerin
     *   ✅ **(Tamamlandı)** Temel metrik hesaplama mantığının eklenmesi (`MetricsOutput` sınıfı).
 *   **Çıktılar:** Tamamlanmış (temel set için) CP-SAT modeli kodu, konfigürasyon okuma ve dinamik kısıt ekleme mantığı, standart formatta sonuç üreten kod, soyutlama yapısının ilk versiyonu. **(✅ Tamamlandı)**
 
-## 4. Hafta: n8n ile Uçtan Uca Otomasyon Akışları
+## 4. Hafta: n8n ile Uçtan Uca Otomasyon Akışları (✅ Tamamlandı)
 
 *   **Odak Alanı:** n8n iş akışlarını tamamlama, veri almadan sonuç dağıtımına kadar tüm süreci otomatikleştirme.
 *   **Hedefler:**
-    *   n8n veri toplama/hazırlama akışının tamamlanması.   
-    *   Opti    mizasyon Çekirdeği'ni tetikleyen ve dönen standart sonucu yakalayan n8n adımlarının tamamlanması.
-    *   Optimizasyon sonuçlarını işleyen (örn. basit raporlama veya belirli alanları ayıklama) n8n akışının oluşturulması.
-    *   Sonuçların örnek hedef sistemlere (örn. bir veritabanı tablosuna yazma, e-posta ile gönderme) n8n aracılığıyla iletilmesi.
-    *   Temel hata yönetimi mekanizmalarının (örn. optimizasyon başarısız olursa bildirim) n8n akışına eklenmesi.
-    *   Uçtan uca akışın yapay veri ile test edilmesi.
-*   **Çıktılar:** Tamamlanmış n8n iş akışları (veri al → optimize et → sonuç dağıt), örnek sistem entegrasyonları, test edilmiş otomasyon akışı.
+    *   ✅ **(Tamamlandı)** n8n veri toplama/hazırlama akışının tamamlanması.
+    *   ✅ **(Tamamlandı)** Optimizasyon Çekirdeği'ni tetikleyen ve dönen standart sonucu yakalayan n8n adımlarının tamamlanması.
+    *   ✅ **(Tamamlandı)** Optimizasyon sonuçlarını işleyen (örn. basit raporlama veya belirli alanları ayıklama) n8n akışının oluşturulması.
+    *   ✅ **(Tamamlandı)** Webhook tabanlı dinamik parametre alma mekanizmasının eklenmesi.
+    *   ✅ **(Tamamlandı)** Farklı veri setleri (hastane, çağrı merkezi) için dinamik dosya yolu yapılandırması.
+    *   ✅ **(Tamamlandı)** Uçtan uca akışın yapay veri ile test edilmesi.
+*   **Çıktılar:** Tamamlanmış n8n iş akışları (veri al → optimize et → sonuç dağıt), webhook tabanlı dinamik parametre alma, test edilmiş otomasyon akışı. **(✅ Tamamlandı)**
 
-## 5. Hafta: Test, İyileştirme ve Kurumsal Uyarlanabilirlik
+## 5. Hafta: Kullanıcı Arayüzü Geliştirme
+
+*   **Odak Alanı:** Son kullanıcılar için web tabanlı kullanıcı arayüzü geliştirme.
+*   **Hedefler:**
+    *   Kullanıcı arayüzü için teknoloji seçimi (örn. React, Vue.js, Flask Templates).
+    *   Temel kullanıcı arayüzü bileşenlerinin tasarımı ve implementasyonu:
+        *   Veri seti ve konfigürasyon seçim ekranı
+        *   Optimizasyon parametrelerini ayarlama formu
+        *   Sonuçları görselleştirme ve raporlama paneli
+        *   Vardiya çizelgesi görüntüleme ve düzenleme arayüzü
+    *   Kullanıcı arayüzünün n8n webhook'ları ile entegrasyonu.
+    *   Optimizasyon sonuçlarının kullanıcı dostu bir şekilde sunulması.
+    *   Temel kullanıcı yetkilendirme ve kimlik doğrulama mekanizmasının eklenmesi.
+    *   Kullanıcı arayüzünün farklı cihazlarda (masaüstü, tablet) test edilmesi.
+*   **Çıktılar:** Çalışan web tabanlı kullanıcı arayüzü, kullanıcı kılavuzu, arayüz-n8n entegrasyonu.
+
+## 6. Hafta: Test, İyileştirme ve Kurumsal Uyarlanabilirlik
 
 *   **Odak Alanı:** Kapsamlı test, performans değerlendirme, iyileştirmeler ve dokümantasyon.
 *   **Hedefler:**
     *   Farklı konfigürasyonlar ve yapay veri setleri (farklı kurumları/zorlukları simüle eden) ile sistemin kapsamlı test edilmesi.
     *   Optimizasyon süresi, çözüm kalitesi ve otomasyon akışının güvenilirliği açısından performansı değerlendirme.
     *   Test sonuçlarına göre CP-SAT modelinde, Python kodunda veya n8n akışlarında gerekli iyileştirmeleri (performans, doğruluk) yapma.
+    *   "Kötü" vardiya dağılımı (`bad_shift_distribution_std_dev`) metriğini iyileştirmek için CP-SAT modeline ve konfigürasyona yeni bir hedef terimi/ağırlığı eklenmesi ve test edilmesi.
     *   Hata ayıklama ve kod temizliği.
     *   Projenin farklı kurumlara nasıl kurulacağı, nasıl konfigüre edileceği ve veri entegrasyonunun nasıl yapılacağına dair detaylı bir "Kurumsal Uyarlanabilirlik Rehberi" veya dokümantasyon hazırlama.
     *   Projenin esneklik avantajlarını (açık kaynak CP-SAT kullanımı, modüler yapı, konfigüre edilebilirlik) vurgulama.
-*   **Çıktılar:** Kapsamlı test raporları, iyileştirilmiş proje kodu ve n8n akışları, detaylı kurumsal uyarlanabilirlik dokümantasyonu.
+    *   Kullanıcı arayüzü ile entegre edilmiş tam sistemin kapsamlı testi.
+*   **Çıktılar:** Kapsamlı test raporları, iyileştirilmiş proje kodu ve n8n akışları, detaylı kurumsal uyarlanabilirlik dokümantasyonu, tam entegre sistem.
