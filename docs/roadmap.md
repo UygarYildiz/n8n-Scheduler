@@ -49,32 +49,49 @@ Bu belge, projenin 6 haftalık geliştirme sürecini ve her haftanın hedeflerin
     *   ✅ **(Tamamlandı)** Uçtan uca akışın yapay veri ile test edilmesi.
 *   **Çıktılar:** Tamamlanmış n8n iş akışları (veri al → optimize et → sonuç dağıt), webhook tabanlı dinamik parametre alma, test edilmiş otomasyon akışı. **(✅ Tamamlandı)**
 
-## 5. Hafta: Kullanıcı Arayüzü Geliştirme
+## 5. Hafta: Kullanıcı Arayüzü Tasarımı ve Geliştirme
 
-*   **Odak Alanı:** Son kullanıcılar için web tabanlı kullanıcı arayüzü geliştirme.
+*   **Odak Alanı:** Son kullanıcılar için web tabanlı kullanıcı arayüzü tasarımı ve geliştirme.
 *   **Hedefler:**
-    *   Kullanıcı arayüzü için teknoloji seçimi (örn. React, Vue.js, Flask Templates).
-    *   Temel kullanıcı arayüzü bileşenlerinin tasarımı ve implementasyonu:
-        *   Veri seti ve konfigürasyon seçim ekranı
-        *   Optimizasyon parametrelerini ayarlama formu
-        *   Sonuçları görselleştirme ve raporlama paneli
-        *   Vardiya çizelgesi görüntüleme ve düzenleme arayüzü
-    *   Kullanıcı arayüzünün n8n webhook'ları ile entegrasyonu.
-    *   Optimizasyon sonuçlarının kullanıcı dostu bir şekilde sunulması.
-    *   Temel kullanıcı yetkilendirme ve kimlik doğrulama mekanizmasının eklenmesi.
-    *   Kullanıcı arayüzünün farklı cihazlarda (masaüstü, tablet) test edilmesi.
-*   **Çıktılar:** Çalışan web tabanlı kullanıcı arayüzü, kullanıcı kılavuzu, arayüz-n8n entegrasyonu.
+    *   **Aşama 1: Tasarım ve Prototipleme (İlk Yarı)**
+        *   Kullanıcı arayüzü için teknoloji seçimi (React.js, Material-UI/Ant Design, Chart.js/D3.js).
+        *   UI/UX tasarım şablonlarının oluşturulması.
+        *   Temel bileşenlerin prototiplenmesi.
+        *   Kullanıcı akışlarının doğrulanması.
+    *   **Aşama 2: Temel Bileşenlerin Geliştirilmesi (İkinci Yarı)**
+        *   Temel sayfa yapısı ve gezinme (Navbar, Sidebar, Ana İçerik Alanı).
+        *   Veri seti ve konfigürasyon seçim ekranı.
+        *   Optimizasyon parametreleri ayarlama formu.
+        *   Kullanıcı arayüzünün n8n webhook'ları ile temel entegrasyonu.
+*   **Çıktılar:**
+    *   Kullanıcı arayüzü tasarım dokümanı ve prototipleri.
+    *   Temel sayfa yapısı ve gezinme bileşenleri.
+    *   Veri seti ve konfigürasyon yönetimi ekranları.
+    *   Optimizasyon parametreleri formu.
+    *   n8n webhook entegrasyonu için temel altyapı.
 
-## 6. Hafta: Test, İyileştirme ve Kurumsal Uyarlanabilirlik
+## 6. Hafta: Kullanıcı Arayüzü Tamamlama, Test ve İyileştirme
 
-*   **Odak Alanı:** Kapsamlı test, performans değerlendirme, iyileştirmeler ve dokümantasyon.
+*   **Odak Alanı:** Kullanıcı arayüzünün tamamlanması, görselleştirme, entegrasyon, test ve iyileştirmeler.
 *   **Hedefler:**
-    *   Farklı konfigürasyonlar ve yapay veri setleri (farklı kurumları/zorlukları simüle eden) ile sistemin kapsamlı test edilmesi.
-    *   Optimizasyon süresi, çözüm kalitesi ve otomasyon akışının güvenilirliği açısından performansı değerlendirme.
-    *   Test sonuçlarına göre CP-SAT modelinde, Python kodunda veya n8n akışlarında gerekli iyileştirmeleri (performans, doğruluk) yapma.
-    *   "Kötü" vardiya dağılımı (`bad_shift_distribution_std_dev`) metriğini iyileştirmek için CP-SAT modeline ve konfigürasyona yeni bir hedef terimi/ağırlığı eklenmesi ve test edilmesi.
-    *   Hata ayıklama ve kod temizliği.
-    *   Projenin farklı kurumlara nasıl kurulacağı, nasıl konfigüre edileceği ve veri entegrasyonunun nasıl yapılacağına dair detaylı bir "Kurumsal Uyarlanabilirlik Rehberi" veya dokümantasyon hazırlama.
-    *   Projenin esneklik avantajlarını (açık kaynak CP-SAT kullanımı, modüler yapı, konfigüre edilebilirlik) vurgulama.
-    *   Kullanıcı arayüzü ile entegre edilmiş tam sistemin kapsamlı testi.
-*   **Çıktılar:** Kapsamlı test raporları, iyileştirilmiş proje kodu ve n8n akışları, detaylı kurumsal uyarlanabilirlik dokümantasyonu, tam entegre sistem.
+    *   **Aşama 3: Görselleştirme ve Raporlama (İlk Yarı)**
+        *   Metrik görselleştirmeleri ve grafikler.
+        *   Vardiya çizelgesi takvim görünümü.
+        *   Sonuç görselleştirme ve raporlama paneli.
+        *   Rapor oluşturma ve dışa aktarma araçları.
+    *   **Aşama 4: Entegrasyon ve Test (İkinci Yarı)**
+        *   API entegrasyonunun tamamlanması.
+        *   n8n webhook bağlantılarının iyileştirilmesi.
+        *   Temel kullanıcı yetkilendirme ve kimlik doğrulama mekanizması.
+        *   Kullanıcı testleri ve geri bildirim.
+        *   Farklı cihazlarda (masaüstü, tablet) test edilmesi.
+        *   Hata düzeltmeleri ve performans iyileştirmeleri.
+        *   Kullanıcı arayüzü ile entegre edilmiş tam sistemin kapsamlı testi.
+*   **Çıktılar:**
+    *   Tamamlanmış web tabanlı kullanıcı arayüzü.
+    *   Metrik görselleştirmeleri ve grafikler.
+    *   Vardiya çizelgesi görüntüleme ve düzenleme arayüzü.
+    *   Rapor oluşturma ve dışa aktarma araçları.
+    *   Kullanıcı kılavuzu ve dokümantasyon.
+    *   Test raporları ve iyileştirme belgeleri.
+    *   Tam entegre ve test edilmiş sistem.
