@@ -11,16 +11,17 @@ services:
       # Webhook'ların dışarıdan erişilebilir olması için
       - N8N_EDITOR_BASE_URL=http://localhost:5678
       # JSON ve YAML işleme için gerekli kütüphaneleri etkinleştir
-      - NODE_FUNCTION_ALLOW_EXTERNAL=yaml,fs-extra
+      - NODE_FUNCTION_ALLOW_EXTERNAL=js-yaml,yaml,fs-extra
     volumes:
       - ./n8n_data:/home/node/.n8n
-      # Veri kaynaklarını tek bir ana klasör altında organize et
-      - ./synthetic_data:/veri_kaynaklari/hastane
-      - ./synthetic_data_cagri_merkezi:/veri_kaynaklari/cagri_merkezi
       # Konfigürasyon dosyaları
-      - ./configs:/configs
+      - ./configs:/mnt/workflow_configs
       # Kurallar için ayrı bir klasör (opsiyonel)
       - ./configs/kurallar:/configs/kurallar
+      # DOĞRU Veri Kaynağı Eşleştirmeleri:
+      - ./synthetic_data:/mnt/workflow_data/hastane
+      - ./synthetic_data_cagri_merkezi:/mnt/workflow_data/cagri_merkezi
+    # user: "1000:1000" # Uncomment if you have permission issues
 
 volumes:
   n8n_data: # Define the volume if not using local path mapping above

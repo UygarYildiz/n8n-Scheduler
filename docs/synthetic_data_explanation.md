@@ -6,10 +6,12 @@ Bu belge, `generate_synthetic_data.py` betiği tarafından `synthetic_data` klas
 
 ### 1. `employees.csv`
 
-*   **Amaç:** Sistemdeki çalışanları ve ana rollerini listeler.
+*   **Amaç:** Sistemdeki çalışanları, ana rollerini ve departmanlarını listeler.
 *   **Sütunlar:**
-    *   `employee_id`: Çalışan için benzersiz kimlik (Örn: "E001", "E050").
-    *   `role`: Çalışanın ana rolü (Örn: "Hemşire", "Doktor", "Teknisyen", "İdari"). Roller ve dağılımları betikteki `ROLES` sözlüğünden gelir.
+    *   `employee_id`: Çalışan için benzersiz kimlik (Örn: "E001", "E050" hastane veri seti için; "CM_E001", "CM_E080" çağrı merkezi veri seti için).
+    *   `role`: Çalışanın ana rolü (Örn: Hastane için "Hemşire", "Doktor", "Teknisyen", "İdari"; Çağrı merkezi için "Çağrı Alıcı", "Yönlendirici", "Vardiya Amiri"). Roller ve dağılımları betikteki `ROLES` sözlüğünden gelir.
+    *   `department`: Çalışanın bağlı olduğu departman (Örn: Hastane için "Acil", "Kardiyoloji", "Cerrahi"; Çağrı merkezi için "Genel Çağrı", "Polis Yönlendirme", "Sağlık Yönlendirme"). Departmanlar betikteki `DEPARTMENTS` sözlüğünden gelir.
+    *   `name`: Çalışanın adı (Çağrı merkezi veri setinde bulunur, hastane veri setinde bulunmayabilir).
 
 ### 2. `skills.csv`
 
@@ -22,11 +24,12 @@ Bu belge, `generate_synthetic_data.py` betiği tarafından `synthetic_data` klas
 
 *   **Amaç:** Çizelgeleme periyodu içindeki tüm olası vardiyaları listeler.
 *   **Sütunlar:**
-    *   `shift_id`: Vardiya için benzersiz kimlik (Örn: "S0001", "S0025").
-    *   `name`: Vardiyanın adı (Örn: "Gündüz Hafta İçi", "Gece Hafta Sonu"). Betikteki `SHIFT_DEFINITIONS`'dan gelir.
+    *   `shift_id`: Vardiya için benzersiz kimlik (Örn: "S0001", "S0025" hastane veri seti için; "CM_S0001", "CM_S0125" çağrı merkezi veri seti için).
+    *   `name`: Vardiyanın adı (Örn: Hastane için "Gündüz Hafta İçi Acil", "Gece Hafta Sonu Kardiyoloji"; Çağrı merkezi için "Sabah Hafta İçi Genel Çağrı", "Akşam Hafta Sonu Polis Yönlendirme"). Betikteki `SHIFT_DEFINITIONS`'dan gelir.
     *   `date`: Vardiyanın gerçekleştiği tarih (ISO formatı, Örn: "YYYY-MM-DD").
     *   `start_time`: Vardiyanın başlangıç saati (ISO formatı, Örn: "HH:MM:SS").
     *   `end_time`: Vardiyanın bitiş saati (ISO formatı, Örn: "HH:MM:SS"). Vardiya gece yarısını aşıyorsa, bitiş saati bir sonraki güne ait olabilir (örn. başlangıç 20:00, bitiş 08:00).
+    *   `department`: Vardiyanın ilgili olduğu departman (Örn: Hastane için "Acil", "Kardiyoloji", "Cerrahi"; Çağrı merkezi için "Genel Çağrı", "Polis Yönlendirme", "Sağlık Yönlendirme").
 
 ### 4. `availability.csv`
 
@@ -46,4 +49,20 @@ Bu belge, `generate_synthetic_data.py` betiği tarafından `synthetic_data` klas
 
 ## Kullanım
 
-Bu CSV dosyaları, n8n iş akışları tarafından okunacak ve `docs/data_model.md`'de tanımlanan standart JSON formatındaki `input_data` yapısını oluşturmak için birleştirilecektir. Bu JSON verisi daha sonra Python Optimizasyon Çekirdeği'ne gönderilecektir. 
+Bu CSV dosyaları, n8n iş akışları tarafından okunacak ve `docs/data_model.md`'de tanımlanan standart JSON formatındaki `input_data` yapısını oluşturmak için birleştirilecektir. Bu JSON verisi daha sonra Python Optimizasyon Çekirdeği'ne gönderilecektir.
+
+## Veri Setleri
+
+Sistem iki farklı veri seti ile çalışabilir:
+
+1. **Hastane Veri Seti** (`synthetic_data` klasörü):
+   * `employees.csv`, `skills.csv`, `shifts.csv`, `availability.csv`, `preferences.csv`
+   * Hastane departmanları ve rolleri içerir (Acil, Kardiyoloji, Cerrahi, vb.)
+   * Dosya önekleri kullanılmaz (Örn: "E001", "S0001")
+
+2. **Çağrı Merkezi Veri Seti** (`synthetic_data_cagri_merkezi` klasörü):
+   * `employees_cm.csv`, `skills_cm.csv`, `shifts_cm.csv`, `availability_cm.csv`, `preferences_cm.csv`
+   * Çağrı merkezi departmanları ve rolleri içerir (Genel Çağrı, Polis Yönlendirme, vb.)
+   * Dosya önekleri "CM_" ile başlar (Örn: "CM_E001", "CM_S0001")
+
+Her iki veri seti de aynı temel yapıyı kullanır, ancak içerik ve alan değerleri kuruma özgüdür. n8n iş akışı, seçilen veri setine göre doğru dosyaları okuyarak API'ye gönderilecek JSON yapısını oluşturur.

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { api } from '../services/api';
 import {
   Box,
   Typography,
@@ -40,14 +41,21 @@ import {
   Business as BusinessIcon,
   People as PeopleIcon,
   AttachMoney as MoneyIcon,
-  Balance as BalanceIcon
+  Balance as BalanceIcon,
+  CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 
 const OptimizationParams = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
+  const [resultMessage, setResultMessage] = useState('');
   const [selectedDataset, setSelectedDataset] = useState('hastane');
-  const [selectedConfig, setSelectedConfig] = useState('hospital_test_config.yaml');
+  // Seçilen veri setine göre uygun kural setini otomatik olarak seç
+  const [selectedConfig, setSelectedConfig] = useState(() => {
+    // Varsayılan veri seti 'hastane' olduğu için, varsayılan kural seti 'hospital_test_config.yaml' olmalı
+    return 'hospital_test_config.yaml';
+  });
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState('balanced');
   const [optimizationGoal, setOptimizationGoal] = useState('balanced');
@@ -179,38 +187,105 @@ const OptimizationParams = () => {
     console.log('Ağırlık Değerleri:', newWeights);
   };
 
-  const handleOptimizationStart = () => {
+  const handleOptimizationStart = async () => {
     setLoading(true);
+    setSuccess(false);
+    setError(false);
+    setResultMessage('');
 
-    // Optimizasyon başlatılırken kullanılacak parametreleri konsola yazdır
-    console.log('Optimizasyon Başlatılıyor:');
-    console.log('Seçilen Veri Seti:', selectedDataset);
-    console.log('Seçilen Konfigürasyon:', selectedConfig);
-    console.log('Optimizasyon Hedefi:', optimizationGoal);
-    console.log('Ağırlık Değerleri:', weights);
-    console.log('Çözücü Parametreleri:', solverParams);
+    try {
+      // Optimizasyon başlatılırken kullanılacak parametreleri konsola yazdır
+      console.log('Optimizasyon Başlatılıyor:');
+      console.log('Seçilen Veri Seti:', selectedDataset);
+      console.log('Seçilen Konfigürasyon:', selectedConfig);
+      console.log('Optimizasyon Hedefi:', optimizationGoal);
+      console.log('Ağırlık Değerleri:', weights);
+      console.log('Çözücü Parametreleri:', solverParams);
 
-    // Simüle edilmiş API çağrısı
-    setTimeout(() => {
-      setLoading(false);
-      setSuccess(true);
+      // API üzerinden n8n webhook'unu tetikle
+      const result = await api.startOptimization(
+        selectedDataset,
+        selectedConfig,
+        optimizationGoal,
+        weights,
+        solverParams
+      );
 
-      // Başarı mesajını 3 saniye sonra kaldır
+      console.log('Optimizasyon Sonucu:', result);
+
+      // Sonucu kontrol et
+      if (result && result.status) {
+        // Başarılı sonuç
+        setSuccess(true);
+
+        // Çözüm durumuna göre mesaj oluştur
+        if (result.status === 'OPTIMAL') {
+          setResultMessage('Optimal çözüm bulundu! Çizelge başarıyla oluşturuldu.');
+        } else if (result.status === 'FEASIBLE') {
+          setResultMessage('Uygun bir çözüm bulundu, ancak optimal olmayabilir. Çizelge oluşturuldu.');
+        } else {
+          setResultMessage(`Çizelge oluşturuldu. Çözüm durumu: ${result.status}`);
+        }
+
+        // Sonuçlar sayfasına yönlendirme için bilgi verilebilir
+        // Örneğin: "Sonuçları görmek için 'Sonuçlar' sayfasına gidin."
+      } else {
+        // Başarısız sonuç
+        setError(true);
+        setResultMessage('Çizelge oluşturma işlemi tamamlandı ancak sonuç alınamadı.');
+      }
+
+      // Bildirim mesajını 5 saniye sonra kaldır
       setTimeout(() => {
         setSuccess(false);
-      }, 3000);
-    }, 2000);
+        setError(false);
+        setResultMessage('');
+      }, 5000);
+    } catch (error) {
+      console.error('Optimizasyon başlatma hatası:', error);
+      // Hata durumunda kullanıcıya bildirim göster
+      setError(true);
+      setResultMessage('Çizelge oluşturma sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+
+      // Hata mesajını 5 saniye sonra kaldır
+      setTimeout(() => {
+        setError(false);
+        setResultMessage('');
+      }, 5000);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const datasets = [
+  // Veri setleri ve konfigürasyon dosyaları için state tanımlamaları
+  const [datasets, setDatasets] = useState([
     { id: 'hastane', name: 'Hastane Veri Seti' },
     { id: 'cagri_merkezi', name: 'Çağrı Merkezi Veri Seti' }
-  ];
+  ]);
 
-  const configs = [
+  const [configs, setConfigs] = useState([
     { id: 'hospital_test_config.yaml', name: 'Hastane Konfigürasyonu' },
     { id: 'cagri_merkezi_config.yaml', name: 'Çağrı Merkezi Konfigürasyonu' }
-  ];
+  ]);
+
+  // Sayfa yüklendiğinde veri setleri ve konfigürasyon dosyalarını API'den al
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Veri setlerini al
+        const datasetsData = await api.getDatasets();
+        setDatasets(datasetsData);
+
+        // Konfigürasyon dosyalarını al
+        const configsData = await api.getConfigurations();
+        setConfigs(configsData);
+      } catch (error) {
+        console.error('Veri yükleme hatası:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <Box>
@@ -245,10 +320,32 @@ const OptimizationParams = () => {
           }}
         >
           <Typography variant="subtitle1" fontWeight="600">
-            Çizelge oluşturma süreci başlatıldı!
+            Çizelge oluşturma işlemi başarılı!
           </Typography>
           <Typography variant="body2">
-            Sonuçlar hazır olduğunda bildirim alacaksınız. İşlem durumunu Sonuçlar sayfasından takip edebilirsiniz.
+            {resultMessage || 'Çizelge başarıyla oluşturuldu. Sonuçları Sonuçlar sayfasından görüntüleyebilirsiniz.'}
+          </Typography>
+        </Alert>
+      )}
+
+      {error && (
+        <Alert
+          severity="error"
+          variant="filled"
+          sx={{
+            mb: 4,
+            borderRadius: 2,
+            boxShadow: '0 4px 12px rgba(211, 47, 47, 0.2)',
+            '& .MuiAlert-icon': {
+              fontSize: '1.5rem'
+            }
+          }}
+        >
+          <Typography variant="subtitle1" fontWeight="600">
+            Çizelge oluşturma işlemi başarısız!
+          </Typography>
+          <Typography variant="body2">
+            {resultMessage || 'Çizelge oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.'}
           </Typography>
         </Alert>
       )}
@@ -312,7 +409,15 @@ const OptimizationParams = () => {
                           boxShadow: '0 4px 12px rgba(25, 118, 210, 0.15)'
                         }
                       }}
-                      onClick={() => setSelectedDataset(dataset.id)}
+                      onClick={() => {
+                        setSelectedDataset(dataset.id);
+                        // Kurum seçimine göre uygun kural setini otomatik olarak seç
+                        if (dataset.id === 'hastane') {
+                          setSelectedConfig('hospital_test_config.yaml');
+                        } else if (dataset.id === 'cagri_merkezi') {
+                          setSelectedConfig('cagri_merkezi_config.yaml');
+                        }
+                      }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <BusinessIcon sx={{
@@ -351,27 +456,25 @@ const OptimizationParams = () => {
                   </Tooltip>
                 </Box>
 
-                <FormControl
-                  fullWidth
-                  size="small"
-                >
-                  <Select
-                    value={selectedConfig}
-                    onChange={(e) => setSelectedConfig(e.target.value)}
-                    sx={{
-                      borderRadius: 2,
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgba(25, 118, 210, 0.2)'
-                      }
-                    }}
-                  >
-                    {configs.map((config) => (
-                      <MenuItem key={config.id} value={config.id}>
-                        {config.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <Box sx={{
+                  p: 2,
+                  bgcolor: 'rgba(25, 118, 210, 0.05)',
+                  borderRadius: 2,
+                  border: '1px solid rgba(25, 118, 210, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2
+                }}>
+                  <CheckCircleIcon sx={{ color: 'primary.main' }} />
+                  <Box>
+                    <Typography variant="subtitle2" fontWeight="600">
+                      {configs.find(c => c.id === selectedConfig)?.name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Seçilen kuruma uygun kural seti otomatik olarak ayarlandı
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
 
               <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
@@ -397,7 +500,7 @@ const OptimizationParams = () => {
                     fullWidth
                     variant="outlined"
                     size="small"
-                    value={`http://localhost:5678/webhook/[webhook-id]?veriSeti=${selectedDataset}&kurallar=temel_kurallar`}
+                    value={`/webhook/optimization?veriSeti=${selectedDataset}&kurallar=${selectedConfig}`}
                     InputProps={{
                       readOnly: true,
                       sx: {
@@ -696,10 +799,18 @@ const OptimizationParams = () => {
                     boxShadow: loading ? 'none' : '0 4px 14px rgba(76, 175, 80, 0.4)',
                     '&:hover': {
                       boxShadow: '0 6px 20px rgba(76, 175, 80, 0.6)'
-                    }
+                    },
+                    minWidth: '220px'
                   }}
                 >
-                  {loading ? 'Çizelge Oluşturuluyor...' : 'Çizelge Oluştur'}
+                  {loading ? (
+                    <>
+                      <span style={{ marginRight: '8px' }}>İşleniyor</span>
+                      <CircularProgress size={20} color="inherit" />
+                    </>
+                  ) : (
+                    'Çizelge Oluştur'
+                  )}
                 </Button>
               </Box>
 

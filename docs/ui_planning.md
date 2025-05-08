@@ -27,12 +27,6 @@ Bu belge, Kurumsal Optimizasyon ve Otomasyon Çözümü için kullanıcı arayü
 - Vardiya çizelgesi görüntüleme ve düzenleme arayüzü
 - Temel kullanıcı yetkilendirme ve kimlik doğrulama mekanizması
 
-## 2. Teknoloji Seçimi ve Mimari
-
-
-
-
-
 #### Backend (API Entegrasyonu)
 - **Mevcut API:** FastAPI (Optimizasyon Çekirdeği)
 - **n8n Entegrasyonu:** Webhook tabanlı iletişim
