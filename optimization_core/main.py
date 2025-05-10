@@ -8,8 +8,13 @@ from fastapi import FastAPI, HTTPException, Body, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.concurrency import run_in_threadpool
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator, ValidationError
 from datetime import date, datetime, time as dt_time # time ile çakışmaması için dt_time
+
+# Dashboard API'sini içe aktar
+from optimization_core.dashboard_api import router as dashboard_router
+from optimization_core.activity_logger import log_optimization_activity, log_configuration_update, log_dataset_added
 
 # CP-SAT Model Builder'ı içe aktar
 try:
@@ -114,6 +119,49 @@ app = FastAPI(
     description="n8n ile entegre çalışacak CP-SAT optimizasyon servisi.",
     version="0.2.0" # Versiyon güncellendi
 )
+
+# CORS middleware ekle
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Tüm originlere izin ver (geliştirme için)
+    allow_credentials=True,
+    allow_methods=["*"],  # Tüm HTTP metodlarına izin ver
+    allow_headers=["*"],  # Tüm headerlara izin ver
+)
+
+# Dashboard API router'ını ekle
+app.include_router(dashboard_router, tags=["Dashboard"])
+
+# --- Webhook Handler ---
+@app.post("/webhook/optimization")
+async def webhook_handler(request: Request):
+    """
+    n8n'den gelen webhook isteklerini işler.
+    URL parametreleri:
+    - veriSeti: Hangi veri setinin kullanılacağı (hastane, cagri_merkezi)
+    - kurallar: Hangi konfigürasyon dosyasının kullanılacağı
+    """
+    try:
+        # URL parametrelerini al
+        params = dict(request.query_params)
+        logger.info(f"Webhook isteği alındı. Parametreler: {params}")
+
+        # Body'yi al
+        body = await request.json()
+        logger.info(f"Webhook body: {body}")
+
+        # Veri seti tipini belirle
+        veri_seti = params.get("veriSeti", "")
+        dataset_type = "Hastane" if veri_seti.lower() == "hastane" else "Çağrı Merkezi"
+
+        # Aktivite log dosyasına kayıt ekle
+        log_optimization_activity(dataset_type, "WEBHOOK_RECEIVED")
+
+        # İşlem başarılı mesajı döndür
+        return {"status": "success", "message": f"{dataset_type} veri seti için webhook isteği alındı"}
+    except Exception as e:
+        logger.error(f"Webhook işlenirken hata: {e}", exc_info=True)
+        return {"status": "error", "message": str(e)}
 
 # --- Hata Yönetimi (Validation Errors için) ---
 @app.exception_handler(RequestValidationError)
@@ -286,6 +334,56 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
             with open(result_path, 'w', encoding='utf-8') as f:
                 json.dump(response.model_dump(), f, indent=2, ensure_ascii=False)
             logger.info(f"Optimizasyon sonuçları {result_path} dosyasına kaydedildi.")
+
+            # Aktivite log dosyasına kayıt ekle
+            try:
+                # Veri seti tipini belirle
+                dataset_type = ""
+
+                # Webhook parametrelerinden veri seti tipini belirle
+                # request değişkeni tanımlı olmadığı için bu kısmı atlıyoruz
+
+                # Eğer bulunamadıysa, input_data'dan kontrol et
+                if not dataset_type and isinstance(input_data, dict):
+                    # Önce veriSeti parametresini kontrol et
+                    if "veriSeti" in input_data:
+                        veri_seti = input_data.get("veriSeti", "")
+                        if veri_seti:
+                            dataset_type = "Hastane" if veri_seti.lower() == "hastane" else "Çağrı Merkezi"
+                            logger.info(f"Input data'dan veriSeti parametresi ile veri seti tipi belirlendi: {dataset_type}")
+
+                    # Eğer hala bulunamadıysa, institution_id parametresini kontrol et
+                    elif "institution_id" in input_data:
+                        institution_id = input_data.get("institution_id", "")
+                        if institution_id:
+                            dataset_type = "Hastane" if "hospital" in institution_id.lower() else "Çağrı Merkezi"
+                            logger.info(f"Input data'dan institution_id parametresi ile veri seti tipi belirlendi: {dataset_type}")
+
+                # Eğer hala bulunamadıysa, response'dan kontrol et
+                if not dataset_type:
+                    response_dict = response.model_dump()
+                    if "institution_id" in response_dict:
+                        institution_id = response_dict.get("institution_id", "")
+                        if institution_id:
+                            dataset_type = "Hastane" if "hospital" in institution_id.lower() else "Çağrı Merkezi"
+                            logger.info(f"Response'dan institution_id parametresi ile veri seti tipi belirlendi: {dataset_type}")
+
+                # Eğer hala bulunamadıysa, konfigürasyon dosyasından tahmin et
+                if not dataset_type and "configuration_ref" in response_dict:
+                    config_ref = response_dict.get("configuration_ref", "")
+                    if config_ref:
+                        dataset_type = "Hastane" if "hospital" in config_ref.lower() else "Çağrı Merkezi"
+                        logger.info(f"Konfigürasyon dosyasından veri seti tipi tahmin edildi: {dataset_type}")
+
+                # Eğer hala bulunamadıysa, varsayılan olarak "Bilinmeyen" kullan
+                if not dataset_type:
+                    dataset_type = "Bilinmeyen"
+                    logger.warning("Veri seti tipi belirlenemedi, varsayılan olarak 'Bilinmeyen' kullanılıyor.")
+
+                logger.info(f"Aktivite kaydı için veri seti tipi: {dataset_type}")
+                log_optimization_activity(dataset_type, status)
+            except Exception as log_error:
+                logger.error(f"Aktivite log kaydı oluşturulurken hata: {log_error}", exc_info=True)
         except Exception as e:
             logger.error(f"Sonuçlar dosyaya kaydedilirken hata: {e}", exc_info=True)
 

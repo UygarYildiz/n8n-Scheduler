@@ -1,0 +1,20 @@
+[
+  {
+    "id": "act2",
+    "date": "10.05.2025 17:14",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1746886482
+  },
+  {
+    "id": "act1",
+    "date": "10.05.2025 17:14",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1746886456
+  }
+]
