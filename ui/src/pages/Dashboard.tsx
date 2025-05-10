@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+import { api } from '../services/api';
 import {
   Box,
   Typography,
@@ -14,7 +16,9 @@ import {
   useTheme,
   alpha,
   Stack,
-  List
+  List,
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import {
   PlayArrow as StartIcon,
@@ -27,23 +31,225 @@ import {
   Speed as SpeedIcon,
   Bolt as BoltIcon,
   Settings as SettingsIcon,
-  Dataset as DatasetIcon
+  Dataset as DatasetIcon,
+  Error as ErrorIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+
+// Varsayılan API yanıt yapısı (api.ts içinde tanımlanmalı veya buradan uyarlanmalı)
+interface DashboardData {
+  performanceMetrics: {
+    understaffing: number;
+    overstaffing: number;
+    coverageRatio: number;
+    skillCoverage: number;
+    preferenceScore: number;
+    workloadBalance: number;
+    coverageRatioChange?: string; // Örn: "+5%" veya "-2%"
+    skillCoverageChange?: string;
+    preferenceScoreChange?: string;
+    workloadBalanceChange?: string;
+  };
+  lastOptimizationReport: {
+    status: string; // Örn: "BAŞARILI"
+    statusColor: string; // Örn: theme.palette.success.main
+    summaryText: string;
+    processingTime: string; // Örn: "2.45s"
+    objectiveValue: number;
+    assignmentsCount: number;
+    date: string; // Örn: "07.05"
+  };
+  systemStatus: {
+    overallStatusText: string;
+    apiStatus: 'Çalışıyor' | 'Sorun Var' | 'Bilinmiyor';
+    n8nStatus: 'Çalışıyor' | 'Sorun Var' | 'Bilinmiyor';
+    activeDataset: string;
+    activeConfig: string;
+    lastUpdate: string; // Örn: "07.05.2025"
+  };
+  recentActivities: Array<{
+    id: string;
+    date: string;
+    action: string;
+    detail: string;
+    color: string; // MUI theme color string, örn: 'primary.main'
+    icon: 'BoltIcon' | 'SettingsIcon' | 'DatasetIcon' | 'ReportIcon'; // Icon adları
+  }>;
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  // Örnek metrik verileri
-  const metrics = {
+  // State tanımlamaları
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [metrics, setMetrics] = useState({
     understaffing: 0,
-    overstaffing: 2,
-    coverageRatio: 98,
-    skillCoverage: 95,
-    preferenceScore: 85,
-    workloadBalance: 92
-  };
+    overstaffing: 0,
+    coverageRatio: 0,
+    skillCoverage: 0,
+    preferenceScore: 0,
+    workloadBalance: 0
+  });
+  const [lastReport, setLastReport] = useState({
+    status: '',
+    statusColor: 'success.main',
+    summaryText: '',
+    processingTime: '',
+    objectiveValue: 0,
+    assignmentsCount: 0,
+    date: ''
+  });
+  const [systemStatus, setSystemStatus] = useState({
+    overallStatusText: '',
+    apiStatus: 'Bilinmiyor' as 'Çalışıyor' | 'Sorun Var' | 'Bilinmiyor',
+    n8nStatus: 'Bilinmiyor' as 'Çalışıyor' | 'Sorun Var' | 'Bilinmiyor',
+    activeDataset: '',
+    activeConfig: '',
+    lastUpdate: ''
+  });
+  const [recentActivities, setRecentActivities] = useState<Array<{
+    date: string;
+    action: string;
+    detail: string;
+    color: string;
+  }>>([]);
+
+  // Dashboard verilerini API'den çekme
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // API'den dashboard verilerini çek
+        const dashboardData = await api.getDashboardData();
+
+        if (!dashboardData) {
+          throw new Error('API yanıtı boş veya geçersiz');
+        }
+
+        // Performans metriklerini güncelle
+        if (dashboardData.performanceMetrics) {
+          setMetrics({
+            understaffing: dashboardData.performanceMetrics.understaffing || 0,
+            overstaffing: dashboardData.performanceMetrics.overstaffing || 0,
+            coverageRatio: dashboardData.performanceMetrics.coverageRatio || 0,
+            skillCoverage: dashboardData.performanceMetrics.skillCoverage || 0,
+            preferenceScore: dashboardData.performanceMetrics.preferenceScore || 0,
+            workloadBalance: dashboardData.performanceMetrics.workloadBalance || 0
+          });
+        }
+
+        // Son çizelgeleme raporunu güncelle
+        if (dashboardData.lastOptimizationReport) {
+          setLastReport({
+            status: dashboardData.lastOptimizationReport.status || '',
+            statusColor: dashboardData.lastOptimizationReport.statusColor || 'success.main',
+            summaryText: dashboardData.lastOptimizationReport.summaryText || '',
+            processingTime: dashboardData.lastOptimizationReport.processingTime || '',
+            objectiveValue: dashboardData.lastOptimizationReport.objectiveValue || 0,
+            assignmentsCount: dashboardData.lastOptimizationReport.assignmentsCount || 0,
+            date: dashboardData.lastOptimizationReport.date || ''
+          });
+        }
+
+        // Sistem durumunu güncelle
+        if (dashboardData.systemStatus) {
+          setSystemStatus({
+            overallStatusText: dashboardData.systemStatus.overallStatusText || '',
+            apiStatus: (dashboardData.systemStatus.apiStatus as 'Çalışıyor' | 'Sorun Var' | 'Bilinmiyor') || 'Bilinmiyor',
+            n8nStatus: (dashboardData.systemStatus.n8nStatus as 'Çalışıyor' | 'Sorun Var' | 'Bilinmiyor') || 'Bilinmiyor',
+            activeDataset: dashboardData.systemStatus.activeDataset || '',
+            activeConfig: dashboardData.systemStatus.activeConfig || '',
+            lastUpdate: dashboardData.systemStatus.lastUpdate || ''
+          });
+        }
+
+        // Son aktiviteleri güncelle
+        if (dashboardData.recentActivities && Array.isArray(dashboardData.recentActivities)) {
+          const activities = dashboardData.recentActivities.map((activity: {
+            date?: string;
+            action?: string;
+            detail?: string;
+            color?: string;
+            icon?: string;
+          }) => {
+            let colorValue = theme.palette.primary.main; // Varsayılan renk
+
+            if (activity.color) {
+              if (activity.color.startsWith('#')) {
+                colorValue = activity.color;
+              } else if (activity.color.includes('.')) {
+                const [palette, shade] = activity.color.split('.');
+                try {
+                  // Type-safe erişim
+                  const paletteObj = theme.palette[palette as keyof typeof theme.palette];
+                  if (paletteObj && typeof paletteObj === 'object' && shade in paletteObj) {
+                    const shadeValue = paletteObj[shade as keyof typeof paletteObj];
+                    if (typeof shadeValue === 'string') {
+                      colorValue = shadeValue;
+                    }
+                  }
+                } catch (e) {
+                  console.error('Renk değeri işlenirken hata:', e);
+                }
+              }
+            }
+
+            return {
+              date: activity.date || '',
+              action: activity.action || '',
+              detail: activity.detail || '',
+              color: colorValue
+            };
+          });
+
+          setRecentActivities(activities);
+        }
+
+      } catch (err) {
+        console.error('Dashboard verilerini çekerken hata oluştu:', err);
+        setError('Dashboard verilerini yüklerken bir hata oluştu. Lütfen sayfayı yenileyin.');
+
+        // Hata durumunda varsayılan değerleri ayarla
+        setMetrics({
+          understaffing: 0,
+          overstaffing: 0,
+          coverageRatio: 0,
+          skillCoverage: 0,
+          preferenceScore: 0,
+          workloadBalance: 0
+        });
+
+        setLastReport({
+          status: 'Hata',
+          statusColor: 'error.main',
+          summaryText: 'Veri yüklenirken bir hata oluştu.',
+          processingTime: '-',
+          objectiveValue: 0,
+          assignmentsCount: 0,
+          date: '-'
+        });
+
+        setSystemStatus({
+          overallStatusText: 'Sistem durumu bilgisi alınamadı.',
+          apiStatus: 'Sorun Var',
+          n8nStatus: 'Bilinmiyor',
+          activeDataset: '-',
+          activeConfig: '-',
+          lastUpdate: '-'
+        });
+
+        setRecentActivities([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [theme.palette.primary.main, theme.palette.warning.main, theme.palette.success.main, theme.palette.error.main]);
 
   return (
     <Box>
@@ -103,6 +309,36 @@ const Dashboard = () => {
           </Box>
         </Box>
       </Box>
+
+      {/* Yükleme durumu */}
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+          <CircularProgress color="primary" />
+        </Box>
+      )}
+
+      {/* Hata durumu */}
+      {error && (
+        <Alert
+          severity="error"
+          variant="filled"
+          sx={{
+            mb: 4,
+            borderRadius: 2,
+            boxShadow: '0 4px 12px rgba(211, 47, 47, 0.2)',
+            '& .MuiAlert-icon': {
+              fontSize: '1.5rem'
+            }
+          }}
+        >
+          <Typography variant="subtitle1" fontWeight="600">
+            Hata Oluştu
+          </Typography>
+          <Typography variant="body2">
+            {error}
+          </Typography>
+        </Alert>
+      )}
 
       {/* Kurumsal Performans Göstergeleri */}
       <Box sx={{ mb: 5 }}>
@@ -390,12 +626,30 @@ const Dashboard = () => {
                 <Typography variant="h6" fontWeight="bold">Son Çizelgeleme Raporu</Typography>
               </Box>
               <Chip
-                label="BAŞARILI"
+                label={lastReport.status || 'Bilinmiyor'}
                 sx={{
                   fontWeight: 'bold',
                   borderRadius: 2,
                   bgcolor: 'white',
-                  color: theme.palette.success.main
+                  color: (() => {
+                    if (!lastReport.statusColor) return theme.palette.info.main;
+
+                    try {
+                      const [palette, shade] = lastReport.statusColor.split('.');
+                      // Type-safe erişim
+                      const paletteObj = theme.palette[palette as keyof typeof theme.palette];
+                      if (paletteObj && typeof paletteObj === 'object' && shade in paletteObj) {
+                        const shadeValue = paletteObj[shade as keyof typeof paletteObj];
+                        if (typeof shadeValue === 'string') {
+                          return shadeValue;
+                        }
+                      }
+                      return theme.palette.info.main;
+                    } catch (e) {
+                      console.error('Durum rengi işlenirken hata:', e);
+                      return theme.palette.info.main;
+                    }
+                  })()
                 }}
               />
             </Box>
@@ -406,7 +660,7 @@ const Dashboard = () => {
                   Çizelgeleme Özeti
                 </Typography>
                 <Typography variant="body2" color="text.secondary" paragraph>
-                  Son çizelgeleme işlemi başarıyla tamamlandı. Tüm departmanlar için minimum personel gereksinimleri karşılandı ve çalışan tercihleri maksimum düzeyde dikkate alındı.
+                  {lastReport.summaryText}
                 </Typography>
               </Box>
 
@@ -414,7 +668,7 @@ const Dashboard = () => {
                 <Grid item xs={6} md={3}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h5" fontWeight="bold" color={theme.palette.primary.main}>
-                      2.45s
+                      {lastReport.processingTime}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       İşlem Süresi
@@ -424,7 +678,7 @@ const Dashboard = () => {
                 <Grid item xs={6} md={3}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h5" fontWeight="bold" color={theme.palette.primary.main}>
-                      125.5
+                      {lastReport.objectiveValue}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Hedef Değeri
@@ -434,7 +688,7 @@ const Dashboard = () => {
                 <Grid item xs={6} md={3}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h5" fontWeight="bold" color={theme.palette.primary.main}>
-                      42
+                      {lastReport.assignmentsCount}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Atama Sayısı
@@ -444,7 +698,7 @@ const Dashboard = () => {
                 <Grid item xs={6} md={3}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h5" fontWeight="bold" color={theme.palette.primary.main}>
-                      07.05
+                      {lastReport.date}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Tarih
@@ -524,7 +778,7 @@ const Dashboard = () => {
                   Genel Durum
                 </Typography>
                 <Typography variant="body2" color="text.secondary" paragraph>
-                  Tüm sistemler normal şekilde çalışıyor. Veri seti ve konfigürasyon dosyaları güncel durumda. Son güncelleme 07.05.2025 tarihinde yapıldı.
+                  {systemStatus.overallStatusText} Son güncelleme {systemStatus.lastUpdate} tarihinde yapıldı.
                 </Typography>
               </Box>
 
@@ -536,16 +790,36 @@ const Dashboard = () => {
                     alignItems: 'center',
                     p: 2,
                     borderRadius: 2,
-                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                    bgcolor: alpha(
+                      systemStatus.apiStatus === 'Çalışıyor'
+                        ? theme.palette.success.main
+                        : systemStatus.apiStatus === 'Sorun Var'
+                          ? theme.palette.error.main
+                          : theme.palette.warning.main,
+                      0.1
+                    ),
                     mb: 2
                   }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckCircleIcon sx={{ color: theme.palette.success.main, mr: 1 }} />
+                      <CheckCircleIcon sx={{
+                        color: systemStatus.apiStatus === 'Çalışıyor'
+                          ? theme.palette.success.main
+                          : systemStatus.apiStatus === 'Sorun Var'
+                            ? theme.palette.error.main
+                            : theme.palette.warning.main,
+                        mr: 1
+                      }} />
                       <Typography variant="subtitle2">API Durumu</Typography>
                     </Box>
                     <Chip
-                      label="Çalışıyor"
-                      color="success"
+                      label={systemStatus.apiStatus}
+                      color={
+                        systemStatus.apiStatus === 'Çalışıyor'
+                          ? 'success'
+                          : systemStatus.apiStatus === 'Sorun Var'
+                            ? 'error'
+                            : 'warning'
+                      }
                       size="small"
                       sx={{ fontWeight: 'medium', borderRadius: 2 }}
                     />
@@ -559,16 +833,36 @@ const Dashboard = () => {
                     alignItems: 'center',
                     p: 2,
                     borderRadius: 2,
-                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                    bgcolor: alpha(
+                      systemStatus.n8nStatus === 'Çalışıyor'
+                        ? theme.palette.success.main
+                        : systemStatus.n8nStatus === 'Sorun Var'
+                          ? theme.palette.error.main
+                          : theme.palette.warning.main,
+                      0.1
+                    ),
                     mb: 2
                   }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckCircleIcon sx={{ color: theme.palette.success.main, mr: 1 }} />
+                      <CheckCircleIcon sx={{
+                        color: systemStatus.n8nStatus === 'Çalışıyor'
+                          ? theme.palette.success.main
+                          : systemStatus.n8nStatus === 'Sorun Var'
+                            ? theme.palette.error.main
+                            : theme.palette.warning.main,
+                        mr: 1
+                      }} />
                       <Typography variant="subtitle2">n8n Durumu</Typography>
                     </Box>
                     <Chip
-                      label="Çalışıyor"
-                      color="success"
+                      label={systemStatus.n8nStatus}
+                      color={
+                        systemStatus.n8nStatus === 'Çalışıyor'
+                          ? 'success'
+                          : systemStatus.n8nStatus === 'Sorun Var'
+                            ? 'error'
+                            : 'warning'
+                      }
                       size="small"
                       sx={{ fontWeight: 'medium', borderRadius: 2 }}
                     />
@@ -586,13 +880,13 @@ const Dashboard = () => {
                       <Grid item xs={6}>
                         <Typography variant="subtitle2" color="text.secondary">Aktif Veri Seti</Typography>
                         <Typography variant="body2" fontWeight="medium">
-                          Hastane
+                          {systemStatus.activeDataset}
                         </Typography>
                       </Grid>
                       <Grid item xs={6}>
                         <Typography variant="subtitle2" color="text.secondary">Aktif Konfigürasyon</Typography>
                         <Typography variant="body2" fontWeight="medium">
-                          hospital_test_config.yaml
+                          {systemStatus.activeConfig}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -649,15 +943,10 @@ const Dashboard = () => {
 
             <CardContent sx={{ p: 0 }}>
               <List sx={{ py: 0 }}>
-                {[
-                  { date: '07.05.2025 14:30', action: 'Çizelgeleme tamamlandı', detail: 'Hastane veri seti için başarılı optimizasyon', color: theme.palette.primary.main },
-                  { date: '07.05.2025 13:15', action: 'Konfigürasyon güncellendi', detail: 'Hastane konfigürasyon dosyası güncellendi', color: theme.palette.warning.main },
-                  { date: '07.05.2025 10:45', action: 'Çizelgeleme tamamlandı', detail: 'Çağrı Merkezi veri seti için başarılı optimizasyon', color: theme.palette.primary.main },
-                  { date: '06.05.2025 16:20', action: 'Yeni veri seti eklendi', detail: 'Çağrı Merkezi veri seti sisteme yüklendi', color: theme.palette.success.main }
-                ].map((activity, index) => (
+                {recentActivities.map((activity, index) => (
                   <Box key={index} sx={{
                     p: 3,
-                    borderBottom: index < 3 ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
+                    borderBottom: index < recentActivities.length - 1 ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 3,
@@ -667,14 +956,15 @@ const Dashboard = () => {
                     }
                   }}>
                     <Avatar sx={{
-                      bgcolor: alpha(activity.color, 0.1),
-                      color: activity.color,
+                      bgcolor: alpha(activity.color || theme.palette.primary.main, 0.1),
+                      color: activity.color || theme.palette.primary.main,
                       width: 48,
                       height: 48,
                       boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                     }}>
-                      {index === 0 || index === 2 ? <BoltIcon /> :
-                       index === 1 ? <SettingsIcon /> : <DatasetIcon />}
+                      {activity.action?.includes('Çizelgeleme') ? <BoltIcon /> :
+                       activity.action?.includes('Konfigürasyon') ? <SettingsIcon /> :
+                       activity.action?.includes('Veri seti') ? <DatasetIcon /> : <ReportIcon />}
                     </Avatar>
                     <Box sx={{ flexGrow: 1 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>

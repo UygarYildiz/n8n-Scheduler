@@ -13,6 +13,18 @@ const apiClient = axios.create({
 
 // API fonksiyonları
 export const api = {
+  // Dashboard verilerini alma
+  getDashboardData: async () => {
+    try {
+      // Backend'den dashboard verilerini çek
+      const response = await axios.get('/api/dashboard');
+      return response.data;
+    } catch (error) {
+      console.error('Dashboard verilerini alma hatası:', error);
+      throw error;
+    }
+  },
+
   // Optimizasyon çalıştırma (Doğrudan Python API'sine, bu muhtemelen artık kullanılmayacak)
   runOptimization: async (data: any) => {
     try {
@@ -38,7 +50,7 @@ export const api = {
       // webhookPath örn: '/optimization' veya '/analiz-baslat'
       const queryParams = new URLSearchParams(queryParamsData).toString();
       const fullWebhookUrl = `/webhook${webhookPath}?${queryParams}`;
-      
+
       console.log('N8N Webhook URL:', fullWebhookUrl);
       if (bodyData) {
         console.log('N8N Webhook Gövdesi:', bodyData);
@@ -121,73 +133,31 @@ export const api = {
 
   // Veri setlerini listeleme
   getDatasets: async () => {
-    // Simüle edilmiş veri
-    // Gerçekte backend'den /api/datasets gibi bir endpoint'ten gelmeli
-    return [
-      { id: 'hastane', name: 'Hastane Veri Seti', path: '/veri_kaynaklari/hastane' },
-      { id: 'cagri_merkezi', name: 'Çağrı Merkezi Veri Seti', path: '/veri_kaynaklari/cagri_merkezi' }
-    ];
+    try {
+      const response = await axios.get('/api/datasets');
+      return response.data;
+    } catch (error) {
+      console.error('Veri setlerini alma hatası:', error);
+      throw error;
+    }
   },
 
   // Konfigürasyon dosyalarını listeleme
   getConfigurations: async () => {
-    // Simüle edilmiş veri
-    // Gerçekte backend'den /api/configurations gibi bir endpoint'ten gelmeli
-    return [
-      { id: 'hospital_test_config.yaml', name: 'Hastane Konfigürasyonu', path: '/configs/hospital_test_config.yaml' },
-      { id: 'cagri_merkezi_config.yaml', name: 'Çağrı Merkezi Konfigürasyonu', path: '/configs/cagri_merkezi_config.yaml' }
-    ];
+    try {
+      const response = await axios.get('/api/configurations');
+      return response.data;
+    } catch (error) {
+      console.error('Konfigürasyon dosyalarını alma hatası:', error);
+      throw error;
+    }
   },
 
-  // Konfigürasyon dosyasını okuma (Bu genellikle backend'in işidir)
-  // Frontend'in doğrudan dosya sistemi okuması güvenlik nedeniyle ve pratikte mümkün değildir.
-  // Bu fonksiyon muhtemelen backend API'nize (Python/FastAPI) bir istek yapmalı
-  // örn: /api/configuration-content?configId=hospital_test_config.yaml
+  // Konfigürasyon dosyasını okuma
   getConfigurationContent: async (configId: string) => {
     try {
-      // Örnek API çağrısı (backend'de bu endpoint'i oluşturmanız gerekir)
-      // const response = await axios.get(`/api/configuration-content?configId=${configId}`);
-      // return response.data.content; 
-
-      // Şimdilik simüle edilmiş veri
-      console.warn(`getConfigurationContent for ${configId} is using mock data.`);
-      if (configId === 'hospital_test_config.yaml') {
-        return `institution_id: "hospital_a"
-institution_name: "Hastane A"
-problem_type: "shift_scheduling"
-
-optimization_core:
-  solver_time_limit_seconds: 60
-  objective_weights:
-    minimize_understaffing: 100
-    minimize_overstaffing: 1
-    maximize_preferences: 2
-    balance_workload: 3
-    maximize_shift_coverage: 50
-
-rules:
-  min_staffing_requirements:
-    - shift_pattern: "*Acil*"
-      role: "Doktor"
-      department: "Acil"
-      min_count: 2
-      penalty_if_violated: 500`;
-      } else if (configId === 'cagri_merkezi_config.yaml') {
-        return `institution_id: "112_cagri_merkezi_bolge_x"
-institution_name: "Bölge X - 112 Acil Çağrı Merkezi"
-problem_type: "shift_scheduling"
-
-optimization_core:
-  solver_time_limit_seconds: 120
-  objective_weights:
-    minimize_overstaffing: 1.5
-    minimize_understaffing: 100
-    maximize_preferences: 1
-    balance_workload: 3.0
-    maximize_shift_coverage: 50`;
-      } else {
-        return `# Unknown config ID: ${configId}`;
-      }
+      const response = await axios.get(`/api/configuration-content?configId=${configId}`);
+      return response.data.content;
     } catch (error) {
       console.error('Konfigürasyon içeriğini alma hatası:', error);
       throw error;
