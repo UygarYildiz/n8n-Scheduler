@@ -27,42 +27,53 @@ n8n, projenin otomasyon ve veri işleme katmanını oluşturur. Webhook tabanlı
    * URL parametreleri ile hangi veri seti (`veriSeti`) ve kural setinin (`kurallar`) kullanılacağı dinamik olarak belirlenir
    * Varsayılan değerler `configs/aktif_ayarlar.json` dosyasından alınır
 
-2. **Ayar Düğümü (Dinamik Dosya Yolları):**
+2. **Read/Write Files from Disk:**
+   * Webhook'tan gelen verileri işlemek için dosya okuma/yazma işlemlerini yönetir
+   * Veri setine göre dosya yollarını belirler
+
+3. **Edit Fields:**
+   * Webhook'tan gelen parametreleri düzenler ve iş akışı için hazırlar
+
+4. **Ayar Düğümü:**
    * Webhook parametrelerine göre dosya yollarını belirler
    * Örnek: `veriSeti=hastane` için `/veri_kaynaklari/hastane/employees.csv` yolunu oluşturur
    * Örnek: `veriSeti=cagri_merkezi` için `/veri_kaynaklari/cagri_merkezi/employees_cm.csv` yolunu oluşturur
    * Konfigürasyon dosyası referansını belirler (örn. `hospital_test_config.yaml` veya `cagri_merkezi_config.yaml`)
 
-3. **Veri Okuma Düğümleri:**
+5. **Veri Okuma Düğümleri:**
    * Dinamik olarak belirlenen dosya yollarından CSV dosyalarını okur:
-     * Çalışanlar (employees.csv)
-     * Vardiyalar (shifts.csv)
-     * Yetenekler (skills.csv)
-     * Uygunluk durumu (availability.csv)
-     * Tercihler (preferences.csv)
+     * Çalışanlar (Employees)
+     * Vardiyalar (Shifts)
+     * Uygunluk durumu (Availability)
+     * Tercihler (Preferences)
+     * Yetenekler (Skills)
+     * Özel Temel Konfigürasyon (Oku Temel Konfig)
 
-4. **CSV Çıkarma Düğümleri:**
+6. **CSV Çıkarma Düğümleri:**
+   * Her veri kaynağı için ayrı bir CSV çıkarma düğümü bulunur
    * Okunan CSV verilerini JSON formatına dönüştürür
    * Veri temizleme ve doğrulama işlemleri gerçekleştirir
 
-5. **Merge Düğümü:**
+7. **Merge Düğümü:**
    * Tüm veri kaynaklarından gelen JSON verilerini tek bir veri akışında birleştirir
+   * Farklı veri tiplerini (çalışanlar, vardiyalar, yetenekler vb.) tek bir veri paketi haline getirir
 
-6. **Code Düğümü (Veri İşleme ve Hazırlama):**
+8. **Code Düğümü (Veri İşleme ve Hazırlama):**
    * Verileri işleyip API'ye gönderilecek formata dönüştürür
    * Departman bilgilerini kontrol eder ve gerekli düzenlemeleri yapar
    * Optimizasyon API'sine gönderilecek JSON formatını oluşturur
-   * Konfigürasyon dosyası referansını ekler
+   * Konfigürasyon dosyası referansını dinamik olarak ekler
+   * Departman istatistiklerini oluşturur ve vardiyası olan ancak çalışanı olmayan departmanları kontrol eder
 
-7. **HTTP Request Düğümü (API Çağrısı):**
+9. **HTTP Request Düğümü (API Çağrısı):**
    * Hazırlanan verileri Optimizasyon API'sine gönderir (POST isteği)
-   * URL: `http://localhost:8000/optimize`
+   * URL: `http://localhost:8000/optimize` veya üretim ortamında belirtilen URL
    * İstek gövdesi: Code düğümünden gelen işlenmiş veri
 
-8. **Sonuç İşleme (İsteğe Bağlı):**
-   * API'den dönen sonuçları işler ve raporlar
-   * Sonuçları ilgili sistemlere (Veritabanı, E-posta, Slack vb.) gönderebilir
-   * Gerekirse onay veya bildirim adımlarını içerebilir
+10. **Sonuç İşleme:**
+    * API'den dönen sonuçları işler ve raporlar
+    * Sonuçları ilgili sistemlere (Veritabanı, E-posta, Slack vb.) gönderebilir
+    * Gerekirse onay veya bildirim adımlarını içerebilir
 
 #### 1.2. Veri Setleri ve Dinamik Yapılandırma
 
@@ -347,7 +358,7 @@ Aşağıdaki şema, sistemin ana bileşenleri arasındaki veri akışını göst
 
 ### 4.2. n8n İş Akışı Detaylı Şeması
 
-Aşağıdaki şema, n8n iş akışının detaylı yapısını göstermektedir:
+Aşağıdaki şema, n8n iş akışının güncellenmiş detaylı yapısını göstermektedir:
 
 ```
                                   +------------------+
@@ -361,64 +372,97 @@ Aşağıdaki şema, n8n iş akışının detaylı yapısını göstermektedir:
                                            v
                                   +--------+---------+
                                   |                  |
+                                  | Read/Write Files |
+                                  |    from Disk     |
+                                  |                  |
+                                  +--------+---------+
+                                           |
+                                           v
+                                  +--------+---------+
+                                  |                  |
+                                  |   Edit Fields    |
+                                  |                  |
+                                  +--------+---------+
+                                           |
+                                           v
+                                  +--------+---------+
+                                  |                  |
                                   |   Ayar Düğümü    |
                                   | (Dosya Yolları)  |
                                   |                  |
                                   +--------+---------+
                                            |
-                 +---------------------+---+---+---------------------+
-                 |                     |       |                     |
-                 v                     v       v                     v
-        +--------+---------+  +--------+---+ +---+--------+  +------+-------+
-        |                  |  |            | |            |  |              |
-        | Employees CSV    |  | Shifts CSV | | Skills CSV |  | Availability |
-        | Okuma            |  | Okuma      | | Okuma      |  | CSV Okuma    |
-        |                  |  |            | |            |  |              |
-        +--------+---------+  +--------+---+ +---+--------+  +------+-------+
-                 |                     |       |                     |
-                 v                     v       v                     v
-        +--------+---------+  +--------+---+ +---+--------+  +------+-------+
-        |                  |  |            | |            |  |              |
-        | Extract          |  | Extract    | | Extract    |  | Extract      |
-        | Employees CSV    |  | Shifts CSV | | Skills CSV |  | Availability |
-        |                  |  |            | |            |  |              |
-        +--------+---------+  +--------+---+ +---+--------+  +------+-------+
-                 |                     |       |                     |
-                 |                     |       |                     |
-                 |                     v       |                     |
-                 |            +--------+-------+--------+            |
-                 +----------->+                        +<------------+
-                              |         Merge          |
-                              |                        |
-                              +--------+---------------+
-                                       |
-                                       v
-                              +--------+---------------+
-                              |                        |
-                              |  Code: Veri İşleme     |
-                              |  - Departman Kontrolü  |
-                              |  - JSON Formatı        |
-                              |                        |
-                              +--------+---------------+
-                                       |
-                                       | JSON Veri
-                                       v
-                              +--------+---------------+
-                              |                        |
-                              |  HTTP Request:         |
-                              |  API Çağrısı           |
-                              |  (POST /optimize)      |
-                              |                        |
-                              +--------+---------------+
-                                       |
-                                       | Optimizasyon Sonuçları
-                                       v
-                              +--------+---------------+
-                              |                        |
-                              |  Sonuç İşleme          |
-                              |  (İsteğe Bağlı)        |
-                              |                        |
-                              +------------------------+
+         +---------------------+---+---+---+---+---------------------+
+         |                     |       |       |                     |
+         v                     v       v       v                     v
++--------+---------+  +--------+---+ +---+--+ +--+--------+  +------+-------+
+|                  |  |            | |      | |           |  |              |
+| Employees        |  | Shifts     | | Avai-| | Preferen- |  | Skills       |
+| (CSV Okuma)      |  | (CSV Okuma)| | labi-| | ces       |  | (CSV Okuma)  |
+|                  |  |            | | lity | | (CSV)     |  |              |
++--------+---------+  +--------+---+ +---+--+ +--+--------+  +------+-------+
+         |                     |         |        |                  |
+         v                     v         v        v                  v
++--------+---------+  +--------+---+ +---+--+ +--+--------+  +------+-------+
+|                  |  |            | |      | |           |  |              |
+| Extract          |  | Extract    | | Extr-| | Extract   |  | Extract      |
+| Employees CSV    |  | Shifts CSV | | act  | | Preferen- |  | Skills CSV   |
+|                  |  |            | | Avai-| | ces CSV   |  |              |
++--------+---------+  +--------+---+ +---+--+ +--+--------+  +------+-------+
+         |                     |         |        |                  |
+         |                     |         |        |                  |
+         |                     |         |        |                  |
+         |                     |         |        |                  |
+         |                     |         |        |                  |
+         |                     |         |        |                  |
+         |                     |         |        |                  |
+         |                     |         |        |                  |
+         |                     |         |        |                  |
+         |                     |         |        |                  |
+         |                     |         |        |                  |
+         |                     |         |        |                  v
+         |                     |         |        |          +------+-------+
+         |                     |         |        |          |              |
+         |                     |         |        |          | Oku Temel    |
+         |                     |         |        |          | Konfig       |
+         |                     |         |        |          |              |
+         |                     |         |        |          +------+-------+
+         |                     |         |        |                 |
+         |                     |         |        |                 |
+         |                     |         |        |                 |
+         |                     v         |        |                 |
+         |            +--------+---------+--------+-----------------+
+         +----------->+                                            |
+                      |                 Merge                      |
+                      |                                            |
+                      +--------+---------------------------------------+
+                               |
+                               v
+                      +--------+---------------------------------------+
+                      |                                                |
+                      |  Code: Veri İşleme                             |
+                      |  - Departman Kontrolü                          |
+                      |  - JSON Formatı                                |
+                      |                                                |
+                      +--------+---------------------------------------+
+                               |
+                               | JSON Veri
+                               v
+                      +--------+---------------------------------------+
+                      |                                                |
+                      |  HTTP Request:                                 |
+                      |  API Çağrısı                                   |
+                      |  (POST /optimize)                              |
+                      |                                                |
+                      +--------+---------------------------------------+
+                               |
+                               | Optimizasyon Sonuçları
+                               v
+                      +--------+---------------------------------------+
+                      |                                                |
+                      |  Sonuç İşleme                                  |
+                      |                                                |
+                      +------------------------------------------------+
 ```
 
 ### 4.3. Optimizasyon Çekirdeği İç Yapısı
@@ -624,6 +668,7 @@ Sistem, Docker konteynerları kullanılarak dağıtılabilir. `docker-compose.ym
     - `./synthetic_data:/veri_kaynaklari/hastane`
     - `./synthetic_data_cagri_merkezi:/veri_kaynaklari/cagri_merkezi`
     - `./configs:/configs`
+  - Sürüm: 1.91.2 (güncel sürüm)
 
 - **Optimizasyon API:** FastAPI servisi (ayrı bir Dockerfile ile)
   - Port: 8000
@@ -652,6 +697,13 @@ Sistem, aşağıdaki adımlarla başlatılır:
    ```
    http://localhost:5678/webhook/[webhook-id]?veriSeti=hastane&kurallar=temel_kurallar
    ```
+   veya
+   ```
+   http://localhost:5678/webhook/[webhook-id]?veriSeti=cagri_merkezi&kurallar=temel_kurallar
+   ```
+
+4. **Üretim Ortamında Webhook URL'si:**
+   Üretim ortamında webhook URL'si doğru yapılandırılmalıdır. n8n ayarlarında webhook URL'si, dış erişime açık bir adres olarak yapılandırılabilir.
 
 ## 7. Gelecek Geliştirmeler
 

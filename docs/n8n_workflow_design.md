@@ -1,110 +1,158 @@
 # n8n İş Akışı Tasarımı: Veri Hazırlama ve Optimizasyon Tetikleme
 
-Bu belge, `synthetic_data` klasöründeki CSV dosyalarını okuyup işleyerek standart JSON formatına dönüştüren ve Python Optimizasyon Çekirdeği API'sini tetikleyen n8n iş akışının önerilen tasarımını açıklar.
+Bu belge, farklı veri kaynaklarından (CSV dosyaları) veri okuyup işleyerek standart JSON formatına dönüştüren ve Python Optimizasyon Çekirdeği API'sini tetikleyen n8n iş akışının tasarımını açıklar.
 
 **Ana Hedefler:**
 
 *   Farklı veri dosyalarını (CSV) okumak.
 *   Verileri birleştirmek ve `docs/data_model.md`'de tanımlanan `OptimizationRequest` JSON formatına dönüştürmek.
 *   Kuruma özel konfigürasyonu dahil etmek.
+*   Webhook parametreleriyle dinamik yapılandırma sağlamak.
 *   Python Optimizasyon Çekirdeği API'sine isteği göndermek.
 *   Farklı kurum senaryolarına uyarlanabilir olmak.
 
-## Önerilen İş Akışı Adımları ve Nodeları
+## Gerçekleştirilen İş Akışı Yapısı
+
+İş akışı, aşağıdaki temel bileşenlerden oluşur:
 
 ```mermaid
 graph LR
-    A[Start] --> B(Set: Kurum Bilgileri);
-    B --> C{Read Config File (.yaml)};
-    C --> D(Code: Parse YAML);
-    B --> E(Read employees.csv);
-    B --> F(Read skills.csv);
-    B --> G(Read shifts.csv);
-    B --> H(Read availability.csv);
-    B --> I(Read preferences.csv);
-    E --> J(Spreadsheet File: Parse Emp);
-    F --> K(Spreadsheet File: Parse Skills);
-    G --> L(Spreadsheet File: Parse Shifts);
-    H --> M(Spreadsheet File: Parse Avail);
-    I --> N(Spreadsheet File: Parse Prefs);
-    D --> O(Code: Veri Birleştirme ve input_data Oluşturma);
-    J --> O;
-    K --> O;
-    L --> O;
-    M --> O;
-    N --> O;
-    O --> P(Set: API Request Body Oluşturma);
-    P --> Q(HTTP Request: /optimize Çağır);
-    Q --> R[End: Sonucu İşle];
+    A[Webhook] --> B(Read/Write Files from Disk);
+    B --> C(Edit Fields);
+    C --> D(Ayar);
+    D --> E(Oku Temel Konfig);
+    D --> F1(Employees);
+    D --> F2(Shifts);
+    D --> F3(Availability);
+    D --> F4(Preferences);
+    D --> F5(Skills);
+    F1 --> G1(Extract Employees CSV);
+    F2 --> G2(Extract Shifts CSV);
+    F3 --> G3(Extract Availability CSV);
+    F4 --> G4(Extract Preferences CSV);
+    F5 --> G5(Extract Skills CSV);
+    G1 --> H(Merge);
+    G2 --> H;
+    G3 --> H;
+    G4 --> H;
+    G5 --> H;
+    E --> H;
+    H --> I(Code);
+    I --> J(HTTP Request);
+    J --> K[End: Sonucu İşle];
 
-    style C fill:#f9f,stroke:#333,stroke-width:1px
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style D fill:#f9f,stroke:#333,stroke-width:2px
     style E fill:#f9f,stroke:#333,stroke-width:1px
-    style F fill:#f9f,stroke:#333,stroke-width:1px
-    style G fill:#f9f,stroke:#333,stroke-width:1px
-    style H fill:#f9f,stroke:#333,stroke-width:1px
-    style I fill:#f9f,stroke:#333,stroke-width:1px
-    style J fill:#ccf,stroke:#333,stroke-width:1px
-    style K fill:#ccf,stroke:#333,stroke-width:1px
-    style L fill:#ccf,stroke:#333,stroke-width:1px
-    style M fill:#ccf,stroke:#333,stroke-width:1px
-    style N fill:#ccf,stroke:#333,stroke-width:1px
-    style D fill:#ccf,stroke:#333,stroke-width:1px
-    style O fill:#ccf,stroke:#333,stroke-width:2px
-    style P fill:#ccf,stroke:#333,stroke-width:1px
-    style Q fill:#9cf,stroke:#333,stroke-width:2px
+    style F1 fill:#ccf,stroke:#333,stroke-width:1px
+    style F2 fill:#ccf,stroke:#333,stroke-width:1px
+    style F3 fill:#ccf,stroke:#333,stroke-width:1px
+    style F4 fill:#ccf,stroke:#333,stroke-width:1px
+    style F5 fill:#ccf,stroke:#333,stroke-width:1px
+    style H fill:#ccf,stroke:#333,stroke-width:1px
+    style I fill:#ccf,stroke:#333,stroke-width:2px
+    style J fill:#9cf,stroke:#333,stroke-width:2px
 ```
 
-1.  **Start:** Akışı başlatır (Manuel, Zamanlanmış vb.).
-2.  **Set: Kurum Bilgileri (Esneklik için):**
-    *   **Node:** `Set`
-    *   **Amaç:** Hangi kurum için çalışılacağını belirler. Bu, akışın farklı kurumlar için yeniden kullanılmasını sağlar.
-    *   **Örnek:** `institution_id` = "hospital_A", `config_file_path` = "configs/hospital_A_config.yaml", `data_folder_path` = "synthetic_data" gibi değerler ayarlanabilir. Bu değerler akışın başında manuel olarak veya bir üst akıştan/tetikleyiciden alınabilir.
-3.  **Read Config File (.yaml):**
-    *   **Node:** `Read File` veya `Read Binary File`
-    *   **Amaç:** 2. adımda belirlenen `config_file_path`'daki YAML konfigürasyon dosyasını okur.
-    *   **Output:** Dosya içeriğini bir property'ye (örn. `yamlConfigContent`) atar.
-4.  **Code: Parse YAML:**
-    *   **Node:** `Code` (JavaScript)
-    *   **Amaç:** Okunan YAML metnini JSON nesnesine dönüştürür. (n8n'de yerleşik YAML parse nodu yoksa bu gerekli olabilir).
-    *   **Girdi:** `yamlConfigContent`.
-    *   **Kütüphane:** `yaml` npm kütüphanesi kullanılabilir (n8n ortam değişkenlerine eklenmesi gerekebilir: `NODE_FUNCTION_ALLOW_EXTERNAL=yaml`).
-    *   **Output:** Parsed edilmiş konfigürasyon nesnesini (örn. `parsedConfig`) bir property'ye atar.
-5.  **CSV Dosyalarını Oku (Paralel):**
-    *   **Nodes:** Her CSV için ayrı `Read Binary File` nodları.
-    *   **Amaç:** `employees.csv`, `skills.csv`, `shifts.csv`, `availability.csv`, `preferences.csv` dosyalarını okur. Dosya yolları 2. adımda belirlenen `data_folder_path` kullanılarak dinamik hale getirilebilir.
-    *   **Output:** Her dosyanın içeriği ayrı property'lere (örn. `employeesCsv`, `skillsCsv` vb.) atanır.
-6.  **CSV Verilerini Ayrıştır (Paralel):**
-    *   **Nodes:** Her okuma nodundan sonra `Spreadsheet File` nodları.
-    *   **Amaç:** CSV metinlerini JSON dizilerine dönüştürür.
-    *   **Input:** İlgili CSV içeriği (örn. `{{ $json.employeesCsv }}`).
-    *   **Output:** Ayrıştırılmış veriler (örn. `parsedEmployees`, `parsedSkills` vb.).
-7.  **Code: Veri Birleştirme ve `input_data` Oluşturma:**
-    *   **Node:** `Code` (JavaScript)
-    *   **Amaç:** Bu akışın kalbidir. Farklı CSV'lerden gelen ayrıştırılmış verileri alır ve `docs/data_model.md`'deki `input_data` yapısına uygun tek bir JSON nesnesi oluşturur.
-    *   **Girdi:** `parsedEmployees`, `parsedSkills`, `parsedShifts`, `parsedAvailability`, `parsedPreferences`.
-    *   **Mantık:** Yetenekleri, uygunlukları, tercihleri `employee_id` bazında gruplayıp ana çalışan nesnelerine ekler. Vardiya verilerini formatlar.
-    *   **Output:** `input_data` JSON nesnesi.
-8.  **Set: API Request Body Oluşturma:**
-    *   **Node:** `Set`
-    *   **Amaç:** Python API'sinin beklediği tam `OptimizationRequest` JSON gövdesini oluşturur.
-    *   **Girdi:** `parsedConfig` (Adım 4'ten) ve `input_data` (Adım 7'den).
-    *   **Mantık:** `configuration` (veya `configuration_ref`) ve `input_data` alanlarını içeren bir nesne oluşturur.
-    *   **Output:** Tam istek gövdesi (örn. `apiRequestPayload`).
-9.  **HTTP Request: /optimize Çağır:**
-    *   **Node:** `HTTP Request`
-    *   **Amaç:** Hazırlanan JSON isteğini Python Optimizasyon Çekirdeği API'sine gönderir.
-    *   **URL:** `http://localhost:8000/optimize` (veya ortamınıza uygun adres).
-    *   **Method:** `POST`
-    *   **Body:** `{{ JSON.stringify($json.apiRequestPayload) }}`.
-    *   **Options:** Gerekli header'ları (örn. `Content-Type: application/json`) ayarlar.
-10. **End: Sonucu İşle:**
-    *   **Node(lar):** `Set`, `If`, `NoOp` vb.
-    *   **Amaç:** API'den dönen yanıtı (`OptimizationResponse`) alır. Başlangıçta sadece yanıtı loglayabilir veya görüntüleyebilir. İleride, yanıttaki `status`'e göre farklı işlemler (başarılı ise raporlama, başarısız ise hata bildirimi) yapılabilir.
+1. **Webhook:**
+   * **Node:** `Webhook`
+   * **Amaç:** İş akışını HTTP isteği ile tetiklemek ve dinamik parametreleri almak.
+   * **Yapılandırma:**
+     * HTTP Method: POST
+     * Path: optimization
+     * Response Mode: Last Node
+   * **Parametreler:** `veriSeti`, `objective_weights`, `solver_params`
+
+2. **Read/Write Files from Disk:**
+   * **Node:** `Read/Write Files from Disk`
+   * **Amaç:** Sistemdeki aktif ayarlar dosyasını okumak.
+   * **Yapılandırma:**
+     * File Selector: /mnt/workflow_configs/aktif_ayarlar.json
+     * Options: fileName: aktifAyarlar
+     * Always Output Data: true
+
+3. **Edit Fields:**
+   * **Node:** `Set`
+   * **Amaç:** Webhook parametrelerine göre temel ayarları belirlemek.
+   * **Yapılandırma:**
+     * Mode: Raw
+     * JSON Output: Webhook'tan gelen `veriSeti` parametresine göre dosya yollarını belirler.
+
+4. **Ayar:**
+   * **Node:** `Code` (JavaScript)
+   * **Amaç:** Webhook parametreleri ve aktif ayarları kullanarak dosya yollarını belirlemek.
+   * **Girdi:** Edit Fields düğümünden gelen ayarlar ve aktif_ayarlar.json dosyası.
+   * **Mantık:** Veri seti ve kural seti bilgilerine göre dosya yollarını oluşturur.
+   * **Output:** Dosya yolları ve konfigürasyon bilgileri.
+
+5. **Oku Temel Konfig:**
+   * **Node:** `Read/Write Files from Disk`
+   * **Amaç:** Belirlenen veri setine ait YAML konfigürasyon dosyasını okumak.
+   * **Yapılandırma:**
+     * File Selector: `={{ $node["Ayar"].json.configPath }}`
+     * Options: fileName: baseConfigYamlContent
+
+6. **Dosya Okuma Düğümleri:**
+   * **Nodes:** `Employees`, `Shifts`, `Availability`, `Preferences`, `Skills`
+   * **Amaç:** Belirlenen veri setine ait CSV dosyalarını okumak.
+   * **Yapılandırma:** Her düğüm, Ayar düğümünden gelen ilgili dosya yolunu kullanır.
+
+7. **CSV Çıkarma Düğümleri:**
+   * **Nodes:** `Extract Employees CSV`, `Extract Shifts CSV`, `Extract Availability CSV`, `Extract Preferences CSV`, `Extract Skills CSV`
+   * **Amaç:** Okunan CSV verilerini JSON formatına dönüştürmek.
+   * **Yapılandırma:**
+     * Binary Property Name: İlgili dosya verisi (employeesData, shiftData, vb.)
+     * Options: headerRow: true
+
+8. **Merge:**
+   * **Node:** `Merge`
+   * **Amaç:** Tüm CSV verilerini tek bir veri akışında birleştirmek.
+   * **Yapılandırma:**
+     * Number Inputs: 5
+     * Mode: Merge By Position (3.1 sürümü)
+
+9. **Code:**
+   * **Node:** `Code` (JavaScript)
+   * **Amaç:** Verileri işleyip API'ye gönderilecek formata dönüştürmek.
+   * **Girdi:** Merge düğümünden gelen veriler ve Oku Temel Konfig düğümünden gelen YAML içeriği.
+   * **Mantık:**
+     * YAML konfigürasyonunu parse eder.
+     * Webhook'tan gelen parametrelerle konfigürasyonu günceller.
+     * Verileri kategorilere ayırır (employees, shifts, skills, availability, preferences).
+     * Departman bilgilerini kontrol eder ve departman istatistiklerini oluşturur.
+     * Vardiyası olan ancak çalışanı olmayan departmanları tespit eder.
+     * API'ye gönderilecek JSON formatını oluşturur.
+     * Konfigürasyon dosyası referansını dinamik olarak ekler.
+   * **Output:** API isteği için hazırlanmış JSON nesnesi.
+
+10. **HTTP Request:**
+    * **Node:** `HTTP Request`
+    * **Amaç:** Hazırlanan verileri Optimizasyon API'sine göndermek.
+    * **Yapılandırma:**
+      * Method: POST
+      * URL: http://host.docker.internal:8000/optimize veya üretim ortamında belirtilen URL
+      * Send Headers: true
+      * Header Parameters: Content-Type: application/json
+      * Send Body: true
+      * Specify Body: json
+      * JSON Body: `={{ $json }}`
 
 ## Esneklik ve Uyarlanabilirlik Notları
 
-*   **Parametrik Başlangıç:** Akışın başındaki `Set` nodu (Adım 2), farklı kurumlar için farklı konfigürasyon dosyalarını veya veri klasörlerini kolayca belirtmeyi sağlar.
-*   **Standart Çıktı:** Veri Birleştirme nodu (Adım 7) her zaman standart `input_data` formatını hedefler. Eğer bir kurumun ham veri yapısı çok farklıysa (örn. CSV yerine veritabanı), sadece o kuruma özel veri okuma (Adım 5) ve ayrıştırma (Adım 6) nodları değiştirilir, akışın geri kalanı büyük ölçüde aynı kalır.
-*   **Ayrı Akışlar:** Çok farklı optimizasyon problemleri (örn. çizelgeleme vs. rotalama) için bu akış kopyalanıp, özellikle Veri Birleştirme (Adım 7) ve API Çağrısı (Adım 9) kısımları probleme göre özelleştirilebilir.
+* **Webhook Parametreleri:** İş akışı, webhook parametreleri aracılığıyla dinamik olarak yapılandırılabilir. `veriSeti`, `objective_weights` ve `solver_params` parametreleri ile farklı senaryolar için aynı iş akışı kullanılabilir.
 
-Bu taslak, hem mevcut yapay verilerle çalışacak hem de gelecekte farklı veri kaynaklarına ve kurallara uyum sağlayabilecek esnek bir yapı sunmayı hedeflemektedir. 
+* **Aktif Ayarlar:** `/mnt/workflow_configs/aktif_ayarlar.json` dosyası, varsayılan veri seti ve kural seti bilgilerini içerir. Bu dosya güncellenerek, webhook parametresi belirtilmediğinde kullanılacak varsayılan değerler değiştirilebilir.
+
+* **Dinamik Dosya Yolları:** Ayar düğümü, veri setine göre dosya yollarını dinamik olarak oluşturur. Yeni bir veri seti eklemek için sadece bu düğümdeki JavaScript kodunu güncellemek yeterlidir.
+
+* **Konfigürasyon Güncelleme:** Code düğümü, temel YAML konfigürasyonunu webhook parametreleriyle dinamik olarak günceller. Bu sayede, her istek için farklı optimizasyon parametreleri kullanılabilir.
+
+* **Veri Sınıflandırma:** Code düğümü, verileri özelliklerine göre otomatik olarak sınıflandırır. Bu sayede, farklı formatlardaki veriler bile doğru şekilde işlenebilir.
+
+* **Departman Kontrolü:** Code düğümü, departman bilgilerini kontrol eder ve vardiyası olan ancak çalışanı olmayan departmanları tespit eder. Bu sayede, optimizasyon öncesinde veri tutarlılığı sağlanır.
+
+* **Docker Entegrasyonu:** İş akışı, Docker konteynerları içinde çalışacak şekilde tasarlanmıştır. `host.docker.internal` kullanılarak, aynı Docker ağındaki diğer servislere erişim sağlanır.
+
+* **Hata Yönetimi:** İş akışı, eksik veya hatalı veriler için kontroller içerir ve uygun hata mesajları üretir.
+
+Bu iş akışı, hem mevcut veri setleriyle çalışacak hem de gelecekte farklı veri kaynaklarına ve kurallara uyum sağlayabilecek esnek bir yapı sunmaktadır. Webhook parametreleri ve aktif ayarlar dosyası sayesinde, kod değişikliği yapmadan farklı senaryolar için kullanılabilir.

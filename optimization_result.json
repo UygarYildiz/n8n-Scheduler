@@ -1,561 +1,365 @@
 {
   "status": "OPTIMAL",
   "solver_status_message": "Optimal çözüm bulundu.",
-  "processing_time_seconds": 4.363286018371582,
-  "objective_value": -20.0,
+  "processing_time_seconds": 2.420897960662842,
+  "objective_value": -29.0,
   "solution": {
     "assignments": [
       {
-        "employee_id": "CM_E001",
-        "shift_id": "CM_S0079"
+        "employee_id": "E001",
+        "shift_id": "S0004"
       },
       {
-        "employee_id": "CM_E002",
-        "shift_id": "CM_S0064"
+        "employee_id": "E001",
+        "shift_id": "S0079"
       },
       {
-        "employee_id": "CM_E002",
-        "shift_id": "CM_S0091"
+        "employee_id": "E002",
+        "shift_id": "S0043"
       },
       {
-        "employee_id": "CM_E003",
-        "shift_id": "CM_S0043"
+        "employee_id": "E002",
+        "shift_id": "S0048"
       },
       {
-        "employee_id": "CM_E004",
-        "shift_id": "CM_S0086"
+        "employee_id": "E003",
+        "shift_id": "S0010"
       },
       {
-        "employee_id": "CM_E005",
-        "shift_id": "CM_S0054"
+        "employee_id": "E003",
+        "shift_id": "S0061"
       },
       {
-        "employee_id": "CM_E005",
-        "shift_id": "CM_S0102"
+        "employee_id": "E004",
+        "shift_id": "S0047"
       },
       {
-        "employee_id": "CM_E006",
-        "shift_id": "CM_S0005"
+        "employee_id": "E004",
+        "shift_id": "S0077"
       },
       {
-        "employee_id": "CM_E006",
-        "shift_id": "CM_S0015"
+        "employee_id": "E005",
+        "shift_id": "S0040"
       },
       {
-        "employee_id": "CM_E007",
-        "shift_id": "CM_S0031"
+        "employee_id": "E005",
+        "shift_id": "S0055"
       },
       {
-        "employee_id": "CM_E007",
-        "shift_id": "CM_S0071"
+        "employee_id": "E006",
+        "shift_id": "S0068"
       },
       {
-        "employee_id": "CM_E007",
-        "shift_id": "CM_S0085"
+        "employee_id": "E006",
+        "shift_id": "S0074"
       },
       {
-        "employee_id": "CM_E008",
-        "shift_id": "CM_S0037"
+        "employee_id": "E007",
+        "shift_id": "S0062"
       },
       {
-        "employee_id": "CM_E008",
-        "shift_id": "CM_S0073"
+        "employee_id": "E007",
+        "shift_id": "S0069"
       },
       {
-        "employee_id": "CM_E009",
-        "shift_id": "CM_S0018"
+        "employee_id": "E008",
+        "shift_id": "S0016"
       },
       {
-        "employee_id": "CM_E009",
-        "shift_id": "CM_S0030"
+        "employee_id": "E008",
+        "shift_id": "S0018"
       },
       {
-        "employee_id": "CM_E009",
-        "shift_id": "CM_S0114"
+        "employee_id": "E009",
+        "shift_id": "S0024"
       },
       {
-        "employee_id": "CM_E010",
-        "shift_id": "CM_S0009"
+        "employee_id": "E009",
+        "shift_id": "S0037"
       },
       {
-        "employee_id": "CM_E010",
-        "shift_id": "CM_S0093"
+        "employee_id": "E010",
+        "shift_id": "S0049"
       },
       {
-        "employee_id": "CM_E011",
-        "shift_id": "CM_S0107"
+        "employee_id": "E010",
+        "shift_id": "S0072"
       },
       {
-        "employee_id": "CM_E012",
-        "shift_id": "CM_S0025"
+        "employee_id": "E011",
+        "shift_id": "S0066"
       },
       {
-        "employee_id": "CM_E013",
-        "shift_id": "CM_S0124"
+        "employee_id": "E012",
+        "shift_id": "S0060"
       },
       {
-        "employee_id": "CM_E014",
-        "shift_id": "CM_S0058"
+        "employee_id": "E013",
+        "shift_id": "S0027"
       },
       {
-        "employee_id": "CM_E014",
-        "shift_id": "CM_S0066"
+        "employee_id": "E013",
+        "shift_id": "S0035"
       },
       {
-        "employee_id": "CM_E015",
-        "shift_id": "CM_S0004"
+        "employee_id": "E014",
+        "shift_id": "S0017"
       },
       {
-        "employee_id": "CM_E016",
-        "shift_id": "CM_S0083"
+        "employee_id": "E014",
+        "shift_id": "S0025"
       },
       {
-        "employee_id": "CM_E016",
-        "shift_id": "CM_S0088"
+        "employee_id": "E015",
+        "shift_id": "S0054"
       },
       {
-        "employee_id": "CM_E017",
-        "shift_id": "CM_S0113"
+        "employee_id": "E016",
+        "shift_id": "S0026"
       },
       {
-        "employee_id": "CM_E018",
-        "shift_id": "CM_S0087"
+        "employee_id": "E017",
+        "shift_id": "S0064"
       },
       {
-        "employee_id": "CM_E019",
-        "shift_id": "CM_S0001"
+        "employee_id": "E018",
+        "shift_id": "S0009"
       },
       {
-        "employee_id": "CM_E020",
-        "shift_id": "CM_S0095"
+        "employee_id": "E018",
+        "shift_id": "S0033"
       },
       {
-        "employee_id": "CM_E021",
-        "shift_id": "CM_S0033"
+        "employee_id": "E019",
+        "shift_id": "S0015"
       },
       {
-        "employee_id": "CM_E021",
-        "shift_id": "CM_S0118"
+        "employee_id": "E019",
+        "shift_id": "S0059"
       },
       {
-        "employee_id": "CM_E022",
-        "shift_id": "CM_S0044"
+        "employee_id": "E020",
+        "shift_id": "S0046"
       },
       {
-        "employee_id": "CM_E022",
-        "shift_id": "CM_S0080"
+        "employee_id": "E021",
+        "shift_id": "S0053"
       },
       {
-        "employee_id": "CM_E022",
-        "shift_id": "CM_S0092"
+        "employee_id": "E021",
+        "shift_id": "S0078"
       },
       {
-        "employee_id": "CM_E023",
-        "shift_id": "CM_S0076"
+        "employee_id": "E022",
+        "shift_id": "S0014"
       },
       {
-        "employee_id": "CM_E023",
-        "shift_id": "CM_S0094"
+        "employee_id": "E022",
+        "shift_id": "S0051"
       },
       {
-        "employee_id": "CM_E024",
-        "shift_id": "CM_S0106"
+        "employee_id": "E023",
+        "shift_id": "S0019"
       },
       {
-        "employee_id": "CM_E025",
-        "shift_id": "CM_S0014"
+        "employee_id": "E023",
+        "shift_id": "S0067"
       },
       {
-        "employee_id": "CM_E025",
-        "shift_id": "CM_S0038"
+        "employee_id": "E024",
+        "shift_id": "S0013"
       },
       {
-        "employee_id": "CM_E025",
-        "shift_id": "CM_S0050"
+        "employee_id": "E024",
+        "shift_id": "S0032"
       },
       {
-        "employee_id": "CM_E026",
-        "shift_id": "CM_S0046"
+        "employee_id": "E025",
+        "shift_id": "S0031"
       },
       {
-        "employee_id": "CM_E027",
-        "shift_id": "CM_S0040"
+        "employee_id": "E026",
+        "shift_id": "S0007"
       },
       {
-        "employee_id": "CM_E027",
-        "shift_id": "CM_S0077"
+        "employee_id": "E026",
+        "shift_id": "S0021"
       },
       {
-        "employee_id": "CM_E028",
-        "shift_id": "CM_S0042"
+        "employee_id": "E027",
+        "shift_id": "S0039"
       },
       {
-        "employee_id": "CM_E028",
-        "shift_id": "CM_S0048"
+        "employee_id": "E027",
+        "shift_id": "S0052"
       },
       {
-        "employee_id": "CM_E029",
-        "shift_id": "CM_S0049"
+        "employee_id": "E028",
+        "shift_id": "S0022"
       },
       {
-        "employee_id": "CM_E029",
-        "shift_id": "CM_S0103"
+        "employee_id": "E029",
+        "shift_id": "S0006"
       },
       {
-        "employee_id": "CM_E030",
-        "shift_id": "CM_S0044"
+        "employee_id": "E029",
+        "shift_id": "S0073"
       },
       {
-        "employee_id": "CM_E031",
-        "shift_id": "CM_S0065"
+        "employee_id": "E030",
+        "shift_id": "S0065"
       },
       {
-        "employee_id": "CM_E032",
-        "shift_id": "CM_S0062"
+        "employee_id": "E031",
+        "shift_id": "S0028"
       },
       {
-        "employee_id": "CM_E032",
-        "shift_id": "CM_S0104"
+        "employee_id": "E031",
+        "shift_id": "S0038"
       },
       {
-        "employee_id": "CM_E033",
-        "shift_id": "CM_S0060"
+        "employee_id": "E032",
+        "shift_id": "S0042"
       },
       {
-        "employee_id": "CM_E033",
-        "shift_id": "CM_S0090"
+        "employee_id": "E032",
+        "shift_id": "S0070"
       },
       {
-        "employee_id": "CM_E033",
-        "shift_id": "CM_S0116"
+        "employee_id": "E033",
+        "shift_id": "S0003"
       },
       {
-        "employee_id": "CM_E034",
-        "shift_id": "CM_S0119"
+        "employee_id": "E034",
+        "shift_id": "S0023"
       },
       {
-        "employee_id": "CM_E034",
-        "shift_id": "CM_S0121"
+        "employee_id": "E035",
+        "shift_id": "S0002"
       },
       {
-        "employee_id": "CM_E035",
-        "shift_id": "CM_S0006"
+        "employee_id": "E035",
+        "shift_id": "S0056"
       },
       {
-        "employee_id": "CM_E035",
-        "shift_id": "CM_S0084"
+        "employee_id": "E036",
+        "shift_id": "S0058"
       },
       {
-        "employee_id": "CM_E035",
-        "shift_id": "CM_S0096"
+        "employee_id": "E036",
+        "shift_id": "S0082"
       },
       {
-        "employee_id": "CM_E036",
-        "shift_id": "CM_S0016"
+        "employee_id": "E037",
+        "shift_id": "S0029"
       },
       {
-        "employee_id": "CM_E037",
-        "shift_id": "CM_S0013"
+        "employee_id": "E037",
+        "shift_id": "S0080"
       },
       {
-        "employee_id": "CM_E038",
-        "shift_id": "CM_S0059"
+        "employee_id": "E038",
+        "shift_id": "S0057"
       },
       {
-        "employee_id": "CM_E039",
-        "shift_id": "CM_S0002"
+        "employee_id": "E039",
+        "shift_id": "S0011"
       },
       {
-        "employee_id": "CM_E039",
-        "shift_id": "CM_S0116"
+        "employee_id": "E039",
+        "shift_id": "S0036"
       },
       {
-        "employee_id": "CM_E040",
-        "shift_id": "CM_S0019"
+        "employee_id": "E040",
+        "shift_id": "S0034"
       },
       {
-        "employee_id": "CM_E040",
-        "shift_id": "CM_S0055"
+        "employee_id": "E041",
+        "shift_id": "S0085"
       },
       {
-        "employee_id": "CM_E041",
-        "shift_id": "CM_S0023"
+        "employee_id": "E042",
+        "shift_id": "S0012"
       },
       {
-        "employee_id": "CM_E041",
-        "shift_id": "CM_S0047"
+        "employee_id": "E043",
+        "shift_id": "S0044"
       },
       {
-        "employee_id": "CM_E042",
-        "shift_id": "CM_S0020"
+        "employee_id": "E043",
+        "shift_id": "S0084"
       },
       {
-        "employee_id": "CM_E043",
-        "shift_id": "CM_S0022"
+        "employee_id": "E044",
+        "shift_id": "S0001"
       },
       {
-        "employee_id": "CM_E044",
-        "shift_id": "CM_S0034"
+        "employee_id": "E044",
+        "shift_id": "S0076"
       },
       {
-        "employee_id": "CM_E044",
-        "shift_id": "CM_S0045"
+        "employee_id": "E045",
+        "shift_id": "S0045"
       },
       {
-        "employee_id": "CM_E044",
-        "shift_id": "CM_S0069"
+        "employee_id": "E045",
+        "shift_id": "S0081"
       },
       {
-        "employee_id": "CM_E045",
-        "shift_id": "CM_S0061"
+        "employee_id": "E046",
+        "shift_id": "S0005"
       },
       {
-        "employee_id": "CM_E046",
-        "shift_id": "CM_S0012"
+        "employee_id": "E046",
+        "shift_id": "S0050"
       },
       {
-        "employee_id": "CM_E047",
-        "shift_id": "CM_S0033"
+        "employee_id": "E047",
+        "shift_id": "S0041"
       },
       {
-        "employee_id": "CM_E047",
-        "shift_id": "CM_S0051"
+        "employee_id": "E047",
+        "shift_id": "S0075"
       },
       {
-        "employee_id": "CM_E047",
-        "shift_id": "CM_S0057"
+        "employee_id": "E048",
+        "shift_id": "S0020"
       },
       {
-        "employee_id": "CM_E048",
-        "shift_id": "CM_S0067"
+        "employee_id": "E048",
+        "shift_id": "S0063"
       },
       {
-        "employee_id": "CM_E048",
-        "shift_id": "CM_S0115"
+        "employee_id": "E049",
+        "shift_id": "S0030"
       },
       {
-        "employee_id": "CM_E049",
-        "shift_id": "CM_S0021"
+        "employee_id": "E049",
+        "shift_id": "S0071"
       },
       {
-        "employee_id": "CM_E049",
-        "shift_id": "CM_S0035"
+        "employee_id": "E050",
+        "shift_id": "S0008"
       },
       {
-        "employee_id": "CM_E049",
-        "shift_id": "CM_S0099"
-      },
-      {
-        "employee_id": "CM_E050",
-        "shift_id": "CM_S0110"
-      },
-      {
-        "employee_id": "CM_E051",
-        "shift_id": "CM_S0101"
-      },
-      {
-        "employee_id": "CM_E052",
-        "shift_id": "CM_S0091"
-      },
-      {
-        "employee_id": "CM_E053",
-        "shift_id": "CM_S0078"
-      },
-      {
-        "employee_id": "CM_E053",
-        "shift_id": "CM_S0126"
-      },
-      {
-        "employee_id": "CM_E054",
-        "shift_id": "CM_S0012"
-      },
-      {
-        "employee_id": "CM_E054",
-        "shift_id": "CM_S0027"
-      },
-      {
-        "employee_id": "CM_E054",
-        "shift_id": "CM_S0111"
-      },
-      {
-        "employee_id": "CM_E055",
-        "shift_id": "CM_S0070"
-      },
-      {
-        "employee_id": "CM_E056",
-        "shift_id": "CM_S0089"
-      },
-      {
-        "employee_id": "CM_E057",
-        "shift_id": "CM_S0117"
-      },
-      {
-        "employee_id": "CM_E058",
-        "shift_id": "CM_S0053"
-      },
-      {
-        "employee_id": "CM_E059",
-        "shift_id": "CM_S0029"
-      },
-      {
-        "employee_id": "CM_E059",
-        "shift_id": "CM_S0068"
-      },
-      {
-        "employee_id": "CM_E060",
-        "shift_id": "CM_S0010"
-      },
-      {
-        "employee_id": "CM_E061",
-        "shift_id": "CM_S0082"
-      },
-      {
-        "employee_id": "CM_E062",
-        "shift_id": "CM_S0097"
-      },
-      {
-        "employee_id": "CM_E063",
-        "shift_id": "CM_S0074"
-      },
-      {
-        "employee_id": "CM_E063",
-        "shift_id": "CM_S0098"
-      },
-      {
-        "employee_id": "CM_E063",
-        "shift_id": "CM_S0122"
-      },
-      {
-        "employee_id": "CM_E064",
-        "shift_id": "CM_S0032"
-      },
-      {
-        "employee_id": "CM_E064",
-        "shift_id": "CM_S0056"
-      },
-      {
-        "employee_id": "CM_E065",
-        "shift_id": "CM_S0003"
-      },
-      {
-        "employee_id": "CM_E065",
-        "shift_id": "CM_S0075"
-      },
-      {
-        "employee_id": "CM_E065",
-        "shift_id": "CM_S0123"
-      },
-      {
-        "employee_id": "CM_E066",
-        "shift_id": "CM_S0007"
-      },
-      {
-        "employee_id": "CM_E067",
-        "shift_id": "CM_S0112"
-      },
-      {
-        "employee_id": "CM_E068",
-        "shift_id": "CM_S0036"
-      },
-      {
-        "employee_id": "CM_E069",
-        "shift_id": "CM_S0024"
-      },
-      {
-        "employee_id": "CM_E069",
-        "shift_id": "CM_S0072"
-      },
-      {
-        "employee_id": "CM_E069",
-        "shift_id": "CM_S0120"
-      },
-      {
-        "employee_id": "CM_E070",
-        "shift_id": "CM_S0108"
-      },
-      {
-        "employee_id": "CM_E071",
-        "shift_id": "CM_S0081"
-      },
-      {
-        "employee_id": "CM_E071",
-        "shift_id": "CM_S0087"
-      },
-      {
-        "employee_id": "CM_E072",
-        "shift_id": "CM_S0028"
-      },
-      {
-        "employee_id": "CM_E073",
-        "shift_id": "CM_S0011"
-      },
-      {
-        "employee_id": "CM_E074",
-        "shift_id": "CM_S0017"
-      },
-      {
-        "employee_id": "CM_E075",
-        "shift_id": "CM_S0008"
-      },
-      {
-        "employee_id": "CM_E075",
-        "shift_id": "CM_S0026"
-      },
-      {
-        "employee_id": "CM_E076",
-        "shift_id": "CM_S0041"
-      },
-      {
-        "employee_id": "CM_E076",
-        "shift_id": "CM_S0117"
-      },
-      {
-        "employee_id": "CM_E077",
-        "shift_id": "CM_S0057"
-      },
-      {
-        "employee_id": "CM_E077",
-        "shift_id": "CM_S0125"
-      },
-      {
-        "employee_id": "CM_E078",
-        "shift_id": "CM_S0039"
-      },
-      {
-        "employee_id": "CM_E078",
-        "shift_id": "CM_S0063"
-      },
-      {
-        "employee_id": "CM_E078",
-        "shift_id": "CM_S0105"
-      },
-      {
-        "employee_id": "CM_E079",
-        "shift_id": "CM_S0052"
-      },
-      {
-        "employee_id": "CM_E080",
-        "shift_id": "CM_S0100"
-      },
-      {
-        "employee_id": "CM_E080",
-        "shift_id": "CM_S0109"
+        "employee_id": "E050",
+        "shift_id": "S0083"
       }
     ]
   },
   "metrics": {
     "total_understaffing": 0,
-    "total_overstaffing": 8,
+    "total_overstaffing": 0,
     "min_staffing_coverage_ratio": 1.0,
     "skill_coverage_ratio": 1.0,
     "positive_preferences_met_count": 17,
-    "negative_preferences_assigned_count": 0,
-    "total_preference_score_achieved": 17,
-    "workload_distribution_std_dev": 0.7545694136393285,
-    "bad_shift_distribution_std_dev": 0.7644442425710327,
+    "negative_preferences_assigned_count": 1,
+    "total_preference_score_achieved": 16,
+    "workload_distribution_std_dev": 0.458257569495584,
+    "bad_shift_distribution_std_dev": 0.5291502622129182,
     "system_adaptability_score": 5.0,
     "config_complexity_score": 10.0,
-    "rule_count": 11
+    "rule_count": 12
   },
   "error_details": null
 }
