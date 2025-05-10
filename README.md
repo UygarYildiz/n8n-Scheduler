@@ -26,16 +26,18 @@ Projenin farklı kurumlara uyarlanabilirliği şu prensiplerle sağlanır:
 
 Detaylar için [`docs/adaptability.md`](docs/adaptability.md) ve [`docs/configuration.md`](docs/configuration.md) dosyalarına bakınız.
 
-## Teknoloji Yığını (Önerilen)
+## Teknoloji Yığını
 
-*   **Otomasyon:** n8n
+*   **Otomasyon:** n8n (1.91.2)
 *   **Optimizasyon:** Python, Google OR-Tools (CP-SAT)
-*   **API (Opt. Çekirdek):** Flask veya FastAPI (önerilen)
+*   **API (Opt. Çekirdek):** FastAPI
 *   **Veri Formatı:** JSON
+*   **Kullanıcı Arayüzü:** React.js
+*   **Konteynerizasyon:** Docker
 
 ## Yol Haritası
 
-Proje 5 haftalık bir yol haritası ile ilerleyecektir. Detaylar için [`docs/roadmap.md`](docs/roadmap.md) dosyasına bakınız.
+Proje 6 haftalık bir yol haritası ile ilerlemektedir. Detaylar için [`docs/roadmap.md`](docs/roadmap.md) dosyasına bakınız.
 
 ## Kurulum ve Başlangıç
 
@@ -43,15 +45,16 @@ Geliştirme ortamı kurulumu için [`docs/setup.md`](docs/setup.md) dosyasına b
 
 ## Kullanıcı Arayüzü
 
-Projenin ilk 5 haftası, çekirdek optimizasyon motorunun (Python/CP-SAT) ve otomasyon akışlarının (n8n) geliştirilmesine odaklanmaktadır. 6. haftada ise, son kullanıcılar (planlamacılar, personel vb.) için özel bir web tabanlı **kullanıcı arayüzü (UI)** geliştirilecektir.
+Projenin ilk 4 haftası, çekirdek optimizasyon motorunun (Python/CP-SAT) ve otomasyon akışlarının (n8n) geliştirilmesine odaklanmıştır. 5. haftada, son kullanıcılar (yöneticiler, planlamacılar, personel vb.) için özel bir web tabanlı **kullanıcı arayüzü (UI)** geliştirilmeye başlanmıştır.
 
-Kullanıcı arayüzü, aşağıdaki temel özellikleri içerecektir:
-- Veri seti ve konfigürasyon seçim ekranı
-- Optimizasyon parametrelerini ayarlama formu
+Kullanıcı arayüzü, aşağıdaki temel özellikleri içermektedir:
+- Kurum seçimi (hastane, çağrı merkezi vb.)
+- Çizelgeleme hedefi seçimi (dengeli, çalışan odaklı, verimlilik odaklı vb.)
 - Sonuçları görselleştirme ve raporlama paneli
 - Vardiya çizelgesi görüntüleme ve düzenleme arayüzü
+- Başarılı/başarısız çizelgeleme geri bildirimi
 
-Kullanıcı arayüzü, n8n webhook'ları ile entegre çalışacak ve optimizasyon sonuçlarını kullanıcı dostu bir şekilde sunacaktır. Arayüz gereksinimleri ve tasarımı, 5. haftada detaylı olarak belirlenecek ve 6. haftada implementasyonu gerçekleştirilecektir.
+Kullanıcı arayüzü, n8n webhook'ları ile entegre çalışmakta ve optimizasyon sonuçlarını kullanıcı dostu bir şekilde sunmaktadır. Arayüz tasarımı ve gereksinimleri [`docs/ui_design.md`](docs/ui_design.md) dosyasında detaylandırılmıştır. 5. haftada geliştirmeye başlanan arayüz, 6. haftada tamamlanacak ve test edilecektir.
 
 ## Dokümantasyon
 
@@ -64,11 +67,13 @@ Proje ile ilgili detaylı dokümantasyon `docs` klasöründe bulunmaktadır:
 *   [`docs/roadmap.md`](docs/roadmap.md): Proje Yol Haritası
 *   [`docs/setup.md`](docs/setup.md): Kurulum Rehberi
 *   [`docs/n8n_workflow_guide.md`](docs/n8n_workflow_guide.md): n8n İş Akışı Kullanım Kılavuzu
+*   [`docs/n8n_workflow_design.md`](docs/n8n_workflow_design.md): n8n İş Akışı Tasarımı
 *   [`docs/metrics.md`](docs/metrics.md): Metrik Tanımları ve Hesaplama Yöntemleri
+*   [`docs/ui_design.md`](docs/ui_design.md): Kullanıcı Arayüzü Tasarımı ve Gereksinimleri
 
 ## Proje Durumu
 
-Proje, 6 haftalık yol haritasının 4. haftasını tamamlamış durumdadır:
+Proje, 6 haftalık yol haritasının 5. haftasına geçmiş durumdadır:
 
 - ✅ **1. Hafta**: Temelleri Atma ve Problem Alanını Anlama
 - ✅ **2. Hafta**: Veri Entegrasyonu ve Modelleme Başlangıcı
@@ -77,4 +82,16 @@ Proje, 6 haftalık yol haritasının 4. haftasını tamamlamış durumdadır:
 - 🔄 **5. Hafta**: Kullanıcı Arayüzü Geliştirme (Devam Ediyor)
 - 📅 **6. Hafta**: Test, İyileştirme ve Kurumsal Uyarlanabilirlik (Planlandı)
 
-Şu anda, n8n iş akışı webhook tabanlı dinamik parametre alma özelliği ile tamamlanmış ve başarıyla test edilmiştir. Optimizasyon API'si ile entegrasyon sağlanmış ve farklı veri setleri için dinamik dosya yolu yapılandırması eklenmiştir. 5. haftada web tabanlı kullanıcı arayüzü geliştirilecek, 6. haftada ise kapsamlı test ve iyileştirme çalışmaları yapılarak projenin kurumsal uyarlanabilirliği sağlanacaktır.
+### Güncel Durum ve Gelişmeler
+
+- **n8n İş Akışı**: Webhook tabanlı dinamik parametre alma özelliği geliştirilmiş ve başarıyla test edilmiştir. İş akışı, departman istatistikleri oluşturma ve vardiyası olan ancak çalışanı olmayan departmanları tespit etme özellikleri ile genişletilmiştir.
+
+- **Optimizasyon API'si**: API ile entegrasyon sağlanmış ve farklı veri setleri (hastane, çağrı merkezi) için dinamik dosya yolu yapılandırması eklenmiştir. Konfigürasyon dosyası referansı dinamik olarak API'ye iletilmektedir.
+
+- **Veri Modeli**: Hem hastane hem de çağrı merkezi veri setleri için optimizasyon modeli başarıyla çalışmaktadır. Departman bazlı personel gereksinimleri ve yetenek gereksinimleri doğru şekilde işlenmektedir.
+
+- **Üretim Ortamı Hazırlığı**: Webhook URL'leri ve API bağlantıları üretim ortamında çalışacak şekilde yapılandırılmıştır. Docker entegrasyonu n8n'nin 1.91.2 sürümü ile güncellenmiştir.
+
+- **Kullanıcı Arayüzü**: 5. haftada web tabanlı kullanıcı arayüzü geliştirilmeye başlanmıştır. Arayüz tasarımı ve gereksinimleri [`docs/ui_design.md`](docs/ui_design.md) dosyasında detaylandırılmıştır.
+
+6. haftada kapsamlı test ve iyileştirme çalışmaları yapılarak projenin kurumsal uyarlanabilirliği sağlanacak ve kullanıcı arayüzü tamamlanacaktır.
