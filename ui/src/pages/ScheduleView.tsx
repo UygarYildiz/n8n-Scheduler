@@ -4,15 +4,11 @@ import {
   Typography,
   Grid,
   Paper,
-  Card,
-  CardContent,
-  CardHeader,
   Button,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  TextField,
   IconButton,
   Table,
   TableBody,
@@ -20,7 +16,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Chip,
   Tabs,
   Tab,
   CircularProgress,
@@ -30,11 +25,8 @@ import {
 import {
   NavigateBefore as PrevIcon,
   NavigateNext as NextIcon,
-  Edit as EditIcon,
-  Save as SaveIcon,
   Refresh as ResetIcon,
   FilterList as FilterIcon,
-  Remove as RemoveIcon,
   Download as DownloadIcon
 } from '@mui/icons-material';
 import { api } from '../services/api';
@@ -92,11 +84,11 @@ interface ScheduleAssignment {
   date?: string; // API'den gelmiyorsa hesaplanacak
 }
 
-// Vardiya renkleri
+// Vardiya renkleri - daha canlı ve modern renkler
 const shiftColors = {
-  morning: '#4caf50',   // Yeşil
-  afternoon: '#2196f3', // Mavi
-  night: '#9c27b0',     // Mor
+  morning: '#00c853',   // Canlı Yeşil
+  afternoon: '#2979ff', // Canlı Mavi
+  night: '#aa00ff',     // Canlı Mor
   default: '#757575'    // Gri
 };
 
@@ -111,10 +103,8 @@ const ScheduleView = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
 
   // Veri state'leri
-  const [assignments, setAssignments] = useState<ScheduleAssignment[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [datasetType, setDatasetType] = useState<string>('');
 
   // Hesaplanan değerler
   const [processedAssignments, setProcessedAssignments] = useState<ScheduleAssignment[]>([]);
@@ -201,8 +191,8 @@ const ScheduleView = () => {
           setCurrentWeek(startDate.toISOString().split('T')[0]);
         }
 
-        // Örnek vardiya ve çalışan verileri oluştur (gerçek API entegrasyonu yapılana kadar)
-        const generatedShifts = generateShiftsFromAssignments(processedAssignments);
+        // Vardiya ve çalışan verilerini API'den al
+        const generatedShifts = await generateShiftsFromAssignments(processedAssignments, datasetType);
 
         // Çalışan verilerini asenkron olarak al
         const generatedEmployees = await generateEmployeesFromAssignments(processedAssignments, datasetType);
@@ -212,11 +202,9 @@ const ScheduleView = () => {
         console.log('Oluşturulan çalışanlar:', generatedEmployees.slice(0, 5));
 
         // State'leri güncelle
-        setAssignments(scheduleData.solution.assignments);
         setProcessedAssignments(processedAssignments);
         setShifts(generatedShifts);
         setEmployees(generatedEmployees);
-        setDatasetType(datasetType);
 
         // Debug bilgisi
         console.log('Toplam atama sayısı:', scheduleData.solution.assignments.length);
@@ -336,57 +324,159 @@ const ScheduleView = () => {
   };
 
   // Atamalardan vardiya bilgilerini oluştur
-  const generateShiftsFromAssignments = (processedAssignments: ScheduleAssignment[]): Shift[] => {
+  const generateShiftsFromAssignments = async (processedAssignments: ScheduleAssignment[], datasetType: string): Promise<Shift[]> => {
     console.log('İşlenmiş atamalar:', processedAssignments.slice(0, 5)); // İlk 5 atamayı göster
 
     const uniqueShiftIds = [...new Set(processedAssignments.map(a => a.shift_id))];
     console.log('Benzersiz vardiya ID\'leri:', uniqueShiftIds.slice(0, 10)); // İlk 10 benzersiz vardiya ID'sini göster
 
-    return uniqueShiftIds.map(shiftId => {
-      // Vardiya ID'sinden vardiya tipini belirle
-      let shiftType = 'default';
-      let shiftName = 'Vardiya';
+    try {
+      // API'den vardiya verilerini al
+      const apiUrl = `http://localhost:8000/api/shifts?datasetType=${datasetType}`;
+      console.log('Vardiya API isteği URL:', apiUrl);
 
-      // Vardiya tipini belirle (büyük/küçük harf duyarlılığını kaldır)
-      const lowerShiftId = shiftId.toLowerCase();
+      const shiftsResponse = await axios.get(apiUrl);
+      const shiftsData = shiftsResponse.data;
+      console.log('API\'den alınan vardiya verileri:', shiftsData.slice(0, 5));
 
-      if (lowerShiftId.includes('morning') || lowerShiftId.includes('sabah')) {
-        shiftType = 'morning';
-        shiftName = 'Sabah (08:00-16:00)';
-      } else if (lowerShiftId.includes('afternoon') || lowerShiftId.includes('aksam') || lowerShiftId.includes('öğle')) {
-        shiftType = 'afternoon';
-        shiftName = 'Akşam (16:00-00:00)';
-      } else if (lowerShiftId.includes('night') || lowerShiftId.includes('gece')) {
-        shiftType = 'night';
-        shiftName = 'Gece (00:00-08:00)';
+      return uniqueShiftIds.map(shiftId => {
+        // API'den gelen verilerden vardiya bilgilerini bul
+        const shiftData = shiftsData.find((s: any) => s.shift_id === shiftId);
+
+        // Varsayılan değerler
+        let shiftType = 'default';
+        let shiftName = 'Vardiya';
+        let shiftStartTime = '';
+        let shiftEndTime = '';
+
+        if (shiftData) {
+          // API'den gelen verileri kullan
+          shiftName = shiftData.name || 'Vardiya';
+          shiftStartTime = shiftData.start_time || '';
+          shiftEndTime = shiftData.end_time || '';
+
+          // Vardiya tipini belirle
+          const lowerShiftName = shiftName.toLowerCase();
+
+          if (lowerShiftName.includes('sabah') || lowerShiftName.includes('morning')) {
+            shiftType = 'morning';
+          } else if (lowerShiftName.includes('akşam') || lowerShiftName.includes('afternoon') || lowerShiftName.includes('öğle')) {
+            shiftType = 'afternoon';
+          } else if (lowerShiftName.includes('gece') || lowerShiftName.includes('night')) {
+            shiftType = 'night';
+          }
+
+          // Saat bilgilerini formatla
+          if (shiftStartTime && shiftEndTime) {
+            const formattedStartTime = shiftStartTime.substring(0, 5); // "08:00:00" -> "08:00"
+            const formattedEndTime = shiftEndTime.substring(0, 5);     // "16:00:00" -> "16:00"
+
+            // Vardiya adını saat bilgisiyle birlikte göster
+            if (shiftType === 'morning') {
+              shiftName = `Sabah (${formattedStartTime}-${formattedEndTime})`;
+            } else if (shiftType === 'afternoon') {
+              shiftName = `Akşam (${formattedStartTime}-${formattedEndTime})`;
+            } else if (shiftType === 'night') {
+              shiftName = `Gece (${formattedStartTime}-${formattedEndTime})`;
+            } else {
+              shiftName = `Vardiya (${formattedStartTime}-${formattedEndTime})`;
+            }
+          }
+        } else {
+          // API'den veri gelmezse, vardiya ID'sinden çıkarım yap
+          const lowerShiftId = shiftId.toLowerCase();
+
+          if (lowerShiftId.includes('morning') || lowerShiftId.includes('sabah')) {
+            shiftType = 'morning';
+            shiftName = 'Sabah (08:00-16:00)';
+          } else if (lowerShiftId.includes('afternoon') || lowerShiftId.includes('aksam') || lowerShiftId.includes('öğle')) {
+            shiftType = 'afternoon';
+            shiftName = 'Akşam (16:00-00:00)';
+          } else if (lowerShiftId.includes('night') || lowerShiftId.includes('gece')) {
+            shiftType = 'night';
+            shiftName = 'Gece (00:00-08:00)';
+          }
+
+          // Çağrı merkezi için özel kontrol
+          if (lowerShiftId.startsWith('cm_')) {
+            // Vardiya ID'sinden vardiya tipini çıkar (örn: CM_S_20230501_morning)
+            const parts = shiftId.split('_');
+            const lastPart = parts[parts.length - 1].toLowerCase();
+
+            if (lastPart === 'morning' || lastPart === 'sabah') {
+              shiftType = 'morning';
+              shiftName = 'Sabah (08:00-16:00)';
+            } else if (lastPart === 'afternoon' || lastPart === 'aksam' || lastPart === 'öğle') {
+              shiftType = 'afternoon';
+              shiftName = 'Akşam (16:00-00:00)';
+            } else if (lastPart === 'night' || lastPart === 'gece') {
+              shiftType = 'night';
+              shiftName = 'Gece (00:00-08:00)';
+            }
+          }
+        }
+
+        console.log(`Vardiya ID: ${shiftId}, Tip: ${shiftType}, İsim: ${shiftName}`);
+
+        return {
+          id: shiftId,
+          name: shiftName,
+          color: shiftColors[shiftType as keyof typeof shiftColors]
+        };
+      });
+    } catch (error) {
+      console.error('Vardiya verilerini alma hatası:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Hata detayları:', error.response?.status, error.response?.data);
       }
 
-      // Çağrı merkezi için özel kontrol
-      if (lowerShiftId.startsWith('cm_')) {
-        // Vardiya ID'sinden vardiya tipini çıkar (örn: CM_S_20230501_morning)
-        const parts = shiftId.split('_');
-        const lastPart = parts[parts.length - 1].toLowerCase();
+      // Hata durumunda varsayılan değerlerle devam et
+      return uniqueShiftIds.map(shiftId => {
+        // Vardiya ID'sinden vardiya tipini belirle
+        let shiftType = 'default';
+        let shiftName = 'Vardiya';
 
-        if (lastPart === 'morning' || lastPart === 'sabah') {
+        // Vardiya tipini belirle (büyük/küçük harf duyarlılığını kaldır)
+        const lowerShiftId = shiftId.toLowerCase();
+
+        if (lowerShiftId.includes('morning') || lowerShiftId.includes('sabah')) {
           shiftType = 'morning';
           shiftName = 'Sabah (08:00-16:00)';
-        } else if (lastPart === 'afternoon' || lastPart === 'aksam' || lastPart === 'öğle') {
+        } else if (lowerShiftId.includes('afternoon') || lowerShiftId.includes('aksam') || lowerShiftId.includes('öğle')) {
           shiftType = 'afternoon';
           shiftName = 'Akşam (16:00-00:00)';
-        } else if (lastPart === 'night' || lastPart === 'gece') {
+        } else if (lowerShiftId.includes('night') || lowerShiftId.includes('gece')) {
           shiftType = 'night';
           shiftName = 'Gece (00:00-08:00)';
         }
-      }
 
-      console.log(`Vardiya ID: ${shiftId}, Tip: ${shiftType}, İsim: ${shiftName}`);
+        // Çağrı merkezi için özel kontrol
+        if (lowerShiftId.startsWith('cm_')) {
+          // Vardiya ID'sinden vardiya tipini çıkar (örn: CM_S_20230501_morning)
+          const parts = shiftId.split('_');
+          const lastPart = parts[parts.length - 1].toLowerCase();
 
-      return {
-        id: shiftId,
-        name: shiftName,
-        color: shiftColors[shiftType as keyof typeof shiftColors]
-      };
-    });
+          if (lastPart === 'morning' || lastPart === 'sabah') {
+            shiftType = 'morning';
+            shiftName = 'Sabah (08:00-16:00)';
+          } else if (lastPart === 'afternoon' || lastPart === 'aksam' || lastPart === 'öğle') {
+            shiftType = 'afternoon';
+            shiftName = 'Akşam (16:00-00:00)';
+          } else if (lastPart === 'night' || lastPart === 'gece') {
+            shiftType = 'night';
+            shiftName = 'Gece (00:00-08:00)';
+          }
+        }
+
+        console.log(`Vardiya ID: ${shiftId}, Tip: ${shiftType}, İsim: ${shiftName}`);
+
+        return {
+          id: shiftId,
+          name: shiftName,
+          color: shiftColors[shiftType as keyof typeof shiftColors]
+        };
+      });
+    }
   };
 
   // Atamalardan çalışan bilgilerini oluştur
@@ -553,14 +643,92 @@ const ScheduleView = () => {
   const roles = [...new Set(employees.map(e => e.role).filter(Boolean))];
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Vardiya Çizelgesi
-      </Typography>
+    <Box sx={{ maxWidth: '1400px', mx: 'auto', px: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+          pb: 2,
+          borderBottom: '1px solid',
+          borderColor: 'divider'
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 'bold',
+            background: 'linear-gradient(45deg, #3a7bd5, #00d2ff)',
+            backgroundClip: 'text',
+            color: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}
+        >
+          Vardiya Çizelgesi
+        </Typography>
+
+        <Box>
+          <Button
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            sx={{
+              mr: 1,
+              borderRadius: 2,
+              px: 2,
+              py: 1,
+              boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+              background: 'linear-gradient(45deg, #3a7bd5, #00d2ff)',
+              '&:hover': {
+                boxShadow: '0 6px 15px rgba(0,0,0,0.15)',
+                background: 'linear-gradient(45deg, #3a7bd5, #00d2ff)',
+                transform: 'translateY(-2px)',
+                transition: 'all 0.2s ease'
+              }
+            }}
+            onClick={() => {
+              // CSV olarak dışa aktar
+              setSnackbarMessage('Çizelge CSV olarak dışa aktarıldı.');
+              setSnackbarOpen(true);
+            }}
+          >
+            CSV Olarak İndir
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<ResetIcon />}
+            sx={{
+              borderRadius: 2,
+              px: 2,
+              py: 1,
+              borderColor: 'primary.main',
+              '&:hover': {
+                borderColor: 'primary.dark',
+                backgroundColor: 'rgba(58, 123, 213, 0.05)'
+              }
+            }}
+            onClick={() => {
+              // Filtreleri sıfırla
+              setSelectedDepartment('all');
+              setSelectedRole('all');
+            }}
+          >
+            Filtreleri Sıfırla
+          </Button>
+        </Box>
+      </Box>
 
       {/* Hata mesajı */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert
+          severity="error"
+          sx={{
+            mb: 3,
+            borderRadius: 2,
+            boxShadow: '0 4px 12px rgba(244, 67, 54, 0.1)'
+          }}
+        >
           {error}
           <Typography variant="body2" sx={{ mt: 1 }}>
             Lütfen önce "Çizelge Oluştur" sayfasından bir optimizasyon çalıştırın.
@@ -570,53 +738,93 @@ const ScheduleView = () => {
 
       {/* Yükleniyor göstergesi */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-          <CircularProgress />
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 6, flexDirection: 'column', alignItems: 'center' }}>
+          <CircularProgress size={60} thickness={4} />
+          <Typography variant="body1" sx={{ mt: 2, color: 'text.secondary' }}>
+            Vardiya çizelgesi yükleniyor...
+          </Typography>
         </Box>
       ) : (
         <>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 3,
+              backgroundColor: 'rgba(58, 123, 213, 0.05)',
+              borderRadius: 2,
+              p: 2
+            }}
+          >
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <IconButton>
+              <IconButton
+                sx={{
+                  backgroundColor: 'white',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  '&:hover': {
+                    backgroundColor: 'white',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                  }
+                }}
+              >
                 <PrevIcon />
               </IconButton>
-              <Typography variant="h6" sx={{ mx: 2 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  mx: 2,
+                  fontWeight: 'bold',
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  backgroundColor: 'white',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                }}
+              >
                 {currentWeek ? `${currentWeek} Haftası` : 'Mevcut Hafta'}
               </Typography>
-              <IconButton>
+              <IconButton
+                sx={{
+                  backgroundColor: 'white',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  '&:hover': {
+                    backgroundColor: 'white',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                  }
+                }}
+              >
                 <NextIcon />
               </IconButton>
             </Box>
-
-            <Box>
-              <Button
-                variant="contained"
-                startIcon={<DownloadIcon />}
-                sx={{ mr: 1 }}
-                onClick={() => {
-                  // CSV olarak dışa aktar
-                  setSnackbarMessage('Çizelge CSV olarak dışa aktarıldı.');
-                  setSnackbarOpen(true);
-                }}
-              >
-                CSV Olarak İndir
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<ResetIcon />}
-                onClick={() => {
-                  // Filtreleri sıfırla
-                  setSelectedDepartment('all');
-                  setSelectedRole('all');
-                }}
-              >
-                Filtreleri Sıfırla
-              </Button>
-            </Box>
           </Box>
 
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={tabValue} onChange={handleTabChange} aria-label="çizelge görünüm sekmeleri">
+          <Box sx={{ mb: 4 }}>
+            <Tabs
+              value={tabValue}
+              onChange={handleTabChange}
+              aria-label="çizelge görünüm sekmeleri"
+              sx={{
+                '& .MuiTabs-indicator': {
+                  height: 3,
+                  borderRadius: '3px 3px 0 0'
+                },
+                '& .MuiTab-root': {
+                  fontWeight: 'bold',
+                  fontSize: '0.95rem',
+                  textTransform: 'none',
+                  minWidth: 120,
+                  transition: 'all 0.2s',
+                  '&.Mui-selected': {
+                    color: 'primary.main'
+                  },
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                    color: 'primary.main'
+                  }
+                }
+              }}
+            >
               <Tab label="Haftalık Görünüm" />
               <Tab label="Günlük Görünüm" />
               <Tab label="Çalışan Bazlı Görünüm" />
@@ -624,16 +832,39 @@ const ScheduleView = () => {
           </Box>
 
           <TabPanel value={tabValue} index={0}>
-            <Box sx={{ mb: 2 }}>
-              <Grid container spacing={2}>
+            <Box
+              sx={{
+                mb: 4,
+                p: 3,
+                borderRadius: 2,
+                backgroundColor: 'white',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
+              }}
+            >
+              <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', color: 'text.primary' }}>
+                Filtreleme Seçenekleri
+              </Typography>
+              <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
-                  <FormControl fullWidth>
+                  <FormControl fullWidth variant="outlined">
                     <InputLabel id="department-select-label">Departman</InputLabel>
                     <Select
                       labelId="department-select-label"
                       value={selectedDepartment}
                       label="Departman"
                       onChange={(e) => setSelectedDepartment(e.target.value)}
+                      sx={{
+                        borderRadius: 2,
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.light'
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.main'
+                        }
+                      }}
                     >
                       <MenuItem value="all">Tüm Departmanlar</MenuItem>
                       {departments.map(dept => (
@@ -644,13 +875,25 @@ const ScheduleView = () => {
                 </Grid>
 
                 <Grid item xs={12} md={4}>
-                  <FormControl fullWidth>
+                  <FormControl fullWidth variant="outlined">
                     <InputLabel id="role-select-label">Rol</InputLabel>
                     <Select
                       labelId="role-select-label"
                       value={selectedRole}
                       label="Rol"
                       onChange={(e) => setSelectedRole(e.target.value)}
+                      sx={{
+                        borderRadius: 2,
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.light'
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.main'
+                        }
+                      }}
                     >
                       <MenuItem value="all">Tüm Roller</MenuItem>
                       {roles.map(role => (
@@ -662,10 +905,21 @@ const ScheduleView = () => {
 
                 <Grid item xs={12} md={4}>
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     startIcon={<FilterIcon />}
                     fullWidth
-                    sx={{ height: '56px' }}
+                    sx={{
+                      height: '56px',
+                      borderRadius: 2,
+                      background: 'linear-gradient(45deg, #3a7bd5, #00d2ff)',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                      '&:hover': {
+                        boxShadow: '0 6px 15px rgba(0,0,0,0.15)',
+                        background: 'linear-gradient(45deg, #3a7bd5, #00d2ff)',
+                        transform: 'translateY(-2px)',
+                        transition: 'all 0.2s ease'
+                      }
+                    }}
                     onClick={() => {
                       setSnackbarMessage('Filtreler uygulandı.');
                       setSnackbarOpen(true);
@@ -677,15 +931,45 @@ const ScheduleView = () => {
               </Grid>
             </Box>
 
-            <TableContainer component={Paper}>
-              <Table>
+            <TableContainer
+              component={Paper}
+              sx={{
+                borderRadius: 2,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                overflow: 'hidden'
+              }}
+            >
+              <Table size="small">
                 <TableHead>
-                  <TableRow>
-                    <TableCell>Çalışan</TableCell>
+                  <TableRow sx={{ backgroundColor: 'primary.light', '& th': { color: 'white' } }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 'bold',
+                        fontSize: '0.9rem',
+                        width: '180px',
+                        py: 1.5
+                      }}
+                    >
+                      Çalışan
+                    </TableCell>
                     {weekDays.map((day, index) => (
-                      <TableCell key={day} align="center">
-                        {day}<br />
-                        <Typography variant="caption">{weekDates[index]}</Typography>
+                      <TableCell
+                        key={day}
+                        align="center"
+                        sx={{
+                          fontWeight: 'bold',
+                          py: 1,
+                          px: 1,
+                          minWidth: '100px',
+                          maxWidth: '120px'
+                        }}
+                      >
+                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'white' }}>
+                          {day}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'white', opacity: 0.9, fontSize: '0.7rem' }}>
+                          {weekDates[index]}
+                        </Typography>
                       </TableCell>
                     ))}
                   </TableRow>
@@ -693,57 +977,139 @@ const ScheduleView = () => {
                 <TableBody>
                   {filteredEmployees.length > 0 ? (
                     filteredEmployees.map((employee) => (
-                      <TableRow key={employee.id}>
-                        <TableCell>
-                          <Typography variant="body1">{employee.name}</Typography>
-                          <Typography variant="caption">{employee.role} - {employee.department}</Typography>
+                      <TableRow
+                        key={employee.id}
+                        sx={{
+                          '&:nth-of-type(odd)': { backgroundColor: 'rgba(0, 0, 0, 0.02)' },
+                          '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+                        }}
+                      >
+                        <TableCell
+                          sx={{
+                            borderLeft: '3px solid',
+                            borderLeftColor: 'primary.main',
+                            pl: 1.5,
+                            py: 1
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 'medium',
+                              mb: 0.3,
+                              fontSize: '0.85rem'
+                            }}
+                          >
+                            {employee.name}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              display: 'inline-block',
+                              backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                              px: 0.8,
+                              py: 0.3,
+                              borderRadius: 0.8,
+                              color: 'text.secondary',
+                              fontSize: '0.7rem'
+                            }}
+                          >
+                            {employee.role} - {employee.department}
+                          </Typography>
                         </TableCell>
-                        {weekDates.map((date, dateIndex) => {
-                          // Debug için
-                          if (employee.id === filteredEmployees[0]?.id) {
-                            console.log(`Aranan tarih: ${date}, Gün: ${weekDays[dateIndex]}`);
-                          }
-
+                        {weekDates.map((date) => {
                           // Çalışan için bu tarihteki vardiyayı bul
                           const shift = getShiftForEmployeeOnDate(employee.id, date);
 
-                          // Çalışanın tüm vardiyalarını bul
-                          const employeeAssignments = processedAssignments.filter(a => a.employee_id === employee.id);
-
-                          // Debug için
-                          if (employee.id === filteredEmployees[0]?.id) {
-                            console.log(`${employee.id} çalışanının vardiyaları:`,
-                              employeeAssignments.map(a => ({
-                                shift_id: a.shift_id,
-                                date: a.date
-                              }))
-                            );
-
-                            // Tarih eşleşmesi kontrolü
-                            const exactMatch = employeeAssignments.find(a => a.date === date);
-                            console.log(`${date} tarihinde tam eşleşme:`, exactMatch ? 'BULUNDU' : 'BULUNAMADI');
-                          }
-
                           return (
-                            <TableCell key={date} align="center">
+                            <TableCell
+                              key={date}
+                              align="center"
+                              sx={{
+                                py: 1,
+                                px: 1,
+                                position: 'relative',
+                                '&:hover': {
+                                  backgroundColor: 'rgba(0, 0, 0, 0.02)'
+                                }
+                              }}
+                            >
                               {shift ? (
-                                <Chip
-                                  label={shift.name}
-                                  style={{ backgroundColor: shift.color, color: 'white' }}
-                                />
+                                <Box
+                                  sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: shift.color,
+                                    color: 'white',
+                                    borderRadius: 2,
+                                    py: 0.5,
+                                    px: 0.5,
+                                    width: '100%',
+                                    maxWidth: '90px',
+                                    height: '40px',
+                                    margin: '0 auto',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                    '&:hover': {
+                                      boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                                      transform: 'translateY(-2px)',
+                                      transition: 'all 0.2s ease'
+                                    }
+                                  }}
+                                >
+                                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <Typography
+                                      variant="subtitle2"
+                                      sx={{
+                                        fontWeight: 'bold',
+                                        fontSize: '0.75rem',
+                                        textAlign: 'center',
+                                        lineHeight: 1.2
+                                      }}
+                                    >
+                                      {/* Vardiya adını göster (ilk kelime) */}
+                                      {shift.name.split(' ')[0]}
+                                    </Typography>
+                                    <Typography
+                                      variant="caption"
+                                      sx={{
+                                        fontSize: '0.65rem',
+                                        opacity: 0.9,
+                                        mt: 0.2
+                                      }}
+                                    >
+                                      {/* Vardiya saatlerini göster (parantez içindeki kısım) */}
+                                      {shift.name.includes('(') ? shift.name.split('(')[1].replace(')', '') : ''}
+                                    </Typography>
+                                  </Box>
+                                </Box>
                               ) : (
                                 <Box
                                   sx={{
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    position: 'relative',
-                                    '&:hover .edit-button': {
-                                      opacity: 1,
+                                    height: '32px',
+                                    width: '100%',
+                                    maxWidth: '100px',
+                                    margin: '0 auto',
+                                    borderRadius: 2,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                                    border: '1px dashed rgba(0, 0, 0, 0.08)',
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.05)'
                                     }
                                   }}
                                 >
-                                  <RemoveIcon sx={{ color: 'text.disabled', fontSize: '1.5rem' }} />
+                                  <Typography
+                                    sx={{
+                                      color: 'text.disabled',
+                                      fontWeight: 'medium',
+                                      fontSize: '0.75rem'
+                                    }}
+                                  >
+                                    —
+                                  </Typography>
                                 </Box>
                               )}
                             </TableCell>
@@ -754,7 +1120,7 @@ const ScheduleView = () => {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={weekDays.length + 1} align="center">
-                        <Typography variant="body1" sx={{ py: 2 }}>
+                        <Typography variant="body1" sx={{ py: 3, color: 'text.secondary' }}>
                           Seçilen filtrelere uygun çalışan bulunamadı.
                         </Typography>
                       </TableCell>
@@ -790,6 +1156,15 @@ const ScheduleView = () => {
         open={snackbarOpen}
         autoHideDuration={4000}
         onClose={handleSnackbarClose}
+        sx={{
+          '& .MuiSnackbarContent-root': {
+            backgroundColor: 'primary.main',
+            color: 'white',
+            fontWeight: 'medium',
+            borderRadius: 2,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+          }
+        }}
         message={snackbarMessage}
       />
     </Box>
