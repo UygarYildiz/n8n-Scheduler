@@ -27,7 +27,9 @@ import {
   NavigateNext as NextIcon,
   Refresh as ResetIcon,
   FilterList as FilterIcon,
-  Download as DownloadIcon
+  Download as DownloadIcon,
+  CalendarToday as CalendarIcon,
+  Person as PersonIcon
 } from '@mui/icons-material';
 import { api } from '../services/api';
 import axios from 'axios';
@@ -105,6 +107,8 @@ const ScheduleView = () => {
   // Veri state'leri
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>('');
 
   // Hesaplanan değerler
   const [processedAssignments, setProcessedAssignments] = useState<ScheduleAssignment[]>([]);
@@ -135,6 +139,11 @@ const ScheduleView = () => {
     setWeekDates(dates);
     setWeekDays(days);
     setCurrentWeek(startDate.toISOString().split('T')[0]);
+
+    // İlk günü seçili olarak ayarla
+    if (dates.length > 0) {
+      setSelectedDate(dates[0]);
+    }
   }, []);
 
   // Verileri yükle
@@ -205,6 +214,11 @@ const ScheduleView = () => {
         setProcessedAssignments(processedAssignments);
         setShifts(generatedShifts);
         setEmployees(generatedEmployees);
+
+        // İlk çalışanı seçili olarak ayarla
+        if (generatedEmployees.length > 0) {
+          setSelectedEmployeeId(generatedEmployees[0].id);
+        }
 
         // Debug bilgisi
         console.log('Toplam atama sayısı:', scheduleData.solution.assignments.length);
@@ -358,7 +372,7 @@ const ScheduleView = () => {
           // Vardiya tipini belirle
           const lowerShiftName = shiftName.toLowerCase();
 
-          if (lowerShiftName.includes('sabah') || lowerShiftName.includes('morning')) {
+          if (lowerShiftName.includes('sabah') || lowerShiftName.includes('morning') || lowerShiftName.includes('gündüz')) {
             shiftType = 'morning';
           } else if (lowerShiftName.includes('akşam') || lowerShiftName.includes('afternoon') || lowerShiftName.includes('öğle')) {
             shiftType = 'afternoon';
@@ -386,7 +400,7 @@ const ScheduleView = () => {
           // API'den veri gelmezse, vardiya ID'sinden çıkarım yap
           const lowerShiftId = shiftId.toLowerCase();
 
-          if (lowerShiftId.includes('morning') || lowerShiftId.includes('sabah')) {
+          if (lowerShiftId.includes('morning') || lowerShiftId.includes('sabah') || lowerShiftId.includes('gunduz')) {
             shiftType = 'morning';
             shiftName = 'Sabah (08:00-16:00)';
           } else if (lowerShiftId.includes('afternoon') || lowerShiftId.includes('aksam') || lowerShiftId.includes('öğle')) {
@@ -439,7 +453,7 @@ const ScheduleView = () => {
         // Vardiya tipini belirle (büyük/küçük harf duyarlılığını kaldır)
         const lowerShiftId = shiftId.toLowerCase();
 
-        if (lowerShiftId.includes('morning') || lowerShiftId.includes('sabah')) {
+        if (lowerShiftId.includes('morning') || lowerShiftId.includes('sabah') || lowerShiftId.includes('gunduz')) {
           shiftType = 'morning';
           shiftName = 'Sabah (08:00-16:00)';
         } else if (lowerShiftId.includes('afternoon') || lowerShiftId.includes('aksam') || lowerShiftId.includes('öğle')) {
@@ -636,6 +650,108 @@ const ScheduleView = () => {
     return null;
   };
 
+  // Çizelgeyi CSV formatına dönüştür ve indir
+  const exportToCSV = () => {
+    try {
+      // BOM (Byte Order Mark) ekleyerek UTF-8 kodlamasını garantile
+      const BOM = '\uFEFF';
+
+      // Excel'de daha iyi görünüm için HTML formatında dışa aktarma
+      let htmlContent = BOM + '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+      htmlContent += '<head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Vardiya Çizelgesi</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+      htmlContent += '<meta http-equiv="content-type" content="text/plain; charset=UTF-8"/>';
+      htmlContent += '<style>td { padding: 5px; vertical-align: middle; } .shift-cell { font-weight: bold; text-align: center; } .header { background-color: #4472C4; color: white; font-weight: bold; text-align: center; } .employee-name { font-weight: bold; } .employee-info { color: #666; font-size: 0.9em; } .morning-shift { background-color: #FFEB9C; } .afternoon-shift { background-color: #C6E0B4; } .night-shift { background-color: #BDD7EE; } </style>';
+      htmlContent += '</head><body><table border="1">';
+
+      // Tablo başlığı
+      htmlContent += '<tr><th class="header" colspan="3" style="text-align: left;">Vardiya Çizelgesi</th>';
+      weekDates.forEach((date, index) => {
+        htmlContent += `<th class="header">${weekDays[index]}<br/>(${date})</th>`;
+      });
+      htmlContent += '</tr>';
+
+      // Çalışan satırları
+      filteredEmployees.forEach(employee => {
+        htmlContent += '<tr>';
+
+        // Çalışan bilgileri
+        htmlContent += `<td class="employee-name">${employee.name || ''}</td>`;
+        htmlContent += `<td class="employee-info">${employee.department || ''}</td>`;
+        htmlContent += `<td class="employee-info">${employee.role || ''}</td>`;
+
+        // Her gün için vardiya bilgisi
+        weekDates.forEach(date => {
+          const shift = getShiftForEmployeeOnDate(employee.id, date);
+
+          if (shift && shift.name) {
+            // Vardiya tipine göre CSS sınıfı belirle
+            let cssClass = 'shift-cell';
+            const shiftName = shift.name.toLowerCase();
+
+            if (shiftName.includes('sabah')) {
+              cssClass += ' morning-shift';
+            } else if (shiftName.includes('akşam')) {
+              cssClass += ' afternoon-shift';
+            } else if (shiftName.includes('gece')) {
+              cssClass += ' night-shift';
+            }
+
+            // Vardiya adı ve saati
+            let shiftLabel = '';
+            let shiftTime = '';
+
+            if (shift.name) {
+              // Vardiya tipini belirle (Sabah, Akşam, Gece)
+              if (shift.name.toLowerCase().includes('sabah') || shift.name.toLowerCase().includes('gündüz')) {
+                shiftLabel = 'Sabah';
+              } else if (shift.name.toLowerCase().includes('akşam')) {
+                shiftLabel = 'Akşam';
+              } else if (shift.name.toLowerCase().includes('gece')) {
+                shiftLabel = 'Gece';
+              } else {
+                // Eğer özel bir tip yoksa ilk kelimeyi kullan
+                shiftLabel = shift.name.split(' ')[0];
+              }
+
+              // Vardiya saatini çıkar
+              shiftTime = shift.name.includes('(') ? shift.name.split('(')[1].replace(')', '') : '';
+            }
+
+            htmlContent += `<td class="${cssClass}">
+              <div style="font-weight: bold;">${shiftLabel}</div>
+              <div style="font-size: 0.9em;">${shiftTime}</div>
+            </td>`;
+          } else {
+            htmlContent += '<td style="text-align: center;">-</td>';
+          }
+        });
+
+        htmlContent += '</tr>';
+      });
+
+      htmlContent += '</table></body></html>';
+
+      // HTML dosyasını oluştur ve indir (Excel tarafından açılabilir)
+      const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `vardiya_cizelgesi_${currentWeek || 'mevcut_hafta'}.xls`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Bildirim göster
+      setSnackbarMessage('Vardiya çizelgesi Excel formatında indirildi.');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Excel dışa aktarma hatası:', error);
+      setSnackbarMessage('Excel dışa aktarma sırasında bir hata oluştu.');
+      setSnackbarOpen(true);
+    }
+  };
+
   // Departman listesi
   const departments = [...new Set(employees.map(e => e.department).filter(Boolean))];
 
@@ -687,13 +803,9 @@ const ScheduleView = () => {
                 transition: 'all 0.2s ease'
               }
             }}
-            onClick={() => {
-              // CSV olarak dışa aktar
-              setSnackbarMessage('Çizelge CSV olarak dışa aktarıldı.');
-              setSnackbarOpen(true);
-            }}
+            onClick={exportToCSV}
           >
-            CSV Olarak İndir
+            Excel Olarak İndir
           </Button>
           <Button
             variant="outlined"
@@ -1067,8 +1179,11 @@ const ScheduleView = () => {
                                         lineHeight: 1.2
                                       }}
                                     >
-                                      {/* Vardiya adını göster (ilk kelime) */}
-                                      {shift.name.split(' ')[0]}
+                                      {/* Vardiya adını göster */}
+                                      {shift.name.toLowerCase().includes('sabah') || shift.name.toLowerCase().includes('gündüz') ? 'Sabah' :
+                                       shift.name.toLowerCase().includes('akşam') ? 'Akşam' :
+                                       shift.name.toLowerCase().includes('gece') ? 'Gece' :
+                                       shift.name.split(' ')[0]}
                                     </Typography>
                                     <Typography
                                       variant="caption"
@@ -1132,21 +1247,598 @@ const ScheduleView = () => {
           </TabPanel>
 
           <TabPanel value={tabValue} index={1}>
-            <Typography variant="h6" gutterBottom>
-              Günlük Görünüm
-            </Typography>
-            <Typography variant="body1">
-              Bu bölüm, seçilen günün detaylı vardiya görünümünü gösterecektir.
-            </Typography>
+            <Box
+              sx={{
+                mb: 4,
+                p: 3,
+                borderRadius: 2,
+                backgroundColor: 'white',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
+              }}
+            >
+              <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', color: 'text.primary' }}>
+                Gün Seçimi
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth variant="outlined">
+                    <InputLabel id="day-select-label">Gün</InputLabel>
+                    <Select
+                      labelId="day-select-label"
+                      value={selectedDate}
+                      label="Gün"
+                      onChange={(e) => {
+                        // Seçilen günü state'e kaydet
+                        setSelectedDate(e.target.value);
+                        console.log('Seçilen gün:', e.target.value);
+                      }}
+                      sx={{
+                        borderRadius: 2,
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.light'
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.main'
+                        }
+                      }}
+                    >
+                      {weekDates.map((date, index) => (
+                        <MenuItem key={date} value={date}>
+                          {weekDays[index]} ({date})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Button
+                    variant="contained"
+                    startIcon={<FilterIcon />}
+                    fullWidth
+                    sx={{
+                      height: '56px',
+                      borderRadius: 2,
+                      background: 'linear-gradient(45deg, #3a7bd5, #00d2ff)',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                      '&:hover': {
+                        boxShadow: '0 6px 15px rgba(0,0,0,0.15)',
+                        background: 'linear-gradient(45deg, #3a7bd5, #00d2ff)',
+                        transform: 'translateY(-2px)',
+                        transition: 'all 0.2s ease'
+                      }
+                    }}
+                    onClick={() => {
+                      setSnackbarMessage('Seçilen gün için vardiyalar gösteriliyor.');
+                      setSnackbarOpen(true);
+                    }}
+                  >
+                    Günü Göster
+                  </Button>
+                </Grid>
+              </Grid>
+            </Box>
+
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  mb: 2,
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <CalendarIcon sx={{ mr: 1, color: 'primary.main' }} />
+                {selectedDate ? `${weekDays[weekDates.indexOf(selectedDate)]} (${selectedDate})` : 'Seçilen Gün'} Vardiyaları
+              </Typography>
+            </Box>
+
+            <TableContainer
+              component={Paper}
+              sx={{
+                borderRadius: 2,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                overflow: 'hidden',
+                mb: 4
+              }}
+            >
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: 'primary.light', '& th': { color: 'white' } }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 'bold',
+                        fontSize: '0.9rem',
+                        width: '180px',
+                        py: 1.5
+                      }}
+                    >
+                      Çalışan
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 'bold',
+                        py: 1.5,
+                        px: 2
+                      }}
+                    >
+                      Vardiya
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 'bold',
+                        py: 1.5,
+                        px: 2
+                      }}
+                    >
+                      Saat
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 'bold',
+                        py: 1.5,
+                        px: 2
+                      }}
+                    >
+                      Departman
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredEmployees.length > 0 ? (
+                    filteredEmployees.map((employee) => {
+                      // Seçilen gün için vardiya bul
+                      const shift = getShiftForEmployeeOnDate(employee.id, selectedDate);
+
+                      // Vardiya yoksa gösterme
+                      if (!shift) return null;
+
+                      return (
+                        <TableRow
+                          key={employee.id}
+                          sx={{
+                            '&:nth-of-type(odd)': { backgroundColor: 'rgba(0, 0, 0, 0.02)' },
+                            '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+                          }}
+                        >
+                          <TableCell
+                            sx={{
+                              borderLeft: '3px solid',
+                              borderLeftColor: 'primary.main',
+                              pl: 1.5,
+                              py: 1
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 'medium',
+                                mb: 0.3,
+                                fontSize: '0.85rem'
+                              }}
+                            >
+                              {employee.name}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                display: 'inline-block',
+                                backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                                px: 0.8,
+                                py: 0.3,
+                                borderRadius: 0.8,
+                                color: 'text.secondary',
+                                fontSize: '0.7rem'
+                              }}
+                            >
+                              {employee.role} - {employee.department}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Box
+                              sx={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: shift.color,
+                                color: 'white',
+                                borderRadius: 2,
+                                py: 0.7,
+                                px: 1.5,
+                                minWidth: '80px',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                              }}
+                            >
+                              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                {shift.name.toLowerCase().includes('sabah') || shift.name.toLowerCase().includes('gündüz') ? 'Sabah' :
+                                 shift.name.toLowerCase().includes('akşam') ? 'Akşam' :
+                                 shift.name.toLowerCase().includes('gece') ? 'Gece' :
+                                 shift.name.split(' ')[0]}
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {shift.name.includes('(') ? shift.name.split('(')[1].replace(')', '') : ''}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {employee.department}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }).filter(Boolean) // null değerleri filtrele
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center">
+                        <Typography variant="body1" sx={{ py: 3, color: 'text.secondary' }}>
+                          Seçilen gün için vardiya bulunamadı veya filtrelere uygun çalışan yok.
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <Box
+              sx={{
+                p: 3,
+                borderRadius: 2,
+                backgroundColor: 'rgba(58, 123, 213, 0.05)',
+                border: '1px dashed rgba(58, 123, 213, 0.2)',
+                mb: 4
+              }}
+            >
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                Günlük Vardiya Özeti
+              </Typography>
+              <Grid container spacing={3} sx={{ mt: 1 }}>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: 'white',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                      {filteredEmployees.filter(e => getShiftForEmployeeOnDate(e.id, selectedDate)).length}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      Toplam Vardiya
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: 'white',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: shiftColors.morning }}>
+                      {filteredEmployees.filter(e => {
+                        const shift = getShiftForEmployeeOnDate(e.id, selectedDate);
+                        return shift && shift.name.toLowerCase().includes('sabah');
+                      }).length}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      Sabah Vardiyası
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: 'white',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: shiftColors.afternoon }}>
+                      {filteredEmployees.filter(e => {
+                        const shift = getShiftForEmployeeOnDate(e.id, selectedDate);
+                        return shift && shift.name.toLowerCase().includes('akşam');
+                      }).length}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      Akşam Vardiyası
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: 'white',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: shiftColors.night }}>
+                      {filteredEmployees.filter(e => {
+                        const shift = getShiftForEmployeeOnDate(e.id, selectedDate);
+                        return shift && shift.name.toLowerCase().includes('gece');
+                      }).length}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      Gece Vardiyası
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
           </TabPanel>
 
           <TabPanel value={tabValue} index={2}>
-            <Typography variant="h6" gutterBottom>
-              Çalışan Bazlı Görünüm
-            </Typography>
-            <Typography variant="body1">
-              Bu bölüm, seçilen çalışanın vardiya çizelgesini gösterecektir.
-            </Typography>
+            <Box
+              sx={{
+                mb: 4,
+                p: 3,
+                borderRadius: 2,
+                backgroundColor: 'white',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
+              }}
+            >
+              <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', color: 'text.primary' }}>
+                Çalışan Seçimi
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth variant="outlined">
+                    <InputLabel id="employee-select-label">Çalışan</InputLabel>
+                    <Select
+                      labelId="employee-select-label"
+                      value={selectedEmployeeId}
+                      label="Çalışan"
+                      onChange={(e) => {
+                        // Seçilen çalışanı state'e kaydet
+                        setSelectedEmployeeId(e.target.value);
+                        console.log('Seçilen çalışan:', e.target.value);
+                      }}
+                      sx={{
+                        borderRadius: 2,
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.light'
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'primary.main'
+                        }
+                      }}
+                    >
+                      {employees.map((employee) => (
+                        <MenuItem key={employee.id} value={employee.id}>
+                          {employee.name} ({employee.role})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Button
+                    variant="contained"
+                    startIcon={<FilterIcon />}
+                    fullWidth
+                    sx={{
+                      height: '56px',
+                      borderRadius: 2,
+                      background: 'linear-gradient(45deg, #3a7bd5, #00d2ff)',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                      '&:hover': {
+                        boxShadow: '0 6px 15px rgba(0,0,0,0.15)',
+                        background: 'linear-gradient(45deg, #3a7bd5, #00d2ff)',
+                        transform: 'translateY(-2px)',
+                        transition: 'all 0.2s ease'
+                      }
+                    }}
+                    onClick={() => {
+                      setSnackbarMessage('Seçilen çalışanın vardiyaları gösteriliyor.');
+                      setSnackbarOpen(true);
+                    }}
+                  >
+                    Çalışanı Göster
+                  </Button>
+                </Grid>
+              </Grid>
+            </Box>
+
+            {employees.length > 0 && selectedEmployeeId && (
+              <>
+                <Box sx={{ mb: 4 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    {employees.find(e => e.id === selectedEmployeeId)?.name || 'Seçilen Çalışan'} Vardiya Çizelgesi
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      p: 3,
+                      borderRadius: 2,
+                      backgroundColor: 'white',
+                      boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                      mb: 3
+                    }}
+                  >
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={4}>
+                        <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 0.5 }}>
+                          Departman
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                          {employees.find(e => e.id === selectedEmployeeId)?.department || 'Belirtilmemiş'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 0.5 }}>
+                          Rol
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                          {employees.find(e => e.id === selectedEmployeeId)?.role || 'Belirtilmemiş'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 0.5 }}>
+                          Toplam Vardiya
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                          {processedAssignments.filter(a => a.employee_id === selectedEmployeeId).length} vardiya
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Box>
+
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    borderRadius: 2,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                    overflow: 'hidden',
+                    mb: 4
+                  }}
+                >
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: 'primary.light', '& th': { color: 'white' } }}>
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            py: 1.5,
+                            px: 2
+                          }}
+                        >
+                          Tarih
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            py: 1.5,
+                            px: 2
+                          }}
+                        >
+                          Gün
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            py: 1.5,
+                            px: 2
+                          }}
+                        >
+                          Vardiya
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            py: 1.5,
+                            px: 2
+                          }}
+                        >
+                          Saat
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {processedAssignments
+                        .filter(a => a.employee_id === selectedEmployeeId)
+                        .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+                        .map((assignment, index) => {
+                          const shift = shifts.find(s => s.id === assignment.shift_id);
+                          if (!shift || !assignment.date) return null;
+
+                          // Tarihten gün adını bul
+                          const date = new Date(assignment.date);
+                          const dayIndex = date.getDay();
+                          const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+                          const dayName = dayNames[dayIndex];
+
+                          return (
+                            <TableRow
+                              key={index}
+                              sx={{
+                                '&:nth-of-type(odd)': { backgroundColor: 'rgba(0, 0, 0, 0.02)' },
+                                '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+                              }}
+                            >
+                              <TableCell>
+                                <Typography variant="body2">
+                                  {assignment.date}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Typography variant="body2">
+                                  {dayName}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Box
+                                  sx={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: shift.color,
+                                    color: 'white',
+                                    borderRadius: 2,
+                                    py: 0.7,
+                                    px: 1.5,
+                                    minWidth: '80px',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                  }}
+                                >
+                                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                    {shift.name.toLowerCase().includes('sabah') || shift.name.toLowerCase().includes('gündüz') ? 'Sabah' :
+                                     shift.name.toLowerCase().includes('akşam') ? 'Akşam' :
+                                     shift.name.toLowerCase().includes('gece') ? 'Gece' :
+                                     shift.name.split(' ')[0]}
+                                  </Typography>
+                                </Box>
+                              </TableCell>
+                              <TableCell>
+                                <Typography variant="body2">
+                                  {shift.name.includes('(') ? shift.name.split('(')[1].replace(')', '') : ''}
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        }).filter(Boolean)}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </>
+            )}
           </TabPanel>
         </>
       )}
