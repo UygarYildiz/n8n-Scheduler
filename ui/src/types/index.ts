@@ -58,6 +58,7 @@ export interface OptimizationRequest {
 export interface Assignment {
   employee_id: string;
   shift_id: string;
+  date?: string; // Tarih alanını ekle (opsiyonel)
 }
 
 // Optimizasyon çözümü tipi

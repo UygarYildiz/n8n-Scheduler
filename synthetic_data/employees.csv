@@ -1,51 +1,81 @@
-employee_id,role,department
-E001,Doktor,Acil
-E002,Hemşire,Acil
-E003,Doktor,Kardiyoloji
-E004,Hemşire,Kardiyoloji
-E005,Doktor,Cerrahi
-E006,Hemşire,Cerrahi
-E007,Doktor,Pediatri
-E008,Hemşire,Pediatri
-E009,Doktor,Yoğun Bakım
-E010,Hemşire,Yoğun Bakım
-E011,Teknisyen,Radyoloji
-E012,Teknisyen,Laboratuvar
-E013,İdari,İdari
-E014,Doktor,Acil
-E015,Teknisyen,Laboratuvar
-E016,Hemşire,Radyoloji
-E017,Hemşire,Kardiyoloji
-E018,Doktor,Acil
-E019,Hemşire,Yoğun Bakım
-E020,Hemşire,Acil
-E021,Hemşire,Cerrahi
-E022,Teknisyen,Laboratuvar
-E023,Hemşire,Radyoloji
-E024,Hemşire,Pediatri
-E025,Hemşire,Laboratuvar
-E026,Hemşire,Acil
-E027,Teknisyen,Laboratuvar
-E028,Hemşire,Acil
-E029,Hemşire,Laboratuvar
-E030,Hemşire,Laboratuvar
-E031,Hemşire,Cerrahi
-E032,Hemşire,Yoğun Bakım
-E033,Teknisyen,Radyoloji
-E034,Doktor,Pediatri
-E035,Doktor,Laboratuvar
-E036,Hemşire,Cerrahi
-E037,Hemşire,Acil
-E038,Doktor,Cerrahi
-E039,Hemşire,Pediatri
-E040,Doktor,Cerrahi
-E041,Hemşire,Pediatri
-E042,Hemşire,Acil
-E043,Hemşire,Yoğun Bakım
-E044,Doktor,Acil
-E045,Hemşire,Radyoloji
-E046,Hemşire,Pediatri
-E047,Hemşire,Pediatri
-E048,Teknisyen,Radyoloji
-E049,Hemşire,Acil
-E050,Hemşire,Acil
+employee_id,name,role,department
+E001,Buse Özdemir,Doktor,Acil
+E002,Şeyma Kaya,Hemşire,Acil
+E003,Onur Altun,Doktor,Kardiyoloji
+E004,Özge Taş,Hemşire,Kardiyoloji
+E005,Onur Kılıç,Doktor,Cerrahi
+E006,Şeyma Tekin,Hemşire,Cerrahi
+E007,Aslı Demir,Doktor,Pediatri
+E008,Selin Bilgin,Hemşire,Pediatri
+E009,Esra Güneş,Doktor,Yoğun Bakım
+E010,Yusuf Gül,Hemşire,Yoğun Bakım
+E011,Yasemin Altun,Teknisyen,Radyoloji
+E012,İbrahim Yıldırım,Teknisyen,Laboratuvar
+E013,Elif Aksoy,İdari,İdari
+E014,Elif Aksoy,Hemşire,Yoğun Bakım
+E015,Ahmet Korkmaz,Hemşire,Cerrahi
+E016,Tolga Keskin,Hemşire,Radyoloji
+E017,Şeyma Özkan,Doktor,Yoğun Bakım
+E018,Onur Erdoğan,Hemşire,Acil
+E019,Derya Kaya,Hemşire,Pediatri
+E020,Tolga Şen,Doktor,Acil
+E021,Deniz Demir,Doktor,Cerrahi
+E022,Orhan Aktaş,Hemşire,Cerrahi
+E023,Tuğba Özdemir,Teknisyen,Laboratuvar
+E024,Hasan Özkan,Teknisyen,Radyoloji
+E025,Merve Demir,Hemşire,Pediatri
+E026,Tuğba Aktaş,Hemşire,Cerrahi
+E027,Mustafa Acar,Hemşire,Acil
+E028,Tolga Bilgin,Teknisyen,Laboratuvar
+E029,Hatice Bulut,Hemşire,Yoğun Bakım
+E030,Kaan Doğan,Hemşire,Cerrahi
+E031,Şeyma Bulut,Hemşire,Laboratuvar
+E032,Melek Tekin,Hemşire,Yoğun Bakım
+E033,Arda Ünal,Doktor,Acil
+E034,Deniz Balcı,Hemşire,Radyoloji
+E035,Yasemin Kaplan,Hemşire,Pediatri
+E036,Hasan Kurt,Hemşire,Kardiyoloji
+E037,Derya Ünal,Hemşire,Acil
+E038,Cem Kurt,Hemşire,Laboratuvar
+E039,Deniz Aslan,Doktor,Acil
+E040,Pınar Bilgin,Hemşire,Kardiyoloji
+E041,Emre Tekin,İdari,İdari
+E042,Seda Şimşek,Doktor,Pediatri
+E043,Zeynep Özer,Hemşire,Laboratuvar
+E044,Aslı Alkan,Hemşire,Pediatri
+E045,Hatice Doğan,Doktor,Kardiyoloji
+E046,Hasan Bulut,Hemşire,Laboratuvar
+E047,Kaan Taş,Hemşire,Pediatri
+E048,Tuğba Bilgin,Teknisyen,Laboratuvar
+E049,Aslı Koçak,Doktor,Pediatri
+E050,Hatice Çelik,Hemşire,Cerrahi
+E051,Ali Erdoğan,Hemşire,Pediatri
+E052,Erkan Bilgin,Hemşire,Yoğun Bakım
+E053,Emre Koç,Hemşire,Cerrahi
+E054,Osman Aksoy,Hemşire,Radyoloji
+E055,Merve Yavuz,Hemşire,Acil
+E056,Tolga Altun,Hemşire,Yoğun Bakım
+E057,Selim Çelik,Hemşire,Radyoloji
+E058,Ebru Çelik,Doktor,Laboratuvar
+E059,Osman Kaplan,Doktor,Cerrahi
+E060,Cem Çelik,Hemşire,Acil
+E061,Cem Balcı,Teknisyen,Laboratuvar
+E062,Zeynep Doğan,Hemşire,Acil
+E063,Emre Kaya,Hemşire,Pediatri
+E064,Ahmet Polat,Hemşire,Cerrahi
+E065,Seda Koç,İdari,İdari
+E066,Derya Bilgin,Hemşire,Acil
+E067,Fatma Yılmaz,Hemşire,Acil
+E068,Aslı Güneş,Doktor,Kardiyoloji
+E069,Onur Yılmaz,Hemşire,Yoğun Bakım
+E070,Gamze Demir,Hemşire,Laboratuvar
+E071,İbrahim Gül,Hemşire,Radyoloji
+E072,Pınar Balcı,İdari,İdari
+E073,Sevgi Yıldırım,Hemşire,Cerrahi
+E074,Serkan Tekin,Teknisyen,Radyoloji
+E075,Emre Tekin,Hemşire,Acil
+E076,Aslı Erdoğan,Hemşire,Kardiyoloji
+E077,Emre Çetin,Hemşire,Radyoloji
+E078,Ahmet Taş,Doktor,Kardiyoloji
+E079,Esra Taş,Doktor,Kardiyoloji
+E080,Serkan Şahin,Teknisyen,Laboratuvar

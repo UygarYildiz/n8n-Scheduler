@@ -108,6 +108,46 @@ PREFERENCE_PROBABILITY = 0.3
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- Yardımcı Fonksiyonlar (generate_synthetic_data.py'den alındı, gerekirse düzenlenecek) ---
+def generate_turkish_name():
+    """Rastgele Türkçe isim ve soyisim üretir."""
+    # Türkçe erkek isimleri
+    male_first_names = [
+        "Ahmet", "Mehmet", "Ali", "Mustafa", "Hasan", "Hüseyin", "İbrahim", "Murat", "Ömer", "Yusuf",
+        "Osman", "Emre", "Burak", "Cem", "Deniz", "Ercan", "Fatih", "Gökhan", "Hakan", "İsmail",
+        "Kemal", "Levent", "Mert", "Necati", "Orhan", "Polat", "Recep", "Serkan", "Tarık", "Ufuk",
+        "Volkan", "Yasin", "Zafer", "Alper", "Baran", "Cihan", "Doğan", "Erdem", "Ferhat", "Gürkan"
+    ]
+
+    # Türkçe kadın isimleri
+    female_first_names = [
+        "Ayşe", "Fatma", "Zeynep", "Emine", "Hatice", "Merve", "Elif", "Esra", "Ebru", "Gül",
+        "Hülya", "İnci", "Jale", "Kader", "Leyla", "Melek", "Nur", "Özge", "Pınar", "Rabia",
+        "Seda", "Tuğba", "Ümit", "Vildan", "Yasemin", "Zeliha", "Aslı", "Bahar", "Canan", "Derya",
+        "Eda", "Figen", "Gamze", "Hande", "İlknur", "Jülide", "Kübra", "Lale", "Meltem", "Nalan"
+    ]
+
+    # Türkçe soyadları
+    last_names = [
+        "Yılmaz", "Kaya", "Demir", "Çelik", "Şahin", "Yıldız", "Yıldırım", "Öztürk", "Aydın", "Özdemir",
+        "Arslan", "Doğan", "Kılıç", "Aslan", "Çetin", "Kara", "Koç", "Kurt", "Özkan", "Şimşek",
+        "Polat", "Yalçın", "Güneş", "Yüksel", "Kaplan", "Avcı", "Güler", "Çakır", "Erdoğan", "Akbaş",
+        "Tekin", "Alp", "Yücel", "Korkmaz", "Bulut", "Aktaş", "Kartal", "Ateş", "Aksoy", "Taş"
+    ]
+
+    # Rastgele cinsiyet seç
+    gender = random.choice(["male", "female"])
+
+    # Cinsiyete göre isim seç
+    if gender == "male":
+        first_name = random.choice(male_first_names)
+    else:
+        first_name = random.choice(female_first_names)
+
+    # Soyisim seç
+    last_name = random.choice(last_names)
+
+    # Tam ismi döndür
+    return f"{first_name} {last_name}"
 def add_skill_with_limit_check(employee_id, skill, skills_list, employees_df, role_skills_config, strategy="warn", is_config_requirement: bool = False):
     """
     Bir çalışana yetenek ekler, maksimum sınırları kontrol eder.
@@ -309,9 +349,12 @@ def generate_employees(num_employees, roles_distribution, departments_distributi
         else: # Diğer roller için genel bir atama
             department = random.choices(dept_list, dept_probabilities, k=1)[0]
 
+        # Gerçekçi Türkçe isim üret
+        employee_name = generate_turkish_name()
+
         employees.append({
             "employee_id": emp_id,
-            "name": f"{role} {i}", # Basit isimlendirme
+            "name": employee_name,
             "role": role,
             "department": department
         })
@@ -608,9 +651,12 @@ def ensure_min_staffing_requirements(employees_df, shifts_df, skills_list, min_s
 
             for i in range(num_to_add):
                 new_emp_id = f"CM_E_cfg_minstaff_{len(employees_df) + len(newly_added_employees_info) + 1:03d}"
+                # Gerçekçi Türkçe isim üret
+                employee_name = generate_turkish_name()
+
                 new_employee_data = {
                     "employee_id": new_emp_id,
-                    "name": f"CfgMinStaff_{new_emp_id}_{role_req[:3]}_{dept_req[:3]}",
+                    "name": employee_name,
                     "role": role_req,
                     "department": dept_req
                 }

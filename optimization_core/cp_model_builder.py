@@ -105,9 +105,21 @@ class ShiftSchedulingModelBuilder:
             assigned_count = 0
             for (employee_id, shift_id), var in self.assignment_vars.items():
                 if self.solver.Value(var) == 1:  # Eğer atama yapıldıysa
+                    # Vardiya ID'sine karşılık gelen vardiyayı bul
+                    shift_data = self.shifts_dict.get(shift_id, {})
+                    # Tarih bilgisini ekle
+                    date_value = shift_data.get('date', '')
+
+                    # Eğer date_value bir datetime.date nesnesi ise, string'e dönüştür
+                    if hasattr(date_value, 'isoformat'):
+                        date_str = date_value.isoformat()
+                    else:
+                        date_str = str(date_value) if date_value else ''
+
                     assignments.append({
                         "employee_id": employee_id,
-                        "shift_id": shift_id
+                        "shift_id": shift_id,
+                        "date": date_str  # Tarih bilgisini string olarak ekle
                     })
                     assigned_count += 1
             logger.info(f"Toplam {assigned_count} atama yapıldı.")
@@ -149,11 +161,29 @@ class ShiftSchedulingModelBuilder:
                 positive_prefs_met = 0
                 negative_prefs_assigned = 0
                 total_pref_score_achieved = 0
+
                 # Tercih verisini kolay erişim için işle (employee_id, shift_id) -> score
+                preferences = self.input_data.get('preferences', [])
                 prefs_map = {(p.get('employee_id'), p.get('shift_id')): p.get('preference_score', 0)
-                             for p in self.input_data.get('preferences', [])
+                             for p in preferences
                              if p.get('employee_id') and p.get('shift_id')}
 
+                # Toplam pozitif ve negatif tercih sayılarını hesapla
+                total_positive_preferences = 0
+                total_negative_preferences = 0
+
+                logger.info(f"Tercih sayılarını hesaplama başlıyor. Toplam tercih sayısı: {len(preferences)}")
+
+                for pref in preferences:
+                    pref_score = pref.get('preference_score', 0)
+                    if pref_score > 0:
+                        total_positive_preferences += 1
+                    elif pref_score < 0:
+                        total_negative_preferences += 1
+
+                logger.info(f"Tercih sayıları hesaplandı: Pozitif={total_positive_preferences}, Negatif={total_negative_preferences}")
+
+                # Karşılanan tercihleri hesapla
                 for (employee_id, shift_id), var in self.assignment_vars.items():
                     if self.solver.Value(var) == 1:
                         pref_score = prefs_map.get((employee_id, shift_id), 0) # Eşleşen tercih yoksa skor 0
@@ -384,12 +414,17 @@ class ShiftSchedulingModelBuilder:
                     "positive_preferences_met_count": positive_prefs_met,
                     "negative_preferences_assigned_count": negative_prefs_assigned,
                     "total_preference_score_achieved": total_pref_score_achieved,
+                    "total_positive_preferences_count": int(total_positive_preferences),
+                    "total_negative_preferences_count": int(total_negative_preferences),
                     "workload_distribution_std_dev": workload_distribution_std_dev,
                     "bad_shift_distribution_std_dev": bad_shift_distribution_std_dev,
                     "system_adaptability_score": system_adaptability_score,
                     "config_complexity_score": config_complexity_score,
                     "rule_count": rule_count
                 }
+
+                # Debug için metrikleri logla
+                logger.info(f"Hesaplanan metrikler: {calculated_metrics}")
 
                 # Log mesajını da güncelleyelim
                 metric_log_parts = [
@@ -398,7 +433,9 @@ class ShiftSchedulingModelBuilder:
                     f"Min Personel Karşılama Oranı={min_staffing_coverage_ratio:.2f}",
                     f"Yetenek Karşılama Oranı={skill_coverage_ratio:.2f}",
                     f"Pozitif Tercih Sayısı={positive_prefs_met}",
+                    f"Toplam Pozitif Tercih Sayısı={total_positive_preferences}",
                     f"Negatif Tercih Sayısı={negative_prefs_assigned}",
+                    f"Toplam Negatif Tercih Sayısı={total_negative_preferences}",
                     f"Toplam Tercih Skoru={total_pref_score_achieved}",
                     f"İş Yükü Dağılımı StdDev={workload_distribution_std_dev:.2f}",
                     f"Kötü Vardiya Dağılımı StdDev={bad_shift_distribution_std_dev:.2f}",

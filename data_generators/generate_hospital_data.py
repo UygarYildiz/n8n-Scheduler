@@ -8,7 +8,7 @@ import re
 import fnmatch
 
 # --- Parametreler ---
-NUM_EMPLOYEES = 50
+NUM_EMPLOYEES =80
 NUM_DAYS = 7  # Bir haftalık çizelge için
 START_DATE = date.today()
 OUTPUT_DIR = "synthetic_data"
@@ -301,6 +301,23 @@ def generate_employees(num_employees, roles_distribution, departments_distributi
     dept_list = list(departments_distribution.keys())
     dept_probabilities = list(departments_distribution.values())
 
+    # Gerçekçi Türkçe isimler
+    first_names = ['Ahmet', 'Mehmet', 'Ayşe', 'Fatma', 'Ali', 'Zeynep', 'Mustafa', 'Emine',
+                  'Hüseyin', 'Hatice', 'İbrahim', 'Elif', 'Hasan', 'Merve', 'Ömer', 'Esra',
+                  'Yusuf', 'Seda', 'Murat', 'Derya', 'Osman', 'Gül', 'Emre', 'Sevgi',
+                  'Serkan', 'Özge', 'Cem', 'Deniz', 'Burak', 'Ebru', 'Tolga', 'Aslı',
+                  'Onur', 'Melek', 'Selim', 'Canan', 'Erkan', 'Pınar', 'Orhan', 'Şeyma',
+                  'Sinan', 'Tuğba', 'Kaan', 'Yasemin', 'Kemal', 'Gamze', 'Arda', 'Buse',
+                  'Tuncay', 'Selin']
+
+    last_names = ['Yılmaz', 'Kaya', 'Demir', 'Çelik', 'Şahin', 'Yıldız', 'Öztürk', 'Aydın',
+                 'Özdemir', 'Arslan', 'Doğan', 'Kılıç', 'Aslan', 'Çetin', 'Şimşek', 'Yıldırım',
+                 'Kara', 'Kurt', 'Koç', 'Özkan', 'Şen', 'Polat', 'Yalçın', 'Güneş',
+                 'Korkmaz', 'Çakır', 'Erdoğan', 'Kaplan', 'Acar', 'Altun', 'Taş', 'Aksoy',
+                 'Tekin', 'Bulut', 'Yüksel', 'Gül', 'Karaca', 'Ünal', 'Avcı', 'Turan',
+                 'Koçak', 'Balcı', 'Yavuz', 'Ateş', 'Alkan', 'Bilgin', 'Tunç', 'Keskin',
+                 'Özer', 'Aktaş']
+
     # Önce her departmanda en az bir doktor ve bir hemşire olmasını sağla
     required_assignments = []
 
@@ -322,8 +339,15 @@ def generate_employees(num_employees, roles_distribution, departments_distributi
             break  # Çalışan sayısı sınırını aşma
 
         emp_id = f"E{str(emp_counter).zfill(3)}"  # Örn: E001, E002
+
+        # Rastgele isim oluştur
+        first_name = random.choice(first_names)
+        last_name = random.choice(last_names)
+        name = f"{first_name} {last_name}"
+
         employees.append({
             "employee_id": emp_id,
+            "name": name,
             "role": assignment["role"],
             "department": assignment["department"]
         })
@@ -333,6 +357,11 @@ def generate_employees(num_employees, roles_distribution, departments_distributi
     for i in range(emp_counter, num_employees + 1):
         emp_id = f"E{str(i).zfill(3)}"  # Örn: E001, E002
         role = random.choices(roles_list, probabilities, k=1)[0]
+
+        # Rastgele isim oluştur
+        first_name = random.choice(first_names)
+        last_name = random.choice(last_names)
+        name = f"{first_name} {last_name}"
 
         # Rol bazlı departman ataması
         if role == "İdari":
@@ -346,6 +375,7 @@ def generate_employees(num_employees, roles_distribution, departments_distributi
 
         employees.append({
             "employee_id": emp_id,
+            "name": name,
             "role": role,
             "department": department
         })

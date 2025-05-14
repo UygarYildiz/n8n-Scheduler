@@ -4,7 +4,7 @@ import os
 import time
 import json
 from typing import Any, Dict, List, Optional, Tuple
-from fastapi import FastAPI, HTTPException, Body, Request
+from fastapi import FastAPI, HTTPException, Body, Request, Query
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.concurrency import run_in_threadpool
@@ -13,14 +13,14 @@ from pydantic import BaseModel, Field, validator, ValidationError
 from datetime import date, datetime, time as dt_time # time ile çakışmaması için dt_time
 
 # Dashboard API'sini içe aktar
-from optimization_core.dashboard_api import router as dashboard_router
-from optimization_core.activity_logger import log_optimization_activity, log_configuration_update, log_dataset_added
-
-# CP-SAT Model Builder'ı içe aktar
 try:
+    from optimization_core.dashboard_api import router as dashboard_router
+    from optimization_core.activity_logger import log_optimization_activity, log_configuration_update, log_dataset_added
     from optimization_core.cp_model_builder import ShiftSchedulingModelBuilder
 except ImportError:
     # Doğrudan çalıştırıldığında (development) farklı import yolu
+    from dashboard_api import router as dashboard_router
+    from activity_logger import log_optimization_activity, log_configuration_update, log_dataset_added
     from cp_model_builder import ShiftSchedulingModelBuilder
 
 # --- Logging Kurulumu ---
@@ -76,6 +76,7 @@ class OptimizationRequest(BaseModel):
 class Assignment(BaseModel):
     employee_id: str
     shift_id: str
+    date: Optional[str] = None  # Tarih alanını ekle (string olarak)
 
 class OptimizationSolution(BaseModel):
     assignments: List[Assignment] = Field(default_factory=list)
@@ -92,6 +93,8 @@ class MetricsOutput(BaseModel):
     positive_preferences_met_count: Optional[int] = None
     negative_preferences_assigned_count: Optional[int] = None
     total_preference_score_achieved: Optional[int] = None
+    total_positive_preferences_count: Optional[int] = None  # Yeni: Toplam pozitif tercih sayısı
+    total_negative_preferences_count: Optional[int] = None  # Yeni: Toplam negatif tercih sayısı
 
     # Adalet Metrikleri
     workload_distribution_std_dev: Optional[float] = None  # Yeni: İş yükü dağılımı adaleti
@@ -123,7 +126,7 @@ app = FastAPI(
 # CORS middleware ekle
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Tüm originlere izin ver (geliştirme için)
+    allow_origins=["*", "http://localhost:3000"],  # Tüm originlere ve frontend'e özel olarak izin ver
     allow_credentials=True,
     allow_methods=["*"],  # Tüm HTTP metodlarına izin ver
     allow_headers=["*"],  # Tüm headerlara izin ver
@@ -287,6 +290,8 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
                     positive_preferences_met_count=result['metrics'].get('positive_preferences_met_count'),
                     negative_preferences_assigned_count=result['metrics'].get('negative_preferences_assigned_count'),
                     total_preference_score_achieved=result['metrics'].get('total_preference_score_achieved'),
+                    total_positive_preferences_count=result['metrics'].get('total_positive_preferences_count'),
+                    total_negative_preferences_count=result['metrics'].get('total_negative_preferences_count'),
 
                     # Adalet Metrikleri
                     workload_distribution_std_dev=result['metrics'].get('workload_distribution_std_dev'),
@@ -304,7 +309,9 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
                     f"Min Personel Karşılama Oranı={metrics_data.min_staffing_coverage_ratio:.2f}" if metrics_data.min_staffing_coverage_ratio is not None else None,
                     f"Yetenek Karşılama Oranı={metrics_data.skill_coverage_ratio:.2f}" if metrics_data.skill_coverage_ratio is not None else None,
                     f"Pozitif Tercih Sayısı={metrics_data.positive_preferences_met_count}",
+                    f"Toplam Pozitif Tercih Sayısı={metrics_data.total_positive_preferences_count}",
                     f"Negatif Tercih Sayısı={metrics_data.negative_preferences_assigned_count}",
+                    f"Toplam Negatif Tercih Sayısı={metrics_data.total_negative_preferences_count}",
                     f"Toplam Tercih Skoru={metrics_data.total_preference_score_achieved}",
                     f"İş Yükü Dağılımı StdDev={metrics_data.workload_distribution_std_dev:.2f}" if metrics_data.workload_distribution_std_dev is not None else None,
                     f"Kötü Vardiya Dağılımı StdDev={metrics_data.bad_shift_distribution_std_dev:.2f}" if metrics_data.bad_shift_distribution_std_dev is not None else None,
@@ -420,6 +427,60 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
     total_api_time = end_time - start_time
     logger.info(f"Optimizasyon isteği tamamlandı. Toplam API süresi: {total_api_time:.2f}s")
     return response
+
+# --- API Endpoints ---
+@app.get("/api/shifts")
+async def get_shifts(datasetType: str = Query(..., description="Veri seti tipi (hastane veya cagri_merkezi)")):
+    """Vardiya verilerini döndürür."""
+    try:
+        # Veri setine göre dosya yolunu belirle
+        file_path = "synthetic_data/shifts.csv" if datasetType == "hastane" else "synthetic_data_cagri_merkezi/shifts_cm.csv"
+
+        # CSV dosyasını oku
+        import pandas as pd
+        shifts_df = pd.read_csv(file_path)
+
+        # JSON formatına dönüştür
+        shifts_list = shifts_df.to_dict(orient="records")
+
+        return shifts_list
+    except Exception as e:
+        logger.error(f"Vardiya verilerini okurken hata: {e}")
+        raise HTTPException(status_code=500, detail=f"Vardiya verilerini okurken hata: {str(e)}")
+
+@app.get("/api/employees")
+async def get_employees(datasetType: str = Query(..., description="Veri seti tipi (hastane veya cagri_merkezi)")):
+    """Çalışan verilerini döndürür."""
+    try:
+        # Veri setine göre dosya yolunu belirle
+        file_path = "synthetic_data/employees.csv" if datasetType == "hastane" else "synthetic_data_cagri_merkezi/employees_cm.csv"
+
+        logger.info(f"Çalışan verileri okunuyor: {file_path}")
+
+        # Dosyanın varlığını kontrol et
+        if not os.path.exists(file_path):
+            logger.error(f"Dosya bulunamadı: {file_path}")
+            # Proje kök dizinine göre yolu oluştur
+            script_dir = os.path.dirname(os.path.dirname(__file__))
+            file_path = os.path.join(script_dir, file_path)
+            logger.info(f"Alternatif dosya yolu deneniyor: {file_path}")
+
+            if not os.path.exists(file_path):
+                logger.error(f"Alternatif dosya yolu da bulunamadı: {file_path}")
+                raise HTTPException(status_code=404, detail=f"Çalışan verileri dosyası bulunamadı: {file_path}")
+
+        # CSV dosyasını oku
+        import pandas as pd
+        employees_df = pd.read_csv(file_path)
+
+        # JSON formatına dönüştür
+        employees_list = employees_df.to_dict(orient="records")
+
+        logger.info(f"Toplam {len(employees_list)} çalışan verisi okundu.")
+        return employees_list
+    except Exception as e:
+        logger.error(f"Çalışan verilerini okurken hata: {e}")
+        raise HTTPException(status_code=500, detail=f"Çalışan verilerini okurken hata: {str(e)}")
 
 # Uygulamayı çalıştırmak için (terminalden):
 # uvicorn optimization_core.main:app --reload --port 8000

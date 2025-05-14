@@ -7,18 +7,31 @@ from fastapi import APIRouter, HTTPException
 from datetime import datetime
 import glob
 
-from .dashboard_models import (
-    DashboardData,
-    PerformanceMetrics,
-    LastOptimizationReport,
-    SystemStatus,
-    RecentActivity,
-    Dataset,
-    Configuration,
-    ConfigurationContent
-)
-
-from .activity_logger import get_recent_activities
+try:
+    from optimization_core.dashboard_models import (
+        DashboardData,
+        PerformanceMetrics,
+        LastOptimizationReport,
+        SystemStatus,
+        RecentActivity,
+        Dataset,
+        Configuration,
+        ConfigurationContent
+    )
+    from optimization_core.activity_logger import get_recent_activities
+except ImportError:
+    # Doğrudan çalıştırıldığında (development) farklı import yolu
+    from dashboard_models import (
+        DashboardData,
+        PerformanceMetrics,
+        LastOptimizationReport,
+        SystemStatus,
+        RecentActivity,
+        Dataset,
+        Configuration,
+        ConfigurationContent
+    )
+    from activity_logger import get_recent_activities
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -30,6 +43,31 @@ router = APIRouter()
 def get_project_root():
     """Proje kök dizinini döndürür."""
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+def calculate_workload_balance_score(std_dev):
+    """
+    Standart sapmayı iş yükü dengesi puanına dönüştürür.
+
+    Args:
+        std_dev (float): İş yükü dağılımının standart sapması
+
+    Returns:
+        int: 0-100 arasında iş yükü dengesi puanı
+    """
+    # Parametreler
+    max_expected_std_dev = 2.0  # Beklenen maksimum standart sapma
+    min_score = 50  # Minimum puan
+    max_score = 100  # Maksimum puan
+
+    # Doğrusal dönüşüm formülü
+    if std_dev <= 0:
+        return max_score  # Mükemmel denge durumu
+    elif std_dev >= max_expected_std_dev:
+        return min_score  # En kötü denge durumu
+    else:
+        # Doğrusal interpolasyon
+        score = max_score - ((std_dev / max_expected_std_dev) * (max_score - min_score))
+        return int(round(score))  # Tam sayıya yuvarla
 
 def load_optimization_result():
     """Son optimizasyon sonucunu yükler."""
@@ -122,24 +160,52 @@ async def get_dashboard_data():
                 metrics.skillCoverage = int(result_metrics["skill_coverage_ratio"] * 100)
 
             # Tercih skoru
-            if result_metrics.get("total_preference_score_achieved") is not None:
-                # Normalize et (0-100 arası)
-                metrics.preferenceScore = min(100, max(0, int(result_metrics["total_preference_score_achieved"])))
+            if result_metrics.get("positive_preferences_met_count") is not None:
+                # Tercih sayılarını al
+                positive_preferences_met = result_metrics.get("positive_preferences_met_count", 0)
+
+                # Log mesajlarını kontrol et
+                import re
+                import os
+
+                # Log dosyasını bul
+                log_file_path = os.path.join(get_project_root(), "optimization_core", "logs", "app.log")
+                total_positive_preferences = 37  # Varsayılan değer
+
+                try:
+                    if os.path.exists(log_file_path):
+                        with open(log_file_path, 'r') as log_file:
+                            log_content = log_file.read()
+                            # Log mesajlarından toplam pozitif tercih sayısını bul
+                            match = re.search(r'Toplam Pozitif Tercih Sayısı=(\d+)', log_content)
+                            if match:
+                                total_positive_preferences = int(match.group(1))
+                                logger.info(f"Log dosyasından toplam pozitif tercih sayısı bulundu: {total_positive_preferences}")
+                except Exception as e:
+                    logger.warning(f"Log dosyası okunamadı: {e}")
+
+                # Tercih karşılama oranını hesapla (yüzde olarak)
+                if total_positive_preferences > 0:
+                    # Pozitif tercihlerin karşılanma oranı
+                    preference_percentage = (positive_preferences_met / total_positive_preferences) * 100
+                    metrics.preferenceScore = min(100, max(0, int(preference_percentage)))
+                    logger.info(f"Çalışan memnuniyeti hesaplaması: {positive_preferences_met} / {total_positive_preferences} = {preference_percentage:.2f}% -> {metrics.preferenceScore}%")
+                else:
+                    # Eğer pozitif tercih yoksa, %100 göster
+                    metrics.preferenceScore = 100
+                    logger.info("Pozitif tercih bulunamadı, memnuniyet %100 olarak ayarlandı")
+            else:
+                # Eğer pozitif tercih sayısı yoksa, varsayılan değer kullan
+                metrics.preferenceScore = 0
+                logger.warning("Pozitif tercih sayısı bulunamadı, memnuniyet %0 olarak ayarlandı")
 
             # İş yükü dengesi
             if result_metrics.get("workload_distribution_std_dev") is not None:
-                # Standart sapma düşükse denge yüksektir (ters orantı)
+                # Standart sapma değerini al
                 std_dev = result_metrics["workload_distribution_std_dev"]
-                if std_dev <= 0.1:
-                    metrics.workloadBalance = 95
-                elif std_dev <= 0.5:
-                    metrics.workloadBalance = 90
-                elif std_dev <= 1.0:
-                    metrics.workloadBalance = 80
-                elif std_dev <= 1.5:
-                    metrics.workloadBalance = 70
-                else:
-                    metrics.workloadBalance = 60
+
+                # Doğrusal dönüşüm formülü ile iş yükü dengesi puanını hesapla
+                metrics.workloadBalance = calculate_workload_balance_score(std_dev)
 
         # Son optimizasyon raporunu hazırla
         last_report = LastOptimizationReport()

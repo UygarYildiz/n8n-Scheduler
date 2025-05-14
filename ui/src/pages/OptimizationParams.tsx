@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -29,7 +30,12 @@ import {
   Tooltip,
   IconButton,
   Tabs,
-  Tab
+  Tab,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
 } from '@mui/material';
 import {
   PlayArrow as StartIcon,
@@ -42,14 +48,17 @@ import {
   People as PeopleIcon,
   AttachMoney as MoneyIcon,
   Balance as BalanceIcon,
-  CheckCircle as CheckCircleIcon
+  CheckCircle as CheckCircleIcon,
+  CalendarMonth as CalendarIcon
 } from '@mui/icons-material';
 
 const OptimizationParams = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [resultMessage, setResultMessage] = useState('');
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [selectedDataset, setSelectedDataset] = useState('hastane');
   // Seçilen veri setine göre uygun kural setini otomatik olarak seç
   const [selectedConfig, setSelectedConfig] = useState(() => {
@@ -227,20 +236,38 @@ const OptimizationParams = () => {
           setResultMessage(`Çizelge oluşturuldu. Çözüm durumu: ${result.status}`);
         }
 
-        // Sonuçlar sayfasına yönlendirme için bilgi verilebilir
-        // Örneğin: "Sonuçları görmek için 'Sonuçlar' sayfasına gidin."
+        // Sonuçları localStorage'a kaydet
+        if (result.solution && result.solution.assignments) {
+          // Veri setini belirle
+          const datasetType = selectedDataset === 'cagri_merkezi' ? 'cagri_merkezi' : 'hastane';
+
+          // Sonuçları kaydet
+          api.saveOptimizationResults({
+            status: result.status,
+            solution: result.solution,
+            datasetType: datasetType
+          });
+
+          console.log('Optimizasyon sonuçları kaydedildi:', {
+            status: result.status,
+            assignmentsCount: result.solution.assignments.length,
+            datasetType: datasetType
+          });
+        }
+
+        // Başarılı sonuç için dialog göster
+        setShowSuccessDialog(true);
       } else {
         // Başarısız sonuç
         setError(true);
         setResultMessage('Çizelge oluşturma işlemi tamamlandı ancak sonuç alınamadı.');
-      }
 
-      // Bildirim mesajını 5 saniye sonra kaldır
-      setTimeout(() => {
-        setSuccess(false);
-        setError(false);
-        setResultMessage('');
-      }, 5000);
+        // Bildirim mesajını 5 saniye sonra kaldır
+        setTimeout(() => {
+          setError(false);
+          setResultMessage('');
+        }, 5000);
+      }
     } catch (error) {
       console.error('Optimizasyon başlatma hatası:', error);
       // Hata durumunda kullanıcıya bildirim göster
@@ -287,6 +314,21 @@ const OptimizationParams = () => {
     fetchData();
   }, []);
 
+  // Başarılı çizelgeleme sonrası dialog'u kapat
+  const handleCloseSuccessDialog = () => {
+    setShowSuccessDialog(false);
+    setSuccess(false);
+    setResultMessage('');
+  };
+
+  // Çizelge görüntüleme sayfasına git
+  const handleViewSchedule = () => {
+    setShowSuccessDialog(false);
+    setSuccess(false);
+    setResultMessage('');
+    navigate('/schedule-view');
+  };
+
   return (
     <Box>
       <Box sx={{ mb: 5, textAlign: 'center', position: 'relative' }}>
@@ -305,6 +347,55 @@ const OptimizationParams = () => {
           </Typography>
         </Box>
       </Box>
+
+      {/* Başarılı çizelgeleme sonrası dialog */}
+      <Dialog
+        open={showSuccessDialog}
+        onClose={handleCloseSuccessDialog}
+        aria-labelledby="success-dialog-title"
+        aria-describedby="success-dialog-description"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            maxWidth: 500
+          }
+        }}
+      >
+        <DialogTitle id="success-dialog-title" sx={{ pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <CheckCircleIcon sx={{ color: 'success.main' }} />
+            <Typography variant="h6" fontWeight="bold">
+              Çizelge Başarıyla Oluşturuldu
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="success-dialog-description" sx={{ mb: 2 }}>
+            {resultMessage}
+          </DialogContentText>
+          <DialogContentText>
+            Oluşturulan çizelgeyi görüntülemek için "Çizelgeyi Görüntüle" butonuna tıklayabilirsiniz.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            onClick={handleCloseSuccessDialog}
+            variant="outlined"
+            sx={{ borderRadius: 2 }}
+          >
+            Kapat
+          </Button>
+          <Button
+            onClick={handleViewSchedule}
+            variant="contained"
+            startIcon={<CalendarIcon />}
+            sx={{ borderRadius: 2 }}
+            autoFocus
+          >
+            Çizelgeyi Görüntüle
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {success && (
         <Alert

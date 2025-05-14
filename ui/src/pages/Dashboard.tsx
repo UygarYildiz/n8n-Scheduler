@@ -504,6 +504,9 @@ const Dashboard = () => {
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                     Çalışan tercihlerinin karşılanma oranı
                   </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', fontStyle: 'italic' }}>
+                    (Karşılanan pozitif tercihler / Toplam pozitif tercihler)
+                  </Typography>
                 </Box>
 
                 <LinearProgress
@@ -564,6 +567,9 @@ const Dashboard = () => {
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                     Çalışanlar arasında iş yükü dağılımının dengesi
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', fontStyle: 'italic' }}>
+                    (Düşük standart sapma = Yüksek denge puanı)
                   </Typography>
                 </Box>
 

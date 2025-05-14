@@ -119,15 +119,92 @@ export const api = {
   // Optimizasyon sonuçlarını alma
   getOptimizationResults: async () => {
     try {
-      // Bu örnek için, sonuçları doğrudan API'den almak yerine
-      // public klasöründeki optimization_result.json dosyasını okuyoruz
-      // Geliştirme için public klasörüne örnek bir optimization_result.json koyabilirsiniz.
-      // Gerçek senaryoda bu, /api/results gibi bir backend endpoint'i olmalı.
-      const response = await axios.get('/optimization_result.json');
-      return response.data;
+      // Önce localStorage'dan sonuçları kontrol et
+      const savedResults = localStorage.getItem('optimizationResults');
+      if (savedResults) {
+        console.log('Optimizasyon sonuçları localStorage\'dan alındı');
+        return JSON.parse(savedResults);
+      }
+
+      // Eğer localStorage'da sonuç yoksa, API'den almayı dene
+      try {
+        // API'den sonuçları al (backend'den)
+        const response = await axios.get('/api/results');
+        console.log('Optimizasyon sonuçları API\'den alındı');
+        return response.data;
+      } catch (apiError) {
+        console.error('API\'den optimizasyon sonuçlarını alma hatası:', apiError);
+
+        // Son çare olarak, kök dizindeki optimization_result.json dosyasını kontrol et
+        try {
+          // Kök dizindeki dosyayı kontrol et (API tarafından oluşturulan)
+          const response = await axios.get('/optimization_result.json');
+          console.log('Optimizasyon sonuçları kök dizindeki dosyadan alındı');
+          return response.data;
+        } catch (fileError) {
+          console.error('Dosyadan optimizasyon sonuçlarını alma hatası:', fileError);
+          throw new Error('Optimizasyon sonuçları bulunamadı. Lütfen önce bir optimizasyon çalıştırın.');
+        }
+      }
     } catch (error) {
       console.error('Optimizasyon sonuçlarını alma hatası:', error);
       throw error;
+    }
+  },
+
+  // Optimizasyon sonuçlarını kaydetme
+  saveOptimizationResults: (results: any) => {
+    try {
+      localStorage.setItem('optimizationResults', JSON.stringify(results));
+      console.log('Optimizasyon sonuçları localStorage\'a kaydedildi');
+      return true;
+    } catch (error) {
+      console.error('Optimizasyon sonuçlarını kaydetme hatası:', error);
+      return false;
+    }
+  },
+
+  // Vardiya çizelgesi verilerini alma
+  getScheduleData: async () => {
+    try {
+      // Optimizasyon sonuçlarını al
+      const optimizationResult = await api.getOptimizationResults();
+
+      // Veri setini belirle (Hastane veya Çağrı Merkezi)
+      const datasetType = optimizationResult.solution?.assignments[0]?.employee_id?.startsWith('CM_')
+        ? 'cagri_merkezi'
+        : 'hastane';
+
+      // Vardiya ve çalışan verilerini al
+      const shiftsResponse = await axios.get(`/api/shifts?datasetType=${datasetType}`);
+      const employeesResponse = await axios.get(`/api/employees?datasetType=${datasetType}`);
+
+      // Tüm verileri birleştir
+      return {
+        assignments: optimizationResult.solution?.assignments || [],
+        shifts: shiftsResponse.data || [],
+        employees: employeesResponse.data || [],
+        datasetType
+      };
+    } catch (error) {
+      console.error('Vardiya çizelgesi verilerini alma hatası:', error);
+
+      // API henüz hazır değilse, optimizasyon sonuçlarını doğrudan kullan
+      try {
+        const optimizationResult = await api.getOptimizationResults();
+        return {
+          assignments: optimizationResult.solution?.assignments || [],
+          // Diğer veriler henüz mevcut değil, boş diziler döndür
+          shifts: [],
+          employees: [],
+          datasetType: optimizationResult.solution?.assignments[0]?.employee_id?.startsWith('CM_')
+            ? 'cagri_merkezi'
+            : 'hastane'
+        };
+      } catch (fallbackError) {
+        console.error('Yedek veri alma hatası:', fallbackError);
+        throw error; // Orijinal hatayı fırlat
+      }
     }
   },
 
