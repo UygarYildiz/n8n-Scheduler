@@ -1,6 +1,6 @@
-# Proje Yol Haritası (6 Hafta)
+# Proje Yol Haritası (7 Haftalık)
 
-Bu belge, projenin 6 haftalık geliştirme sürecini ve her haftanın hedeflerini özetlemektedir.
+Bu belge, projenin 7 haftalık geliştirme sürecini ve her haftanın hedeflerini özetlemektedir.
 
 ## 1. Hafta: Temelleri Atma ve Problem Alanını Anlama (✅ Tamamlandı)
 
@@ -71,7 +71,7 @@ Bu belge, projenin 6 haftalık geliştirme sürecini ve her haftanın hedeflerin
     *   **Aşama 3: Görselleştirme ve Raporlama (İlk Yarı)**
         *   ✅ **(Tamamlandı)** Temel metrik görselleştirmeleri ve grafikler.
         *   ✅ **(Tamamlandı)** Vardiya çizelgesi takvim görünümü.
-        *   🔄 **(Devam Ediyor)** Sonuç görselleştirme ve raporlama paneli.
+        *   ✅ **(Tamamlandı)** Sonuç görselleştirme ve raporlama paneli.
         *   🔄 **(Devam Ediyor)** Rapor oluşturma ve dışa aktarma araçları.
     *   **Aşama 4: Entegrasyon ve Test (İkinci Yarı)**
         *   ✅ **(Tamamlandı)** API entegrasyonunun temel yapısı.
@@ -83,8 +83,64 @@ Bu belge, projenin 6 haftalık geliştirme sürecini ve her haftanın hedeflerin
         *   🔄 **(Devam Ediyor)** Kullanıcı arayüzü ile entegre edilmiş tam sistemin kapsamlı testi.
 *   **Çıktılar (Şu Ana Kadar):**
     *   ✅ Temel web tabanlı kullanıcı arayüzü.
-    *   ✅ Temel metrik görselleştirmeleri.
+    *   ✅ Temel metrik görselleştirmeleri ve grafikler.
     *   ✅ Vardiya çizelgesi görüntüleme arayüzü.
     *   🔄 Rapor oluşturma ve dışa aktarma araçları (geliştiriliyor).
     *   🔄 Kullanıcı kılavuzu ve dokümantasyon (güncelleniyor).
-    *   🔄 Test ve iyileştirme çalışmaları (devam ediyor).
+    *   🔄 Test ve iyileştirme raporları (devam ediyor).
+
+## 7. Hafta: Veri Modeli Zenginleştirme ve Esneklik İyileştirmeleri (📅 Planlandı)
+
+*   **Odak Alanı:** Veri modelini zenginleştirme, farklı kurum tiplerine uyarlanabilirliği artırma ve veri üretecini geliştirme.
+*   **Hedefler:**
+    *   **Aşama 1: Çalışan ve Vardiya Veri Modelini Zenginleştirme** ([`data_model.md`](data_model.md))
+        *   📅 Çalışan profilleri:
+            * Deneyim seviyesi tanımları
+            * Sözleşme türü (tam/yarı zamanlı)
+            * Maksimum çalışma saati limitleri
+        *   📅 Vardiya tanımları:
+            * Öncelik seviyesi mekanizması
+            * Minimum/optimum personel sayısı ayarları
+            * Özel vardiya türleri desteği
+        *   📅 Yetenek seviyeleri:
+            * Başlangıç/orta/ileri seviye yetenekler
+            * Yetenek puanlama sistemi
+        *   📅 Çalışanlar arası ilişkiler:
+            * Mentorluk ilişkileri
+            * Ekip çalışması gereksinimleri
+
+    *   **Aşama 2: İzin ve Tercih Sistemini Geliştirme** ([`data_model.md`](data_model.md))
+        *   📅 İzin sistemi:
+            * İzin türleri (yıllık, hastalık, eğitim)
+            * İzin öncelik mekanizması
+        *   📅 Tercih sistemi:
+            * Genişletilmiş tercih dereceleri (-3 ile +3)
+            * Tercih nedenleri ve öncelikleri
+            * Rotasyon bazlı izin sistemi
+
+    *   **Aşama 3: Konfigürasyon ve Esneklik İyileştirmeleri** ([`configuration.md`](configuration.md))
+        *   📅 Konfigürasyon şeması:
+            * Kurum tipine özgü alan tanımlamaları
+            * Dinamik kural tanımlama mekanizması
+        *   📅 Veri üreteci yapısı:
+            * BaseDataGenerator sınıfı
+            * Kurum tipine özel veri üreteci sınıfları
+        *   📅 Özellik seçimi:
+            * Konfigürasyon tabanlı özellik seçimi
+            * Veri şeması genişletme mekanizması
+
+    *   **Aşama 4: Test ve Dokümantasyon**
+        *   📅 Test süreci:
+            * Geriye dönük uyumluluk testleri
+            * Farklı kurum senaryoları için test
+        *   📅 Dokümantasyon:
+            * Veri modeli ve konfigürasyon güncellemeleri
+            * Kullanıcı kılavuzu genişletmeleri
+
+*   **Çıktılar (Beklenen):**
+    *   📅 Zenginleştirilmiş veri modeli ([`data_model.md`](data_model.md))
+    *   📅 Geliştirilmiş izin ve tercih sistemi
+    *   📅 Daha esnek konfigürasyon yapısı ([`configuration.md`](configuration.md))
+    *   📅 Modüler veri üreteci sınıfları
+    *   📅 Güncellenmiş dokümantasyon
+    *   📅 Test raporları
