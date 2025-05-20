@@ -1,0 +1,123 @@
+/* Yazdırma için CSS */
+
+@media print {
+  /* Yazdırma sırasında gizlenecek öğeler */
+  header, 
+  nav, 
+  footer, 
+  .MuiAppBar-root, 
+  .MuiDrawer-root,
+  .no-print,
+  button {
+    display: none !important;
+  }
+  
+  /* Yazdırma sırasında görüntülenecek öğeler */
+  .print-only {
+    display: block !important;
+  }
+  
+  /* Sayfa yapısı */
+  @page {
+    size: A4 landscape;
+    margin: 1cm;
+  }
+  
+  /* Genel stil */
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 12pt;
+    line-height: 1.3;
+    background: white;
+    color: black;
+  }
+  
+  /* Başlıklar */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+  
+  /* Tablolar */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    page-break-inside: auto;
+  }
+  
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  /* Grafikler */
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* Sayfa sonları */
+  .page-break {
+    page-break-before: always;
+  }
+  
+  /* Sekme içeriği */
+  .MuiTabs-root, .MuiTab-root {
+    display: none !important;
+  }
+  
+  /* Tüm sekme içeriklerini göster */
+  .MuiTabPanel-root {
+    display: block !important;
+    visibility: visible !important;
+    height: auto !important;
+    opacity: 1 !important;
+  }
+  
+  /* Sekme başlıkları */
+  .tab-title {
+    display: block !important;
+    font-size: 18pt;
+    font-weight: bold;
+    margin: 20px 0;
+    border-bottom: 1px solid #000;
+    padding-bottom: 5px;
+  }
+  
+  /* Kart stilleri */
+  .MuiPaper-root {
+    box-shadow: none !important;
+    border: 1px solid #ddd;
+  }
+  
+  /* Yazdırma sırasında arka plan renkleri */
+  .MuiChip-root {
+    border: 1px solid #ddd !important;
+  }
+  
+  .MuiChip-colorSuccess {
+    background-color: #f0fff0 !important;
+    color: #2e7d32 !important;
+  }
+  
+  .MuiChip-colorWarning {
+    background-color: #fffaf0 !important;
+    color: #ed6c02 !important;
+  }
+  
+  .MuiChip-colorError {
+    background-color: #fff0f0 !important;
+    color: #d32f2f !important;
+  }
+}

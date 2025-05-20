@@ -152,6 +152,19 @@ export const api = {
     }
   },
 
+  // Results sayfası için optimizasyon sonuçlarını alma
+  getResults: async () => {
+    try {
+      // Doğrudan API'den sonuçları al
+      const response = await axios.get('/api/results');
+      console.log('Results sayfası için optimizasyon sonuçları API\'den alındı');
+      return response.data;
+    } catch (error) {
+      console.error('Results sayfası için optimizasyon sonuçlarını alma hatası:', error);
+      throw new Error('Optimizasyon sonuçları bulunamadı. Lütfen önce bir optimizasyon çalıştırın.');
+    }
+  },
+
   // Optimizasyon sonuçlarını kaydetme
   saveOptimizationResults: (results: any) => {
     try {
