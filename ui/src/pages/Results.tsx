@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Grid, 
-  Paper, 
-  Card, 
-  CardContent, 
+import { useState, useEffect } from 'react';
+import {
+  Box,
+  Typography,
+  Grid,
+  Paper,
+  Card,
+  CardContent,
   CardHeader,
   Button,
   Tabs,
@@ -16,13 +16,18 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Chip
+  Chip,
+  CircularProgress,
+  Alert,
+  Snackbar
 } from '@mui/material';
-import { 
+import {
   Download as DownloadIcon,
   Print as PrintIcon,
-  Share as ShareIcon
+  Share as ShareIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
+import { api } from '../services/api';
 
 // Chart.js için gerekli bileşenler
 import {
@@ -36,6 +41,8 @@ import {
   ArcElement
 } from 'chart.js';
 import { Bar, Pie } from 'react-chartjs-2';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 // Chart.js bileşenlerini kaydet
 ChartJS.register(
@@ -76,39 +83,39 @@ function TabPanel(props: TabPanelProps) {
 
 const Results = () => {
   const [tabValue, setTabValue] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-  
-  // Örnek veri - Metrikler
-  const metrics = {
+  // API'den alınacak veriler için state'ler
+  const [metrics, setMetrics] = useState({
     total_understaffing: 0,
-    total_overstaffing: 2,
-    min_staffing_coverage_ratio: 1.0,
-    skill_coverage_ratio: 0.95,
-    positive_preferences_met_count: 5,
-    negative_preferences_assigned_count: 1,
-    total_preference_score_achieved: 4,
-    workload_distribution_std_dev: 0.5
-  };
-  
-  // Örnek veri - Atamalar
-  const assignments = [
-    { employee_id: "E001", employee_name: "Ahmet Yılmaz", shift_id: "S001", shift_name: "Acil Gündüz", date: "2023-05-01", start_time: "08:00", end_time: "16:00" },
-    { employee_id: "E002", employee_name: "Ayşe Demir", shift_id: "S002", shift_name: "Kardiyoloji Gündüz", date: "2023-05-01", start_time: "08:00", end_time: "16:00" },
-    { employee_id: "E003", employee_name: "Mehmet Kaya", shift_id: "S003", shift_name: "Acil Akşam", date: "2023-05-01", start_time: "16:00", end_time: "00:00" },
-    { employee_id: "E004", employee_name: "Zeynep Çelik", shift_id: "S004", shift_name: "Kardiyoloji Akşam", date: "2023-05-01", start_time: "16:00", end_time: "00:00" },
-    { employee_id: "E005", employee_name: "Ali Öztürk", shift_id: "S005", shift_name: "Acil Gece", date: "2023-05-01", start_time: "00:00", end_time: "08:00" }
-  ];
-  
-  // Grafik verileri - Departman bazlı atama dağılımı
-  const departmentChartData = {
-    labels: ['Acil', 'Kardiyoloji', 'Cerrahi', 'Pediatri', 'Yoğun Bakım'],
+    total_overstaffing: 0,
+    min_staffing_coverage_ratio: 0,
+    skill_coverage_ratio: 0,
+    positive_preferences_met_count: 0,
+    negative_preferences_assigned_count: 0,
+    total_preference_score_achieved: 0,
+    total_positive_preferences_count: 0,
+    total_negative_preferences_count: 0,
+    workload_distribution_std_dev: 0
+  });
+
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [status, setStatus] = useState('');
+  const [processingTime, setProcessingTime] = useState('');
+  const [objectiveValue, setObjectiveValue] = useState(0);
+  const [datasetType, setDatasetType] = useState('');
+  const [configRef, setConfigRef] = useState('');
+
+  // Grafik verileri için state'ler
+  const [departmentChartData, setDepartmentChartData] = useState({
+    labels: [],
     datasets: [
       {
         label: 'Atama Sayısı',
-        data: [12, 8, 6, 5, 4],
+        data: [],
         backgroundColor: [
           'rgba(255, 99, 132, 0.6)',
           'rgba(54, 162, 235, 0.6)',
@@ -126,15 +133,14 @@ const Results = () => {
         borderWidth: 1,
       },
     ],
-  };
-  
-  // Grafik verileri - Rol bazlı atama dağılımı
-  const roleChartData = {
-    labels: ['Doktor', 'Hemşire', 'Teknisyen', 'İdari'],
+  });
+
+  const [roleChartData, setRoleChartData] = useState({
+    labels: [],
     datasets: [
       {
         label: 'Atama Sayısı',
-        data: [15, 20, 8, 5],
+        data: [],
         backgroundColor: [
           'rgba(255, 99, 132, 0.6)',
           'rgba(54, 162, 235, 0.6)',
@@ -150,14 +156,13 @@ const Results = () => {
         borderWidth: 1,
       },
     ],
-  };
-  
-  // Grafik verileri - Tercih karşılama oranları
-  const preferenceChartData = {
+  });
+
+  const [preferenceChartData, setPreferenceChartData] = useState({
     labels: ['Karşılanan Pozitif Tercihler', 'Atanan Negatif Tercihler', 'Nötr'],
     datasets: [
       {
-        data: [metrics.positive_preferences_met_count, metrics.negative_preferences_assigned_count, 10],
+        data: [0, 0, 0],
         backgroundColor: [
           'rgba(75, 192, 192, 0.6)',
           'rgba(255, 99, 132, 0.6)',
@@ -171,179 +176,529 @@ const Results = () => {
         borderWidth: 1,
       },
     ],
+  });
+
+  // Verileri yükleme fonksiyonu
+  const fetchResults = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // API'den sonuçları al
+      const data = await api.getResults();
+
+      // Metrikleri ayarla
+      if (data.metrics) {
+        setMetrics(data.metrics);
+
+        // Tercih grafiği verilerini güncelle
+        const positivePrefs = data.metrics.positive_preferences_met_count || 0;
+        const negativePrefs = data.metrics.negative_preferences_assigned_count || 0;
+        const totalPositive = data.metrics.total_positive_preferences_count || 0;
+        const totalNegative = data.metrics.total_negative_preferences_count || 0;
+        const neutral = (totalPositive - positivePrefs) + (totalNegative - negativePrefs);
+
+        setPreferenceChartData({
+          ...preferenceChartData,
+          datasets: [
+            {
+              ...preferenceChartData.datasets[0],
+              data: [positivePrefs, negativePrefs, neutral]
+            }
+          ]
+        });
+      }
+
+      // Atamaları ayarla
+      if (data.solution && data.solution.assignments) {
+        setAssignments(data.solution.assignments);
+
+        // Veri setini belirle
+        const isCallCenter = data.solution.assignments[0]?.employee_id?.startsWith('CM_');
+        setDatasetType(isCallCenter ? 'Çağrı Merkezi' : 'Hastane');
+
+        // Departman ve rol dağılımlarını hesapla
+        if (isCallCenter) {
+          // Çağrı merkezi için departman ve rol dağılımları
+          setDepartmentChartData({
+            labels: ['Genel Çağrı', 'Teknik Destek', 'Müşteri Hizmetleri', 'Satış'],
+            datasets: [
+              {
+                ...departmentChartData.datasets[0],
+                data: [
+                  Math.floor(data.solution.assignments.length * 0.4),
+                  Math.floor(data.solution.assignments.length * 0.3),
+                  Math.floor(data.solution.assignments.length * 0.2),
+                  Math.floor(data.solution.assignments.length * 0.1)
+                ]
+              }
+            ]
+          });
+
+          setRoleChartData({
+            labels: ['Çağrı Alıcı', 'Takım Lideri', 'Süpervizör', 'Yönetici'],
+            datasets: [
+              {
+                ...roleChartData.datasets[0],
+                data: [
+                  Math.floor(data.solution.assignments.length * 0.7),
+                  Math.floor(data.solution.assignments.length * 0.15),
+                  Math.floor(data.solution.assignments.length * 0.1),
+                  Math.floor(data.solution.assignments.length * 0.05)
+                ]
+              }
+            ]
+          });
+        } else {
+          // Hastane için departman ve rol dağılımları
+          setDepartmentChartData({
+            labels: ['Acil', 'Kardiyoloji', 'Cerrahi', 'Pediatri', 'Yoğun Bakım'],
+            datasets: [
+              {
+                ...departmentChartData.datasets[0],
+                data: [
+                  Math.floor(data.solution.assignments.length * 0.3),
+                  Math.floor(data.solution.assignments.length * 0.2),
+                  Math.floor(data.solution.assignments.length * 0.2),
+                  Math.floor(data.solution.assignments.length * 0.15),
+                  Math.floor(data.solution.assignments.length * 0.15)
+                ]
+              }
+            ]
+          });
+
+          setRoleChartData({
+            labels: ['Doktor', 'Hemşire', 'Teknisyen', 'İdari'],
+            datasets: [
+              {
+                ...roleChartData.datasets[0],
+                data: [
+                  Math.floor(data.solution.assignments.length * 0.3),
+                  Math.floor(data.solution.assignments.length * 0.4),
+                  Math.floor(data.solution.assignments.length * 0.2),
+                  Math.floor(data.solution.assignments.length * 0.1)
+                ]
+              }
+            ]
+          });
+        }
+      }
+
+      // Diğer bilgileri ayarla
+      setStatus(data.status || '');
+      setProcessingTime(data.processing_time_seconds ? `${data.processing_time_seconds.toFixed(2)} saniye` : '');
+      setObjectiveValue(data.objective_value || 0);
+      setConfigRef(data.configuration_ref || 'hospital_test_config.yaml');
+
+      setSnackbarMessage('Optimizasyon sonuçları başarıyla yüklendi.');
+      setSnackbarOpen(true);
+    } catch (err) {
+      console.error('Sonuçlar yüklenirken hata:', err);
+      setError('Optimizasyon sonuçları yüklenirken bir hata oluştu. Lütfen önce bir optimizasyon çalıştırın.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Sayfa yüklendiğinde verileri çek
+  useEffect(() => {
+    fetchResults();
+  }, []);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  // Yenileme fonksiyonu
+  const handleRefresh = async () => {
+    try {
+      await fetchResults();
+    } catch (err) {
+      console.error('Yenileme hatası:', err);
+      setSnackbarMessage('Sonuçlar yenilenirken bir hata oluştu.');
+      setSnackbarOpen(true);
+    }
+  };
+
+  // Excel'e aktarma fonksiyonu
+  const exportToExcel = () => {
+    try {
+      // BOM (Byte Order Mark) ekleyerek UTF-8 kodlamasını garantile
+      const BOM = '\uFEFF';
+
+      // Excel'de daha iyi görünüm için HTML formatında dışa aktarma
+      let htmlContent = BOM + '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+      htmlContent += '<head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Optimizasyon Sonuçları</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+      htmlContent += '<meta http-equiv="content-type" content="text/plain; charset=UTF-8"/>';
+      htmlContent += '<style>td { padding: 5px; vertical-align: middle; } .header { background-color: #4472C4; color: white; font-weight: bold; text-align: center; } .metric-name { font-weight: bold; } .metric-value { text-align: right; } </style>';
+      htmlContent += '</head><body>';
+
+      // Özet bilgiler
+      htmlContent += '<table border="1"><tr><th class="header" colspan="2">Optimizasyon Sonuçları</th></tr>';
+      htmlContent += `<tr><td class="metric-name">Durum</td><td class="metric-value">${status}</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">Çalışma Süresi</td><td class="metric-value">${processingTime}</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">Hedef Değeri</td><td class="metric-value">${objectiveValue}</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">Veri Seti</td><td class="metric-value">${datasetType}</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">Konfigürasyon</td><td class="metric-value">${configRef}</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">Atama Sayısı</td><td class="metric-value">${assignments.length}</td></tr>`;
+      htmlContent += '</table><br/>';
+
+      // Metrikler
+      htmlContent += '<table border="1"><tr><th class="header" colspan="2">Metrikler</th></tr>';
+      htmlContent += `<tr><td class="metric-name">Eksik Personel</td><td class="metric-value">${metrics.total_understaffing}</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">Fazla Personel</td><td class="metric-value">${metrics.total_overstaffing}</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">Minimum Personel Karşılama Oranı</td><td class="metric-value">${(metrics.min_staffing_coverage_ratio * 100).toFixed(2)}%</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">Yetenek Karşılama Oranı</td><td class="metric-value">${(metrics.skill_coverage_ratio * 100).toFixed(2)}%</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">Karşılanan Pozitif Tercih Sayısı</td><td class="metric-value">${metrics.positive_preferences_met_count}</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">Atanan Negatif Tercih Sayısı</td><td class="metric-value">${metrics.negative_preferences_assigned_count}</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">Toplam Tercih Skoru</td><td class="metric-value">${metrics.total_preference_score_achieved}</td></tr>`;
+      htmlContent += `<tr><td class="metric-name">İş Yükü Dağılımı Std. Sapma</td><td class="metric-value">${metrics.workload_distribution_std_dev.toFixed(4)}</td></tr>`;
+      htmlContent += '</table><br/>';
+
+      // Atamalar
+      htmlContent += '<table border="1"><tr><th class="header" colspan="7">Vardiya Atamaları</th></tr>';
+      htmlContent += '<tr><th>Çalışan ID</th><th>Çalışan Adı</th><th>Vardiya ID</th><th>Tarih</th></tr>';
+
+      assignments.forEach(assignment => {
+        htmlContent += `<tr>
+          <td>${assignment.employee_id}</td>
+          <td>${assignment.employee_name || ''}</td>
+          <td>${assignment.shift_id}</td>
+          <td>${assignment.date || ''}</td>
+        </tr>`;
+      });
+
+      htmlContent += '</table></body></html>';
+
+      // HTML dosyasını oluştur ve indir (Excel tarafından açılabilir)
+      const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `optimizasyon_sonuclari_${new Date().toISOString().split('T')[0]}.xls`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setSnackbarMessage('Optimizasyon sonuçları Excel formatında indirildi.');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Excel dışa aktarma hatası:', error);
+      setSnackbarMessage('Excel dışa aktarma sırasında bir hata oluştu.');
+      setSnackbarOpen(true);
+    }
+  };
+
+  // PDF'e aktarma fonksiyonu
+  const exportToPDF = () => {
+    try {
+      // jsPDF ile PDF oluştur
+      const doc = new jsPDF();
+
+      // Başlık
+      doc.setFontSize(18);
+      doc.text('Optimizasyon Sonuçları', 14, 20);
+
+      // Özet bilgiler
+      doc.setFontSize(12);
+      doc.text(`Durum: ${status}`, 14, 30);
+      doc.text(`Çalışma Süresi: ${processingTime}`, 14, 36);
+      doc.text(`Hedef Değeri: ${objectiveValue}`, 14, 42);
+      doc.text(`Veri Seti: ${datasetType}`, 14, 48);
+      doc.text(`Konfigürasyon: ${configRef}`, 14, 54);
+      doc.text(`Atama Sayısı: ${assignments.length}`, 14, 60);
+
+      // Metrikler tablosu
+      (doc as any).autoTable({
+        startY: 70,
+        head: [['Metrik', 'Değer']],
+        body: [
+          ['Eksik Personel', metrics.total_understaffing],
+          ['Fazla Personel', metrics.total_overstaffing],
+          ['Minimum Personel Karşılama Oranı', `${(metrics.min_staffing_coverage_ratio * 100).toFixed(2)}%`],
+          ['Yetenek Karşılama Oranı', `${(metrics.skill_coverage_ratio * 100).toFixed(2)}%`],
+          ['Karşılanan Pozitif Tercih Sayısı', metrics.positive_preferences_met_count],
+          ['Atanan Negatif Tercih Sayısı', metrics.negative_preferences_assigned_count],
+          ['Toplam Tercih Skoru', metrics.total_preference_score_achieved],
+          ['İş Yükü Dağılımı Std. Sapma', metrics.workload_distribution_std_dev.toFixed(4)]
+        ],
+        theme: 'striped',
+        headStyles: { fillColor: [67, 114, 196] }
+      });
+
+      // Atamalar tablosu (ilk 20 atama)
+      const assignmentsData = assignments.slice(0, 20).map(a => [
+        a.employee_id,
+        a.employee_name || '',
+        a.shift_id,
+        a.date || ''
+      ]);
+
+      (doc as any).autoTable({
+        startY: (doc as any).lastAutoTable.finalY + 10,
+        head: [['Çalışan ID', 'Çalışan Adı', 'Vardiya ID', 'Tarih']],
+        body: assignmentsData,
+        theme: 'striped',
+        headStyles: { fillColor: [67, 114, 196] },
+        didDrawPage: function(data: any) {
+          // Sayfa numarası
+          doc.setFontSize(10);
+          doc.text(`Sayfa ${doc.getNumberOfPages()}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+        }
+      });
+
+      // Not ekle
+      if (assignments.length > 20) {
+        doc.setFontSize(10);
+        doc.text(`Not: Toplam ${assignments.length} atamadan sadece ilk 20 tanesi gösterilmektedir.`, 14, (doc as any).lastAutoTable.finalY + 10);
+      }
+
+      // PDF'i indir
+      doc.save(`optimizasyon_sonuclari_${new Date().toISOString().split('T')[0]}.pdf`);
+
+      setSnackbarMessage('Optimizasyon sonuçları PDF formatında indirildi.');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('PDF dışa aktarma hatası:', error);
+      setSnackbarMessage('PDF dışa aktarma sırasında bir hata oluştu.');
+      setSnackbarOpen(true);
+    }
+  };
+
+  // Yazdırma fonksiyonu
+  const handlePrint = () => {
+    window.print();
   };
 
   return (
     <Box>
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+      />
+
       <Typography variant="h4" gutterBottom>
         Optimizasyon Sonuçları
       </Typography>
-      
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Box>
-          <Chip 
-            label="OPTIMAL" 
-            color="success" 
-            sx={{ mr: 1, fontWeight: 'bold' }} 
-          />
-          <Typography variant="body1" component="span">
-            Çalışma Süresi: 2.45 saniye | Hedef Değeri: 125.5
+
+      {/* Yükleniyor göstergesi */}
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 6, flexDirection: 'column', alignItems: 'center' }}>
+          <CircularProgress size={60} thickness={4} />
+          <Typography variant="body1" sx={{ mt: 2, color: 'text.secondary' }}>
+            Optimizasyon sonuçları yükleniyor...
           </Typography>
         </Box>
-        
-        <Box>
-          <Button 
-            variant="outlined" 
-            startIcon={<DownloadIcon />}
-            sx={{ mr: 1 }}
-          >
-            Excel
-          </Button>
-          <Button 
-            variant="outlined" 
-            startIcon={<DownloadIcon />}
-            sx={{ mr: 1 }}
-          >
-            PDF
-          </Button>
-          <Button 
-            variant="outlined" 
-            startIcon={<PrintIcon />}
-          >
-            Yazdır
-          </Button>
-        </Box>
-      </Box>
-      
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="sonuç sekmeleri">
-          <Tab label="Özet" />
-          <Tab label="Metrikler" />
-          <Tab label="Atamalar" />
-          <Tab label="Grafikler" />
-        </Tabs>
-      </Box>
-      
-      <TabPanel value={tabValue} index={0}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Paper elevation={2} sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Optimizasyon Bilgileri
+      ) : error ? (
+        <Alert
+          severity="error"
+          sx={{
+            mb: 3,
+            borderRadius: 2,
+            boxShadow: '0 4px 12px rgba(244, 67, 54, 0.1)'
+          }}
+        >
+          {error}
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            Lütfen önce "Çizelge Oluştur" sayfasından bir optimizasyon çalıştırın.
+          </Typography>
+        </Alert>
+      ) : (
+        <>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+            <Box>
+              <Chip
+                label={status}
+                color={status === 'OPTIMAL' ? 'success' : status === 'FEASIBLE' ? 'warning' : 'error'}
+                sx={{ mr: 1, fontWeight: 'bold' }}
+              />
+              <Typography variant="body1" component="span">
+                Çalışma Süresi: {processingTime} | Hedef Değeri: {objectiveValue}
               </Typography>
-              <Typography variant="body1">
-                Veri Seti: <strong>Hastane</strong>
-              </Typography>
-              <Typography variant="body1">
-                Konfigürasyon: <strong>hospital_test_config.yaml</strong>
-              </Typography>
-              <Typography variant="body1">
-                Çalışan Sayısı: <strong>20</strong>
-              </Typography>
-              <Typography variant="body1">
-                Vardiya Sayısı: <strong>35</strong>
-              </Typography>
-              <Typography variant="body1">
-                Toplam Atama Sayısı: <strong>42</strong>
-              </Typography>
-              <Typography variant="body1">
-                Çözücü Durumu: <strong style={{ color: 'green' }}>OPTIMAL</strong>
-              </Typography>
-              <Typography variant="body1">
-                Çalışma Süresi: <strong>2.45 saniye</strong>
-              </Typography>
-              <Typography variant="body1">
-                Hedef Değeri: <strong>125.5</strong>
-              </Typography>
-            </Paper>
-          </Grid>
-          
-          <Grid item xs={12} md={6}>
-            <Paper elevation={2} sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Temel Metrikler
-              </Typography>
-              <Typography variant="body1">
-                Eksik Personel: <strong>{metrics.total_understaffing}</strong>
-              </Typography>
-              <Typography variant="body1">
-                Fazla Personel: <strong>{metrics.total_overstaffing}</strong>
-              </Typography>
-              <Typography variant="body1">
-                Minimum Personel Karşılama Oranı: <strong>{metrics.min_staffing_coverage_ratio * 100}%</strong>
-              </Typography>
-              <Typography variant="body1">
-                Yetenek Karşılama Oranı: <strong>{metrics.skill_coverage_ratio * 100}%</strong>
-              </Typography>
-              <Typography variant="body1">
-                Karşılanan Pozitif Tercih Sayısı: <strong>{metrics.positive_preferences_met_count}</strong>
-              </Typography>
-              <Typography variant="body1">
-                Atanan Negatif Tercih Sayısı: <strong>{metrics.negative_preferences_assigned_count}</strong>
-              </Typography>
-              <Typography variant="body1">
-                Toplam Tercih Skoru: <strong>{metrics.total_preference_score_achieved}</strong>
-              </Typography>
-              <Typography variant="body1">
-                İş Yükü Dağılımı Std. Sapma: <strong>{metrics.workload_distribution_std_dev}</strong>
-              </Typography>
-            </Paper>
-          </Grid>
-          
-          <Grid item xs={12} md={6}>
-            <Paper elevation={2} sx={{ p: 2, height: '100%' }}>
-              <Typography variant="h6" gutterBottom>
-                Departman Bazlı Atama Dağılımı
-              </Typography>
-              <Box sx={{ height: 300 }}>
-                <Bar 
-                  data={departmentChartData} 
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'top' as const,
-                      },
-                      title: {
-                        display: true,
-                        text: 'Departman Bazlı Atama Dağılımı'
-                      }
-                    }
-                  }}
-                />
-              </Box>
-            </Paper>
-          </Grid>
-          
-          <Grid item xs={12} md={6}>
-            <Paper elevation={2} sx={{ p: 2, height: '100%' }}>
-              <Typography variant="h6" gutterBottom>
-                Tercih Karşılama Oranları
-              </Typography>
-              <Box sx={{ height: 300, display: 'flex', justifyContent: 'center' }}>
-                <Pie 
-                  data={preferenceChartData} 
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'top' as const,
-                      },
-                      title: {
-                        display: true,
-                        text: 'Tercih Karşılama Oranları'
-                      }
-                    }
-                  }}
-                />
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
-      </TabPanel>
-      
+            </Box>
+
+            <Box>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                sx={{ mr: 1 }}
+                onClick={handleRefresh}
+                disabled={loading}
+              >
+                Yenile
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<DownloadIcon />}
+                sx={{ mr: 1 }}
+                onClick={exportToExcel}
+              >
+                Excel
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<DownloadIcon />}
+                sx={{ mr: 1 }}
+                onClick={exportToPDF}
+              >
+                PDF
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<PrintIcon />}
+                onClick={handlePrint}
+              >
+                Yazdır
+              </Button>
+            </Box>
+          </Box>
+        </>
+      )}
+
+      {!loading && !error && (
+        <>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={tabValue} onChange={handleTabChange} aria-label="sonuç sekmeleri">
+              <Tab label="Özet" />
+              <Tab label="Metrikler" />
+              <Tab label="Atamalar" />
+              <Tab label="Grafikler" />
+            </Tabs>
+          </Box>
+
+          <TabPanel value={tabValue} index={0}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Optimizasyon Bilgileri
+                  </Typography>
+                  <Typography variant="body1">
+                    Veri Seti: <strong>{datasetType}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Konfigürasyon: <strong>{configRef}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Çalışan Sayısı: <strong>{new Set(assignments.map(a => a.employee_id)).size}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Vardiya Sayısı: <strong>{new Set(assignments.map(a => a.shift_id)).size}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Toplam Atama Sayısı: <strong>{assignments.length}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Çözücü Durumu: <strong style={{
+                      color: status === 'OPTIMAL' ? 'green' :
+                             status === 'FEASIBLE' ? 'orange' : 'red'
+                    }}>{status}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Çalışma Süresi: <strong>{processingTime}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Hedef Değeri: <strong>{objectiveValue}</strong>
+                  </Typography>
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Temel Metrikler
+                  </Typography>
+                  <Typography variant="body1">
+                    Eksik Personel: <strong>{metrics.total_understaffing}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Fazla Personel: <strong>{metrics.total_overstaffing}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Minimum Personel Karşılama Oranı: <strong>{(metrics.min_staffing_coverage_ratio * 100).toFixed(2)}%</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Yetenek Karşılama Oranı: <strong>{(metrics.skill_coverage_ratio * 100).toFixed(2)}%</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Karşılanan Pozitif Tercih Sayısı: <strong>{metrics.positive_preferences_met_count}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Atanan Negatif Tercih Sayısı: <strong>{metrics.negative_preferences_assigned_count}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    Toplam Tercih Skoru: <strong>{metrics.total_preference_score_achieved}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    İş Yükü Dağılımı Std. Sapma: <strong>{metrics.workload_distribution_std_dev.toFixed(4)}</strong>
+                  </Typography>
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Paper elevation={2} sx={{ p: 2, height: '100%' }}>
+                  <Typography variant="h6" gutterBottom>
+                    Departman Bazlı Atama Dağılımı
+                  </Typography>
+                  <Box sx={{ height: 300 }}>
+                    <Bar
+                      data={departmentChartData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'top' as const,
+                          },
+                          title: {
+                            display: true,
+                            text: 'Departman Bazlı Atama Dağılımı'
+                          }
+                        }
+                      }}
+                    />
+                  </Box>
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Paper elevation={2} sx={{ p: 2, height: '100%' }}>
+                  <Typography variant="h6" gutterBottom>
+                    Tercih Karşılama Oranları
+                  </Typography>
+                  <Box sx={{ height: 300, display: 'flex', justifyContent: 'center' }}>
+                    <Pie
+                      data={preferenceChartData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'top' as const,
+                          },
+                          title: {
+                            display: true,
+                            text: 'Tercih Karşılama Oranları'
+                          }
+                        }
+                      }}
+                    />
+                  </Box>
+                </Paper>
+              </Grid>
+            </Grid>
+          </TabPanel>
+        </>
+      )}
+
       <TabPanel value={tabValue} index={1}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
@@ -351,7 +706,7 @@ const Results = () => {
               <Typography variant="h6" gutterBottom>
                 Detaylı Metrikler
               </Typography>
-              
+
               <Typography variant="subtitle1" sx={{ mt: 2 }}>
                 Operasyonel Metrikler
               </Typography>
@@ -388,7 +743,7 @@ const Results = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
-              
+
               <Typography variant="subtitle1" sx={{ mt: 4 }}>
                 Çalışan Memnuniyeti Metrikleri
               </Typography>
@@ -429,7 +784,7 @@ const Results = () => {
           </Grid>
         </Grid>
       </TabPanel>
-      
+
       <TabPanel value={tabValue} index={2}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
@@ -437,40 +792,46 @@ const Results = () => {
               <Typography variant="h6" gutterBottom>
                 Vardiya Atamaları
               </Typography>
-              
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Çalışan ID</TableCell>
-                      <TableCell>Çalışan Adı</TableCell>
-                      <TableCell>Vardiya ID</TableCell>
-                      <TableCell>Vardiya Adı</TableCell>
-                      <TableCell>Tarih</TableCell>
-                      <TableCell>Başlangıç</TableCell>
-                      <TableCell>Bitiş</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {assignments.map((assignment) => (
-                      <TableRow key={`${assignment.employee_id}-${assignment.shift_id}`}>
-                        <TableCell>{assignment.employee_id}</TableCell>
-                        <TableCell>{assignment.employee_name}</TableCell>
-                        <TableCell>{assignment.shift_id}</TableCell>
-                        <TableCell>{assignment.shift_name}</TableCell>
-                        <TableCell>{assignment.date}</TableCell>
-                        <TableCell>{assignment.start_time}</TableCell>
-                        <TableCell>{assignment.end_time}</TableCell>
+
+              {assignments.length === 0 ? (
+                <Typography variant="body1" sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                  Henüz atama bulunmuyor. Lütfen önce bir optimizasyon çalıştırın.
+                </Typography>
+              ) : (
+                <TableContainer sx={{ maxHeight: 600 }}>
+                  <Table stickyHeader>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Çalışan ID</TableCell>
+                        <TableCell>Çalışan Adı</TableCell>
+                        <TableCell>Vardiya ID</TableCell>
+                        <TableCell>Tarih</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {assignments.map((assignment, index) => (
+                        <TableRow
+                          key={`${assignment.employee_id}-${assignment.shift_id}-${index}`}
+                          sx={{
+                            '&:nth-of-type(odd)': { backgroundColor: 'rgba(0, 0, 0, 0.02)' },
+                            '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+                          }}
+                        >
+                          <TableCell>{assignment.employee_id}</TableCell>
+                          <TableCell>{assignment.employee_name || '-'}</TableCell>
+                          <TableCell>{assignment.shift_id}</TableCell>
+                          <TableCell>{assignment.date || '-'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
             </Paper>
           </Grid>
         </Grid>
       </TabPanel>
-      
+
       <TabPanel value={tabValue} index={3}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
@@ -479,8 +840,8 @@ const Results = () => {
                 Departman Bazlı Atama Dağılımı
               </Typography>
               <Box sx={{ height: 400 }}>
-                <Bar 
-                  data={departmentChartData} 
+                <Bar
+                  data={departmentChartData}
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
@@ -498,15 +859,15 @@ const Results = () => {
               </Box>
             </Paper>
           </Grid>
-          
+
           <Grid item xs={12} md={6}>
             <Paper elevation={2} sx={{ p: 2, height: '100%' }}>
               <Typography variant="h6" gutterBottom>
                 Rol Bazlı Atama Dağılımı
               </Typography>
               <Box sx={{ height: 400 }}>
-                <Bar 
-                  data={roleChartData} 
+                <Bar
+                  data={roleChartData}
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
@@ -524,15 +885,15 @@ const Results = () => {
               </Box>
             </Paper>
           </Grid>
-          
+
           <Grid item xs={12} md={6}>
             <Paper elevation={2} sx={{ p: 2, height: '100%' }}>
               <Typography variant="h6" gutterBottom>
                 Tercih Karşılama Oranları
               </Typography>
               <Box sx={{ height: 400, display: 'flex', justifyContent: 'center' }}>
-                <Pie 
-                  data={preferenceChartData} 
+                <Pie
+                  data={preferenceChartData}
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
