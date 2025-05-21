@@ -167,16 +167,29 @@ const MainLayout = () => {
           </IconButton>
 
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                borderRadius: '4px',
+                py: 0.5,
+                px: 1.5,
+                mr: 1
+              }}
+            >
+              <AssessmentIcon sx={{ color: 'white', mr: 1, fontSize: '1.2rem' }} />
+            </Box>
             <Typography
               variant="h6"
               noWrap
               component="div"
               sx={{
                 display: { xs: 'none', sm: 'block' },
-                color: theme.palette.primary.main,
-                fontWeight: 'bold',
-                letterSpacing: '0.5px',
-                textShadow: '0px 1px 1px rgba(255, 255, 255, 0.84)'
+                color: theme.palette.text.primary,
+                fontWeight: 600,
+                letterSpacing: '0.3px',
+                fontSize: '1rem'
               }}
             >
               Kurumsal Optimizasyon ve Otomasyon Çözümü
