@@ -1,182 +1,182 @@
 [
   {
     "id": "act21",
-    "date": "20.05.2025 18:21",
+    "date": "21.05.2025 17:03",
     "action": "Çizelgeleme tamamlandı",
     "detail": "Başarılı optimizasyon",
     "color": "primary.main",
     "icon": "BoltIcon",
-    "timestamp": 1747754465
+    "timestamp": 1747836225
   },
   {
     "id": "act21",
-    "date": "20.05.2025 18:13",
+    "date": "21.05.2025 16:45",
     "action": "Çizelgeleme tamamlandı",
     "detail": "Başarılı optimizasyon",
     "color": "primary.main",
     "icon": "BoltIcon",
-    "timestamp": 1747754014
+    "timestamp": 1747835115
   },
   {
     "id": "act21",
-    "date": "20.05.2025 18:07",
+    "date": "21.05.2025 16:44",
     "action": "Çizelgeleme tamamlandı",
     "detail": "Başarılı optimizasyon",
     "color": "primary.main",
     "icon": "BoltIcon",
-    "timestamp": 1747753661
+    "timestamp": 1747835058
   },
   {
     "id": "act21",
-    "date": "20.05.2025 18:06",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747753594
+    "date": "21.05.2025 16:35",
+    "action": "Çizelgeleme tamamlanamadı",
+    "detail": "Uygun çözüm bulunamadı",
+    "color": "error.main",
+    "icon": "ErrorIcon",
+    "timestamp": 1747834546
   },
   {
     "id": "act21",
-    "date": "14.05.2025 15:05",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747224316
+    "date": "21.05.2025 16:32",
+    "action": "Çizelgeleme tamamlanamadı",
+    "detail": "Uygun çözüm bulunamadı",
+    "color": "error.main",
+    "icon": "ErrorIcon",
+    "timestamp": 1747834376
   },
   {
     "id": "act21",
-    "date": "14.05.2025 13:58",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747220291
+    "date": "21.05.2025 16:29",
+    "action": "Çizelgeleme tamamlanamadı",
+    "detail": "Uygun çözüm bulunamadı",
+    "color": "error.main",
+    "icon": "ErrorIcon",
+    "timestamp": 1747834175
   },
   {
     "id": "act21",
-    "date": "14.05.2025 13:57",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747220254
+    "date": "21.05.2025 16:28",
+    "action": "Çizelgeleme tamamlanamadı",
+    "detail": "Uygun çözüm bulunamadı",
+    "color": "error.main",
+    "icon": "ErrorIcon",
+    "timestamp": 1747834117
   },
   {
     "id": "act21",
-    "date": "14.05.2025 13:55",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747220138
+    "date": "21.05.2025 16:28",
+    "action": "Veri dosyası güncellendi",
+    "detail": "hastane veri setindeki preferences.csv dosyası güncellendi",
+    "color": "info.main",
+    "icon": "CloudUploadIcon",
+    "timestamp": 1747834109
   },
   {
     "id": "act21",
-    "date": "14.05.2025 13:52",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747219936
+    "date": "21.05.2025 16:28",
+    "action": "Veri dosyası güncellendi",
+    "detail": "hastane veri setindeki availability.csv dosyası güncellendi",
+    "color": "info.main",
+    "icon": "CloudUploadIcon",
+    "timestamp": 1747834106
   },
   {
     "id": "act21",
-    "date": "14.05.2025 13:46",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747219610
+    "date": "21.05.2025 16:28",
+    "action": "Veri dosyası güncellendi",
+    "detail": "hastane veri setindeki skills.csv dosyası güncellendi",
+    "color": "info.main",
+    "icon": "CloudUploadIcon",
+    "timestamp": 1747834102
   },
   {
     "id": "act21",
-    "date": "14.05.2025 13:42",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747219323
+    "date": "21.05.2025 16:28",
+    "action": "Veri dosyası güncellendi",
+    "detail": "hastane veri setindeki shifts.csv dosyası güncellendi",
+    "color": "info.main",
+    "icon": "CloudUploadIcon",
+    "timestamp": 1747834096
   },
   {
     "id": "act21",
-    "date": "14.05.2025 13:32",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747218721
+    "date": "21.05.2025 16:28",
+    "action": "Veri dosyası güncellendi",
+    "detail": "hastane veri setindeki employees.csv dosyası güncellendi",
+    "color": "info.main",
+    "icon": "CloudUploadIcon",
+    "timestamp": 1747834093
   },
   {
     "id": "act21",
-    "date": "14.05.2025 13:08",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747217296
+    "date": "21.05.2025 16:26",
+    "action": "Çizelgeleme tamamlanamadı",
+    "detail": "Uygun çözüm bulunamadı",
+    "color": "error.main",
+    "icon": "ErrorIcon",
+    "timestamp": 1747833965
   },
   {
     "id": "act21",
-    "date": "14.05.2025 12:26",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747214761
+    "date": "21.05.2025 16:24",
+    "action": "Çizelgeleme tamamlanamadı",
+    "detail": "Uygun çözüm bulunamadı",
+    "color": "error.main",
+    "icon": "ErrorIcon",
+    "timestamp": 1747833886
   },
   {
     "id": "act21",
-    "date": "14.05.2025 12:13",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747214010
+    "date": "21.05.2025 15:35",
+    "action": "Veri dosyası güncellendi",
+    "detail": "hastane veri setindeki employees.csv dosyası güncellendi",
+    "color": "info.main",
+    "icon": "CloudUploadIcon",
+    "timestamp": 1747830929
   },
   {
     "id": "act21",
-    "date": "14.05.2025 12:11",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747213880
+    "date": "21.05.2025 14:48",
+    "action": "Veri dosyası güncellendi",
+    "detail": "hastane veri setindeki employees.csv dosyası güncellendi",
+    "color": "info.main",
+    "icon": "CloudUploadIcon",
+    "timestamp": 1747828119
   },
   {
     "id": "act21",
-    "date": "14.05.2025 12:01",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747213283
+    "date": "21.05.2025 13:38",
+    "action": "Veri dosyası güncellendi",
+    "detail": "hastane veri setindeki employees.csv dosyası güncellendi",
+    "color": "info.main",
+    "icon": "CloudUploadIcon",
+    "timestamp": 1747823904
   },
   {
     "id": "act21",
-    "date": "14.05.2025 12:01",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747213272
+    "date": "21.05.2025 13:38",
+    "action": "Veri dosyası güncellendi",
+    "detail": "hastane veri setindeki employees.csv dosyası güncellendi",
+    "color": "info.main",
+    "icon": "CloudUploadIcon",
+    "timestamp": 1747823895
   },
   {
     "id": "act21",
-    "date": "14.05.2025 12:00",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747213206
+    "date": "21.05.2025 13:37",
+    "action": "Veri dosyası güncellendi",
+    "detail": "hastane veri setindeki employees.csv dosyası güncellendi",
+    "color": "info.main",
+    "icon": "CloudUploadIcon",
+    "timestamp": 1747823867
   },
   {
     "id": "act21",
-    "date": "14.05.2025 11:59",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747213188
+    "date": "21.05.2025 13:30",
+    "action": "Veri dosyası güncellendi",
+    "detail": "hastane veri setindeki employees.csv dosyası güncellendi",
+    "color": "info.main",
+    "icon": "CloudUploadIcon",
+    "timestamp": 1747823400
   }
 ]

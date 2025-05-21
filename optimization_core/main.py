@@ -12,16 +12,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator, ValidationError
 from datetime import date, datetime, time as dt_time # time ile çakışmaması için dt_time
 
-# Dashboard API'sini içe aktar
+# API modüllerini içe aktar
 try:
     from optimization_core.dashboard_api import router as dashboard_router
-    from optimization_core.activity_logger import log_optimization_activity, log_configuration_update, log_dataset_added
+    from optimization_core.management_api import router as management_router
+    from optimization_core.results_api import router as results_router
+    from optimization_core.webhook_api import router as webhook_router
+    from optimization_core.activity_logger import log_optimization_activity
     from optimization_core.cp_model_builder import ShiftSchedulingModelBuilder
+    from optimization_core.utils import get_project_root, load_json_file, save_json_file, format_error_response
 except ImportError:
     # Doğrudan çalıştırıldığında (development) farklı import yolu
     from dashboard_api import router as dashboard_router
-    from activity_logger import log_optimization_activity, log_configuration_update, log_dataset_added
+    from management_api import router as management_router
+    from results_api import router as results_router
+    from webhook_api import router as webhook_router
+    from activity_logger import log_optimization_activity
     from cp_model_builder import ShiftSchedulingModelBuilder
+    from utils import get_project_root, load_json_file, save_json_file, format_error_response
 
 # --- Logging Kurulumu ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -132,39 +140,11 @@ app.add_middleware(
     allow_headers=["*"],  # Tüm headerlara izin ver
 )
 
-# Dashboard API router'ını ekle
+# API router'larını ekle
 app.include_router(dashboard_router, tags=["Dashboard"])
-
-# --- Webhook Handler ---
-@app.post("/webhook/optimization")
-async def webhook_handler(request: Request):
-    """
-    n8n'den gelen webhook isteklerini işler.
-    URL parametreleri:
-    - veriSeti: Hangi veri setinin kullanılacağı (hastane, cagri_merkezi)
-    - kurallar: Hangi konfigürasyon dosyasının kullanılacağı
-    """
-    try:
-        # URL parametrelerini al
-        params = dict(request.query_params)
-        logger.info(f"Webhook isteği alındı. Parametreler: {params}")
-
-        # Body'yi al
-        body = await request.json()
-        logger.info(f"Webhook body: {body}")
-
-        # Veri seti tipini belirle
-        veri_seti = params.get("veriSeti", "")
-        dataset_type = "Hastane" if veri_seti.lower() == "hastane" else "Çağrı Merkezi"
-
-        # Aktivite log dosyasına kayıt ekle
-        log_optimization_activity(dataset_type, "WEBHOOK_RECEIVED")
-
-        # İşlem başarılı mesajı döndür
-        return {"status": "success", "message": f"{dataset_type} veri seti için webhook isteği alındı"}
-    except Exception as e:
-        logger.error(f"Webhook işlenirken hata: {e}", exc_info=True)
-        return {"status": "error", "message": str(e)}
+app.include_router(management_router, tags=["Management"])
+app.include_router(results_router, tags=["Results"])
+app.include_router(webhook_router, tags=["Webhook"])
 
 # --- Hata Yönetimi (Validation Errors için) ---
 @app.exception_handler(RequestValidationError)
@@ -429,109 +409,7 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
     return response
 
 # --- API Endpoints ---
-@app.get("/api/results")
-async def get_results():
-    """Optimizasyon sonuçlarını döndürür."""
-    try:
-        # Optimizasyon sonuçlarını yükle
-        result_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "optimization_result.json")
-        logger.info(f"Optimizasyon sonuçları okunuyor: {result_path}")
-
-        if not os.path.exists(result_path):
-            logger.error(f"Optimizasyon sonuç dosyası bulunamadı: {result_path}")
-            raise HTTPException(status_code=404, detail="Optimizasyon sonuçları bulunamadı. Lütfen önce bir optimizasyon çalıştırın.")
-
-        # JSON dosyasını oku
-        with open(result_path, 'r', encoding='utf-8') as f:
-            optimization_result = json.load(f)
-
-        # Çalışan isimlerini ekle
-        if optimization_result.get("solution") and optimization_result["solution"].get("assignments"):
-            # Veri setini belirle
-            dataset_type = "cagri_merkezi" if optimization_result["solution"]["assignments"][0]["employee_id"].startswith("CM_") else "hastane"
-
-            try:
-                # Çalışan verilerini oku
-                employees_path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                                             "synthetic_data_cagri_merkezi/employees_cm.csv" if dataset_type == "cagri_merkezi" else "synthetic_data/employees.csv")
-
-                if os.path.exists(employees_path):
-                    import pandas as pd
-                    employees_df = pd.read_csv(employees_path)
-                    employees_dict = {row["employee_id"]: row["name"] for _, row in employees_df.iterrows()}
-
-                    # Atamalara çalışan isimlerini ekle
-                    for assignment in optimization_result["solution"]["assignments"]:
-                        employee_id = assignment["employee_id"]
-                        if employee_id in employees_dict:
-                            assignment["employee_name"] = employees_dict[employee_id]
-                        else:
-                            # Eğer çalışan bulunamazsa, ID'den bir isim oluştur
-                            assignment["employee_name"] = f"Çalışan {employee_id.replace('CM_E', '').replace('E', '')}"
-                else:
-                    logger.warning(f"Çalışan verileri dosyası bulunamadı: {employees_path}")
-            except Exception as e:
-                logger.error(f"Çalışan isimleri eklenirken hata: {e}")
-
-        return optimization_result
-    except HTTPException as http_exc:
-        raise http_exc
-    except Exception as e:
-        logger.error(f"Optimizasyon sonuçlarını okurken hata: {e}")
-        raise HTTPException(status_code=500, detail=f"Optimizasyon sonuçlarını okurken hata: {str(e)}")
-
-@app.get("/api/shifts")
-async def get_shifts(datasetType: str = Query(..., description="Veri seti tipi (hastane veya cagri_merkezi)")):
-    """Vardiya verilerini döndürür."""
-    try:
-        # Veri setine göre dosya yolunu belirle
-        file_path = "synthetic_data/shifts.csv" if datasetType == "hastane" else "synthetic_data_cagri_merkezi/shifts_cm.csv"
-
-        # CSV dosyasını oku
-        import pandas as pd
-        shifts_df = pd.read_csv(file_path)
-
-        # JSON formatına dönüştür
-        shifts_list = shifts_df.to_dict(orient="records")
-
-        return shifts_list
-    except Exception as e:
-        logger.error(f"Vardiya verilerini okurken hata: {e}")
-        raise HTTPException(status_code=500, detail=f"Vardiya verilerini okurken hata: {str(e)}")
-
-@app.get("/api/employees")
-async def get_employees(datasetType: str = Query(..., description="Veri seti tipi (hastane veya cagri_merkezi)")):
-    """Çalışan verilerini döndürür."""
-    try:
-        # Veri setine göre dosya yolunu belirle
-        file_path = "synthetic_data/employees.csv" if datasetType == "hastane" else "synthetic_data_cagri_merkezi/employees_cm.csv"
-
-        logger.info(f"Çalışan verileri okunuyor: {file_path}")
-
-        # Dosyanın varlığını kontrol et
-        if not os.path.exists(file_path):
-            logger.error(f"Dosya bulunamadı: {file_path}")
-            # Proje kök dizinine göre yolu oluştur
-            script_dir = os.path.dirname(os.path.dirname(__file__))
-            file_path = os.path.join(script_dir, file_path)
-            logger.info(f"Alternatif dosya yolu deneniyor: {file_path}")
-
-            if not os.path.exists(file_path):
-                logger.error(f"Alternatif dosya yolu da bulunamadı: {file_path}")
-                raise HTTPException(status_code=404, detail=f"Çalışan verileri dosyası bulunamadı: {file_path}")
-
-        # CSV dosyasını oku
-        import pandas as pd
-        employees_df = pd.read_csv(file_path)
-
-        # JSON formatına dönüştür
-        employees_list = employees_df.to_dict(orient="records")
-
-        logger.info(f"Toplam {len(employees_list)} çalışan verisi okundu.")
-        return employees_list
-    except Exception as e:
-        logger.error(f"Çalışan verilerini okurken hata: {e}")
-        raise HTTPException(status_code=500, detail=f"Çalışan verilerini okurken hata: {str(e)}")
+# /api/results, /api/shifts ve /api/employees endpoint'leri ayrı modüllere taşındı
 
 # Uygulamayı çalıştırmak için (terminalden):
 # uvicorn optimization_core.main:app --reload --port 8000

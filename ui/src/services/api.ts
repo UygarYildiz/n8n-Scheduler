@@ -252,6 +252,42 @@ export const api = {
       console.error('Konfigürasyon içeriğini alma hatası:', error);
       throw error;
     }
+  },
+
+  // Konfigürasyon dosyasını kaydetme
+  saveConfigurationContent: async (configId: string, content: string) => {
+    try {
+      const formData = new FormData();
+      formData.append('configId', configId);
+      formData.append('content', content);
+
+      const response = await axios.post('/api/configuration-content', formData);
+      return response.data;
+    } catch (error) {
+      console.error('Konfigürasyon içeriğini kaydetme hatası:', error);
+      throw error;
+    }
+  },
+
+  // Dosya yükleme
+  uploadFile: async (datasetId: string, fileType: string, file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('datasetId', datasetId);
+      formData.append('fileType', fileType);
+
+      const response = await axios.post('/api/upload-file', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Dosya yükleme hatası:', error);
+      throw error;
+    }
   }
 };
 

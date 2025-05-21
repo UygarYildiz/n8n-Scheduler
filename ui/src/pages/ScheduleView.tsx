@@ -32,7 +32,6 @@ import {
   Person as PersonIcon
 } from '@mui/icons-material';
 import { api } from '../services/api';
-import axios from 'axios';
 import { Assignment } from '../types';
 
 interface TabPanelProps {
@@ -200,10 +199,10 @@ const ScheduleView = () => {
           setCurrentWeek(startDate.toISOString().split('T')[0]);
         }
 
-        // Vardiya ve çalışan verilerini API'den al
+        // Vardiya ve çalışan verilerini oluştur
         const generatedShifts = await generateShiftsFromAssignments(processedAssignments, datasetType);
 
-        // Çalışan verilerini asenkron olarak al
+        // Çalışan verilerini oluştur
         const generatedEmployees = await generateEmployeesFromAssignments(processedAssignments, datasetType);
 
         // Debug bilgisi
@@ -345,87 +344,101 @@ const ScheduleView = () => {
     console.log('Benzersiz vardiya ID\'leri:', uniqueShiftIds.slice(0, 10)); // İlk 10 benzersiz vardiya ID'sini göster
 
     try {
-      // API'den vardiya verilerini al
-      const apiUrl = `http://localhost:8000/api/shifts?datasetType=${datasetType}`;
-      console.log('Vardiya API isteği URL:', apiUrl);
-
-      const shiftsResponse = await axios.get(apiUrl);
-      const shiftsData = shiftsResponse.data;
-      console.log('API\'den alınan vardiya verileri:', shiftsData.slice(0, 5));
-
+      // API çağrısını devre dışı bırakıp doğrudan vardiya tiplerini belirleyelim
+      // Vardiya ID'lerinden vardiya tiplerini çıkar
       return uniqueShiftIds.map(shiftId => {
-        // API'den gelen verilerden vardiya bilgilerini bul
-        const shiftData = shiftsData.find((s: any) => s.shift_id === shiftId);
-
         // Varsayılan değerler
         let shiftType = 'default';
         let shiftName = 'Vardiya';
         let shiftStartTime = '';
         let shiftEndTime = '';
 
-        if (shiftData) {
-          // API'den gelen verileri kullan
-          shiftName = shiftData.name || 'Vardiya';
-          shiftStartTime = shiftData.start_time || '';
-          shiftEndTime = shiftData.end_time || '';
+        // Vardiya tipini belirle (büyük/küçük harf duyarlılığını kaldır)
+        const lowerShiftId = shiftId.toLowerCase();
 
-          // Vardiya tipini belirle
-          const lowerShiftName = shiftName.toLowerCase();
-
-          if (lowerShiftName.includes('sabah') || lowerShiftName.includes('morning') || lowerShiftName.includes('gündüz')) {
-            shiftType = 'morning';
-          } else if (lowerShiftName.includes('akşam') || lowerShiftName.includes('afternoon') || lowerShiftName.includes('öğle')) {
-            shiftType = 'afternoon';
-          } else if (lowerShiftName.includes('gece') || lowerShiftName.includes('night')) {
-            shiftType = 'night';
-          }
-
-          // Saat bilgilerini formatla
-          if (shiftStartTime && shiftEndTime) {
-            const formattedStartTime = shiftStartTime.substring(0, 5); // "08:00:00" -> "08:00"
-            const formattedEndTime = shiftEndTime.substring(0, 5);     // "16:00:00" -> "16:00"
-
-            // Vardiya adını saat bilgisiyle birlikte göster
-            if (shiftType === 'morning') {
-              shiftName = `Sabah (${formattedStartTime}-${formattedEndTime})`;
-            } else if (shiftType === 'afternoon') {
-              shiftName = `Akşam (${formattedStartTime}-${formattedEndTime})`;
-            } else if (shiftType === 'night') {
-              shiftName = `Gece (${formattedStartTime}-${formattedEndTime})`;
-            } else {
-              shiftName = `Vardiya (${formattedStartTime}-${formattedEndTime})`;
-            }
-          }
-        } else {
-          // API'den veri gelmezse, vardiya ID'sinden çıkarım yap
-          const lowerShiftId = shiftId.toLowerCase();
-
+        // Hastane veri seti için varsayılan saat bilgileri
+        if (datasetType === 'hastane' || !datasetType.includes('cagri')) {
+          // Vardiya ID'sinden vardiya tipini belirle
           if (lowerShiftId.includes('morning') || lowerShiftId.includes('sabah') || lowerShiftId.includes('gunduz')) {
             shiftType = 'morning';
             shiftName = 'Sabah (08:00-16:00)';
+            shiftStartTime = '08:00';
+            shiftEndTime = '16:00';
           } else if (lowerShiftId.includes('afternoon') || lowerShiftId.includes('aksam') || lowerShiftId.includes('öğle')) {
             shiftType = 'afternoon';
             shiftName = 'Akşam (16:00-00:00)';
+            shiftStartTime = '16:00';
+            shiftEndTime = '00:00';
           } else if (lowerShiftId.includes('night') || lowerShiftId.includes('gece')) {
             shiftType = 'night';
             shiftName = 'Gece (00:00-08:00)';
-          }
+            shiftStartTime = '00:00';
+            shiftEndTime = '08:00';
+          } else {
+            // Eğer vardiya ID'sinde tip belirtilmemişse, vardiya numarasına göre belirle
+            // Örneğin: S001, S002, S003, ...
+            const shiftNumber = parseInt(shiftId.replace(/\D/g, '')) || 0;
+            const shiftMod = shiftNumber % 3;
 
-          // Çağrı merkezi için özel kontrol
-          if (lowerShiftId.startsWith('cm_')) {
-            // Vardiya ID'sinden vardiya tipini çıkar (örn: CM_S_20230501_morning)
-            const parts = shiftId.split('_');
-            const lastPart = parts[parts.length - 1].toLowerCase();
-
-            if (lastPart === 'morning' || lastPart === 'sabah') {
+            if (shiftMod === 0) {
               shiftType = 'morning';
               shiftName = 'Sabah (08:00-16:00)';
-            } else if (lastPart === 'afternoon' || lastPart === 'aksam' || lastPart === 'öğle') {
+              shiftStartTime = '08:00';
+              shiftEndTime = '16:00';
+            } else if (shiftMod === 1) {
               shiftType = 'afternoon';
               shiftName = 'Akşam (16:00-00:00)';
-            } else if (lastPart === 'night' || lastPart === 'gece') {
+              shiftStartTime = '16:00';
+              shiftEndTime = '00:00';
+            } else {
               shiftType = 'night';
               shiftName = 'Gece (00:00-08:00)';
+              shiftStartTime = '00:00';
+              shiftEndTime = '08:00';
+            }
+          }
+        }
+        // Çağrı merkezi için özel kontrol
+        else if (datasetType === 'cagri_merkezi' || lowerShiftId.startsWith('cm_')) {
+          // Vardiya ID'sinden vardiya tipini çıkar (örn: CM_S_20230501_morning)
+          const parts = shiftId.split('_');
+          const lastPart = parts[parts.length - 1].toLowerCase();
+
+          if (lastPart === 'morning' || lastPart === 'sabah') {
+            shiftType = 'morning';
+            shiftName = 'Sabah (08:00-16:00)';
+            shiftStartTime = '08:00';
+            shiftEndTime = '16:00';
+          } else if (lastPart === 'afternoon' || lastPart === 'aksam' || lastPart === 'öğle') {
+            shiftType = 'afternoon';
+            shiftName = 'Akşam (16:00-00:00)';
+            shiftStartTime = '16:00';
+            shiftEndTime = '00:00';
+          } else if (lastPart === 'night' || lastPart === 'gece') {
+            shiftType = 'night';
+            shiftName = 'Gece (00:00-08:00)';
+            shiftStartTime = '00:00';
+            shiftEndTime = '08:00';
+          } else {
+            // Eğer vardiya ID'sinde tip belirtilmemişse, vardiya numarasına göre belirle
+            const shiftNumber = parseInt(shiftId.replace(/\D/g, '')) || 0;
+            const shiftMod = shiftNumber % 3;
+
+            if (shiftMod === 0) {
+              shiftType = 'morning';
+              shiftName = 'Sabah (08:00-16:00)';
+              shiftStartTime = '08:00';
+              shiftEndTime = '16:00';
+            } else if (shiftMod === 1) {
+              shiftType = 'afternoon';
+              shiftName = 'Akşam (16:00-00:00)';
+              shiftStartTime = '16:00';
+              shiftEndTime = '00:00';
+            } else {
+              shiftType = 'night';
+              shiftName = 'Gece (00:00-08:00)';
+              shiftStartTime = '00:00';
+              shiftEndTime = '08:00';
             }
           }
         }
@@ -435,14 +448,13 @@ const ScheduleView = () => {
         return {
           id: shiftId,
           name: shiftName,
-          color: shiftColors[shiftType as keyof typeof shiftColors]
+          color: shiftColors[shiftType as keyof typeof shiftColors],
+          start_time: shiftStartTime,
+          end_time: shiftEndTime
         };
       });
     } catch (error) {
-      console.error('Vardiya verilerini alma hatası:', error);
-      if (axios.isAxiosError(error)) {
-        console.error('Hata detayları:', error.response?.status, error.response?.data);
-      }
+      console.error('Vardiya verilerini işleme hatası:', error);
 
       // Hata durumunda varsayılan değerlerle devam et
       return uniqueShiftIds.map(shiftId => {
@@ -462,21 +474,18 @@ const ScheduleView = () => {
         } else if (lowerShiftId.includes('night') || lowerShiftId.includes('gece')) {
           shiftType = 'night';
           shiftName = 'Gece (00:00-08:00)';
-        }
+        } else {
+          // Eğer vardiya ID'sinde tip belirtilmemişse, vardiya numarasına göre belirle
+          const shiftNumber = parseInt(shiftId.replace(/\D/g, '')) || 0;
+          const shiftMod = shiftNumber % 3;
 
-        // Çağrı merkezi için özel kontrol
-        if (lowerShiftId.startsWith('cm_')) {
-          // Vardiya ID'sinden vardiya tipini çıkar (örn: CM_S_20230501_morning)
-          const parts = shiftId.split('_');
-          const lastPart = parts[parts.length - 1].toLowerCase();
-
-          if (lastPart === 'morning' || lastPart === 'sabah') {
+          if (shiftMod === 0) {
             shiftType = 'morning';
             shiftName = 'Sabah (08:00-16:00)';
-          } else if (lastPart === 'afternoon' || lastPart === 'aksam' || lastPart === 'öğle') {
+          } else if (shiftMod === 1) {
             shiftType = 'afternoon';
             shiftName = 'Akşam (16:00-00:00)';
-          } else if (lastPart === 'night' || lastPart === 'gece') {
+          } else {
             shiftType = 'night';
             shiftName = 'Gece (00:00-08:00)';
           }
@@ -498,102 +507,99 @@ const ScheduleView = () => {
     const uniqueEmployeeIds = [...new Set(processedAssignments.map(a => a.employee_id))];
 
     try {
-      // API'den çalışan verilerini al
-      // Doğrudan API'ye istek yap (tam URL ile)
-      const apiUrl = `http://localhost:8000/api/employees?datasetType=${datasetType}`;
-      console.log('API isteği URL:', apiUrl);
+      // API çağrısını devre dışı bırakıp doğrudan çalışan bilgilerini oluşturalım
+      console.log('Çalışan bilgileri oluşturuluyor...');
 
-      const employeesResponse = await axios.get(apiUrl);
-      const employeesData = employeesResponse.data;
-      console.log('API\'den alınan çalışan verileri:', employeesData);
+      // Hastane veri seti için gerçekçi isimler
+      const hospitalFirstNames = ['Buse', 'Seyma', 'Onur', 'Özge', 'Aslı', 'Selin', 'Mira', 'Zeynep', 'Ayşe', 'Ali', 'Fatma', 'Emine', 'Mustafa'];
+      const hospitalLastNames = ['Özdemir', 'Kaya', 'Altun', 'Taş', 'Kılıç', 'Tekin', 'Demir', 'Bilgin', 'Güneş', 'Öztürk', 'Yılmaz', 'Aydın', 'Çelik'];
 
-      if (!employeesData || employeesData.length === 0) {
-        throw new Error('Çalışan verileri boş');
-      }
+      // Hastane rolleri ve departmanları
+      const hospitalRoles = ['Doktor', 'Hemşire', 'Teknisyen', 'İdari'];
+      const hospitalDepartments = ['Acil', 'Kardiyoloji', 'Cerrahi', 'Pediatri', 'Yoğun Bakım', 'Radyoloji', 'Laboratuvar'];
 
-      return uniqueEmployeeIds.map(employeeId => {
-        // API'den gelen verilerden çalışan bilgilerini bul
-        const employeeData = employeesData.find((e: any) => e.employee_id === employeeId);
+      // Çağrı merkezi için gerçekçi isimler
+      const callCenterFirstNames = ['Zeynep', 'Ayşe', 'Ali', 'Fatma', 'Emine', 'Mustafa', 'Ahmet', 'Mehmet'];
+      const callCenterLastNames = ['Öztürk', 'Demir', 'Yılmaz', 'Aydın', 'Çelik', 'Kaya', 'Şahin', 'Yıldız'];
 
-        if (employeeData) {
-          // API'den gelen verileri kullan
-          return {
-            id: employeeId,
-            name: employeeData.name || `Çalışan ${employeeId.replace('CM_E', '').replace('E', '')}`,
-            department: employeeData.department || 'Genel',
-            role: employeeData.role || 'Çalışan'
-          };
-        } else {
-          // Eğer API'den veri gelmezse, varsayılan değerleri kullan
-          let department = 'Genel';
-          let role = 'Çalışan';
-          let name = `${employeeId.replace('CM_', '').replace('H_', '').replace('E', '')}`;
-
-          // Çağrı merkezi çalışanları için
-          if (datasetType === 'cagri_merkezi') {
-            name = `Çalışan ${employeeId.replace('CM_E', '')}`;
-            department = 'Genel Çağrı';
-            role = 'Çağrı Alıcı';
-          }
-          // Hastane çalışanları için
-          else {
-            name = `Çalışan ${employeeId.replace('E', '')}`;
-            department = 'Genel';
-            role = 'Çalışan';
-          }
-
-          return {
-            id: employeeId,
-            name,
-            department,
-            role
-          };
-        }
-      });
-    } catch (error) {
-      console.error('Çalışan verilerini alma hatası:', error);
-      if (axios.isAxiosError(error)) {
-        console.error('Hata detayları:', error.response?.status, error.response?.data);
-      }
-
-      console.log('API erişimi başarısız. Varsayılan çalışan verileri oluşturuluyor...');
-
-      // Hata durumunda varsayılan değerlerle devam et
-      return uniqueEmployeeIds.map(employeeId => {
+      return uniqueEmployeeIds.map((employeeId, index) => {
         let name = '';
         let department = '';
         let role = '';
 
         // Çağrı merkezi çalışanları için
-        if (datasetType === 'cagri_merkezi') {
+        if (datasetType === 'cagri_merkezi' || employeeId.startsWith('CM_')) {
           // Çağrı merkezi çalışanları için gerçekçi isimler
-          const firstNames = ['Ahmet', 'Mehmet', 'Ayşe', 'Fatma', 'Ali', 'Zeynep', 'Mustafa', 'Emine'];
-          const lastNames = ['Yılmaz', 'Kaya', 'Demir', 'Çelik', 'Şahin', 'Yıldız', 'Öztürk', 'Aydın'];
+          const firstNameIndex = index % callCenterFirstNames.length;
+          const lastNameIndex = Math.floor(index / callCenterFirstNames.length) % callCenterLastNames.length;
 
-          const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-          const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+          name = `${callCenterFirstNames[firstNameIndex]} ${callCenterLastNames[lastNameIndex]}`;
+          department = 'Genel Çağrı';
+          role = 'Çağrı Alıcı';
 
-          name = `${randomFirstName} ${randomLastName}`;
+          // Bazı çalışanlara farklı roller ata
+          if (index % 5 === 0) {
+            role = 'Teknisyen';
+          } else if (index % 7 === 0) {
+            role = 'Yönetici';
+          }
+        }
+        // Hastane çalışanları için
+        else {
+          // Hastane çalışanları için gerçekçi isimler
+          const firstNameIndex = index % hospitalFirstNames.length;
+          const lastNameIndex = Math.floor(index / hospitalFirstNames.length) % hospitalLastNames.length;
+
+          name = `${hospitalFirstNames[firstNameIndex]} ${hospitalLastNames[lastNameIndex]}`;
+
+          // Rol ve departman ataması
+          const roleIndex = index % hospitalRoles.length;
+          const departmentIndex = Math.floor(index / hospitalRoles.length) % hospitalDepartments.length;
+
+          role = hospitalRoles[roleIndex];
+          department = hospitalDepartments[departmentIndex];
+        }
+
+        return {
+          id: employeeId,
+          name,
+          department,
+          role
+        };
+      });
+    } catch (error) {
+      console.error('Çalışan verilerini oluşturma hatası:', error);
+
+      // Hata durumunda daha basit varsayılan değerlerle devam et
+      return uniqueEmployeeIds.map((employeeId, index) => {
+        let name = '';
+        let department = 'Genel';
+        let role = 'Çalışan';
+
+        // Çağrı merkezi çalışanları için
+        if (datasetType === 'cagri_merkezi' || employeeId.startsWith('CM_')) {
+          name = `Çalışan ${employeeId.replace('CM_E', '').replace('CM_', '')}`;
           department = 'Genel Çağrı';
           role = 'Çağrı Alıcı';
         }
         // Hastane çalışanları için
         else {
-          // Hastane çalışanları için gerçekçi isimler
-          const firstNames = ['Ahmet', 'Mehmet', 'Ayşe', 'Fatma', 'Ali', 'Zeynep', 'Mustafa', 'Emine'];
-          const lastNames = ['Yılmaz', 'Kaya', 'Demir', 'Çelik', 'Şahin', 'Yıldız', 'Öztürk', 'Aydın'];
+          name = `Çalışan ${employeeId.replace('E', '')}`;
 
-          const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-          const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-
-          name = `${randomFirstName} ${randomLastName}`;
-
-          // Rol ve departman ataması
-          const roles = ['Doktor', 'Hemşire', 'Teknisyen', 'İdari'];
-          const departments = ['Acil', 'Kardiyoloji', 'Cerrahi', 'Pediatri', 'Yoğun Bakım', 'Radyoloji', 'Laboratuvar'];
-
-          role = roles[Math.floor(Math.random() * roles.length)];
-          department = departments[Math.floor(Math.random() * departments.length)];
+          // Basit rol ataması
+          if (index % 4 === 0) {
+            role = 'Doktor';
+            department = 'Acil';
+          } else if (index % 4 === 1) {
+            role = 'Hemşire';
+            department = 'Kardiyoloji';
+          } else if (index % 4 === 2) {
+            role = 'Teknisyen';
+            department = 'Cerrahi';
+          } else {
+            role = 'İdari';
+            department = 'Pediatri';
+          }
         }
 
         return {

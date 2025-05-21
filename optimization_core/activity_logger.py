@@ -108,6 +108,18 @@ def log_dataset_added(dataset_name: str) -> bool:
     detail = f"{dataset_name} veri seti sisteme yüklendi"
     return add_activity(action, detail, "success.main", "DatasetIcon")
 
+def log_dataset_update(dataset_id: str, file_type: str) -> bool:
+    """Veri seti güncelleme aktivitesi ekler."""
+    action = "Veri dosyası güncellendi"
+    detail = f"{dataset_id} veri setindeki {file_type} dosyası güncellendi"
+    return add_activity(action, detail, "info.main", "CloudUploadIcon")
+
+def log_configuration_update(config_name: str) -> bool:
+    """Konfigürasyon güncelleme aktivitesi ekler."""
+    action = "Konfigürasyon güncellendi"
+    detail = f"{config_name} konfigürasyonu güncellendi"
+    return add_activity(action, detail, "info.main", "SettingsIcon")
+
 def get_recent_activities(limit: int = 10) -> List[Dict[str, Any]]:
     """Son aktiviteleri döndürür."""
     activities = get_activity_log()

@@ -278,18 +278,11 @@ const MainLayout = () => {
           flexGrow: 1,
           p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          marginTop: '64px', // AppBar yüksekliği
-          display: 'flex',
-          flexDirection: 'column',
+          mt: '64px', // AppBar yüksekliği kadar margin eklendi
+          overflow: 'auto' // İçerik taşarsa scroll eklendi
         }}
       >
-        <Box sx={{
-          flexGrow: 1,
-          borderRadius: 3,
-          p: { xs: 2, md: 3 },
-        }}>
-          <Outlet />
-        </Box>
+        <Outlet />
       </Box>
     </Box>
   );

@@ -1,11 +1,10 @@
 import os
 import json
 import logging
-import yaml
-from typing import List, Dict, Any, Optional
+import re
+from typing import List
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
-import glob
 
 try:
     from optimization_core.dashboard_models import (
@@ -13,10 +12,7 @@ try:
         PerformanceMetrics,
         LastOptimizationReport,
         SystemStatus,
-        RecentActivity,
-        Dataset,
-        Configuration,
-        ConfigurationContent
+        RecentActivity
     )
     from optimization_core.activity_logger import get_recent_activities
 except ImportError:
@@ -26,10 +22,7 @@ except ImportError:
         PerformanceMetrics,
         LastOptimizationReport,
         SystemStatus,
-        RecentActivity,
-        Dataset,
-        Configuration,
-        ConfigurationContent
+        RecentActivity
     )
     from activity_logger import get_recent_activities
 
@@ -81,62 +74,8 @@ def load_optimization_result():
         logger.error(f"Optimizasyon sonucu yüklenirken hata: {e}")
         return None
 
-def get_datasets() -> List[Dataset]:
-    """Mevcut veri setlerini listeler."""
-    try:
-        datasets = [
-            Dataset(id="hastane", name="Hastane Veri Seti", path="/veri_kaynaklari/hastane"),
-            Dataset(id="cagri_merkezi", name="Çağrı Merkezi Veri Seti", path="/veri_kaynaklari/cagri_merkezi")
-        ]
-        return datasets
-    except Exception as e:
-        logger.error(f"Veri setleri listelenirken hata: {e}")
-        return []
-
-def get_configurations() -> List[Configuration]:
-    """Mevcut konfigürasyon dosyalarını listeler."""
-    try:
-        configs_dir = os.path.join(get_project_root(), "configs")
-        config_files = glob.glob(os.path.join(configs_dir, "*.yaml"))
-
-        configurations = []
-        for config_file in config_files:
-            config_id = os.path.basename(config_file)
-
-            # Konfigürasyon adını belirle
-            if "hospital" in config_id:
-                name = "Hastane Konfigürasyonu"
-            elif "cagri_merkezi" in config_id:
-                name = "Çağrı Merkezi Konfigürasyonu"
-            else:
-                name = config_id.replace(".yaml", "").replace("_", " ").title()
-
-            configurations.append(Configuration(
-                id=config_id,
-                name=name,
-                path=f"/configs/{config_id}"
-            ))
-
-        return configurations
-    except Exception as e:
-        logger.error(f"Konfigürasyon dosyaları listelenirken hata: {e}")
-        return []
-
-def get_configuration_content(config_id: str) -> str:
-    """Belirtilen konfigürasyon dosyasının içeriğini döndürür."""
-    try:
-        config_path = os.path.join(get_project_root(), "configs", config_id)
-        if not os.path.exists(config_path):
-            raise HTTPException(status_code=404, detail=f"Configuration file not found: {config_id}")
-
-        with open(config_path, 'r', encoding='utf-8') as f:
-            return f.read()
-    except Exception as e:
-        logger.error(f"Konfigürasyon içeriği okunurken hata: {e}")
-        raise HTTPException(status_code=500, detail=f"Error reading configuration file: {str(e)}")
-
 # API Endpoint'leri
-@router.get("/dashboard", response_model=DashboardData)
+@router.get("/api/dashboard", response_model=DashboardData)
 async def get_dashboard_data():
     """Dashboard verilerini döndürür."""
     try:
@@ -289,18 +228,4 @@ async def get_dashboard_data():
         logger.error(f"Dashboard verileri hazırlanırken hata: {e}")
         raise HTTPException(status_code=500, detail=f"Error preparing dashboard data: {str(e)}")
 
-@router.get("/datasets", response_model=List[Dataset])
-async def get_datasets_endpoint():
-    """Mevcut veri setlerini listeler."""
-    return get_datasets()
 
-@router.get("/configurations", response_model=List[Configuration])
-async def get_configurations_endpoint():
-    """Mevcut konfigürasyon dosyalarını listeler."""
-    return get_configurations()
-
-@router.get("/configuration-content")
-async def get_configuration_content_endpoint(configId: str):
-    """Belirtilen konfigürasyon dosyasının içeriğini döndürür."""
-    content = get_configuration_content(configId)
-    return ConfigurationContent(content=content)
