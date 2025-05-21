@@ -243,6 +243,9 @@ const Results = () => {
         const isCallCenter = data.solution.assignments[0]?.employee_id?.startsWith('CM_');
         setDatasetType(isCallCenter ? 'Çağrı Merkezi' : 'Hastane');
 
+        // Konfigürasyon referansını da güncelle
+        setConfigRef(data.configuration_ref || (isCallCenter ? 'callcenter_test_config.yaml' : 'hospital_test_config.yaml'));
+
         // Departman ve rol dağılımlarını hesapla
         if (isCallCenter) {
           // Çağrı merkezi için departman ve rol dağılımları
@@ -314,7 +317,6 @@ const Results = () => {
       setStatus(data.status || '');
       setProcessingTime(data.processing_time_seconds ? `${data.processing_time_seconds.toFixed(2)} saniye` : '');
       setObjectiveValue(data.objective_value || 0);
-      setConfigRef(data.configuration_ref || 'hospital_test_config.yaml');
 
       setSnackbarMessage('Optimizasyon sonuçları başarıyla yüklendi.');
       setSnackbarOpen(true);
