@@ -37,7 +37,16 @@ import {
   CloudUpload as UploadIcon,
   Help as HelpIcon,
   Info as InfoIcon,
-  CheckCircle as CheckCircleIcon
+  CheckCircle as CheckCircleIcon,
+  People as PeopleIcon,
+  Schedule as ScheduleIcon,
+  School as SchoolIcon,
+  TuneSharp as TuneIcon,
+  Visibility as PreviewIcon,
+  Code as CodeIcon,
+  AddCircle as AddCircleIcon,
+  RemoveCircle as RemoveCircleIcon,
+  Warning as WarningIcon
 } from '@mui/icons-material';
 import { api } from '../services/api';
 
@@ -60,6 +69,48 @@ interface UploadedFile {
   fileName: string; // Gerçek dosya adı
   uploadDate: Date;
   status: 'success' | 'error';
+}
+
+// Kural yönetimi için tipler
+interface StaffingRule {
+  id?: string;
+  department: string;
+  role: string;
+  shift: string;
+  weekType: string;
+  minCount: number;
+  penalty: number;
+}
+
+interface SkillRule {
+  id?: string;
+  department: string;
+  skill: string;
+  shift: string;
+  weekType: string;
+  minCount: number;
+  penalty: number;
+}
+
+interface OptimizationWeights {
+  minimize_overstaffing: number;
+  minimize_understaffing: number;
+  maximize_preferences: number;
+  balance_workload: number;
+  maximize_shift_coverage: number;
+}
+
+interface GeneralRules {
+  max_consecutive_shifts: number;
+  min_rest_time_hours: number;
+  solver_time_limit_seconds: number;
+}
+
+interface RuleTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
 }
 
 interface TabPanelProps {
@@ -162,6 +213,16 @@ const DatasetConfig = () => {
       try {
         const content = await api.getConfigurationContent(selectedConfig);
         setConfigContent(content);
+        
+        // Mevcut kuralları parse et
+        if (content) {
+          parseConfigToRules(content);
+        }
+        
+        // Mevcut kuralları parse et
+        if (content) {
+          parseConfigToRules(content);
+        }
       } catch (err) {
         console.error('Konfigürasyon içeriği çekme hatası:', err);
         setError('Konfigürasyon içeriği yüklenirken bir hata oluştu.');
@@ -311,6 +372,800 @@ const DatasetConfig = () => {
       ...snackbar,
       open: false
     });
+  };
+
+  // Kural yönetimi için state'ler
+  const [ruleMode, setRuleMode] = useState<'visual' | 'yaml'>('visual');
+  const [ruleCategory, setRuleCategory] = useState(0);
+  const [staffingRules, setStaffingRules] = useState<StaffingRule[]>([]);
+  const [skillRules, setSkillRules] = useState<SkillRule[]>([]);
+  const [optimizationWeights, setOptimizationWeights] = useState<OptimizationWeights>({
+    minimize_overstaffing: 1,
+    minimize_understaffing: 10,
+    maximize_preferences: 2,
+    balance_workload: 0.5,
+    maximize_shift_coverage: 1
+  });
+  const [generalRules, setGeneralRules] = useState<GeneralRules>({
+    max_consecutive_shifts: 3,
+    min_rest_time_hours: 10,
+    solver_time_limit_seconds: 60
+  });
+
+  // Yardım sistemi için state'ler
+  const [showHelpCenter, setShowHelpCenter] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+
+  // Kural kategorileri
+  const ruleCategories = [
+    { id: 'staffing', label: 'Personel Gereksinimleri', icon: <PeopleIcon />, color: '#1976d2' },
+    { id: 'skills', label: 'Yetenek Gereksinimleri', icon: <SchoolIcon />, color: '#388e3c' },
+    { id: 'optimization', label: 'Optimizasyon Hedefleri', icon: <TuneIcon />, color: '#f57c00' },
+    { id: 'general', label: 'Genel Kurallar', icon: <ScheduleIcon />, color: '#7b1fa2' }
+  ];
+
+  // Hazır şablonlar
+  const ruleTemplates: RuleTemplate[] = [
+    {
+      id: 'hospital_standard',
+      name: 'Hastane Standard Kuralları',
+      description: 'Genel hastane vardiya çizelgeleme kuralları',
+      category: 'Hastane'
+    },
+    {
+      id: 'emergency_rules',
+      name: 'Acil Servis Kuralları',
+      description: 'Acil servis özel gereksinimleri',
+      category: 'Hastane'
+    },
+    {
+      id: 'callcenter_standard',
+      name: 'Çağrı Merkezi Standard Kuralları',
+      description: 'Çağrı merkezi vardiya kuralları',
+      category: 'Çağrı Merkezi'
+    }
+  ];
+
+  // Dropdown seçenekleri
+  const departments = selectedConfig.includes("hospital") 
+    ? ['Acil', 'Yoğun Bakım', 'Kardiyoloji', 'Pediatri', 'Dahiliye', 'Cerrahi']
+    : ['Müşteri Hizmetleri', 'Teknik Destek', 'Satış', 'Yönetim'];
+
+  const roles = selectedConfig.includes("hospital")
+    ? ['Doktor', 'Hemşire', 'Teknisyen', 'Temizlik Personeli', 'Güvenlik']
+    : ['Temsilci', 'Uzman Temsilci', 'Takım Lideri', 'Süpervizör'];
+
+  const shifts = ['Gündüz', 'Gece', 'Mesai'];
+  const weekTypes = ['Hafta İçi', 'Hafta Sonu', 'Tümü'];
+
+  const skills = selectedConfig.includes("hospital")
+    ? ['Acil Servis Deneyimi', 'Yoğun Bakım Sertifikası', 'Pediatri Deneyimi', 'Kardiyoloji Deneyimi']
+    : ['Satış Deneyimi', 'Teknik Bilgi', 'Çoklu Dil', 'Müşteri İlişkileri'];
+
+  // Örnek senaryolar
+  const exampleScenarios = {
+    hospital: {
+      emergency: [
+        {
+          name: "Acilde gece 2 hemşire",
+          description: "Gece vardiyasında acil serviste minimum 2 hemşire bulunması",
+          rule: {
+            department: 'Acil',
+            role: 'Hemşire', 
+            shift: 'Gece',
+            weekType: 'Hafta İçi',
+            minCount: 2,
+            penalty: 100
+          },
+          type: 'staffing'
+        },
+        {
+          name: "24 saat doktor bulunması",
+          description: "Acil serviste her zaman en az 1 doktor bulunması",
+          rule: {
+            department: 'Acil',
+            role: 'Doktor',
+            shift: 'Gündüz',
+            weekType: 'Tümü',
+            minCount: 1,
+            penalty: 200
+          },
+          type: 'staffing'
+        },
+        {
+          name: "Travma deneyimi olan personel",
+          description: "Acil serviste travma deneyimi olan personel bulunması",
+          rule: {
+            department: 'Acil',
+            skill: 'Acil Servis Deneyimi',
+            shift: 'Gündüz',
+            weekType: 'Tümü',
+            minCount: 1,
+            penalty: 150
+          },
+          type: 'skill'
+        }
+      ],
+      icu: [
+        {
+          name: "BLS sertifikalı hemşire",
+          description: "Yoğun bakımda BLS sertifikası olan hemşire",
+          rule: {
+            department: 'Yoğun Bakım',
+            skill: 'Yoğun Bakım Sertifikası',
+            shift: 'Gece',
+            weekType: 'Hafta İçi',
+            minCount: 1,
+            penalty: 100
+          },
+          type: 'skill'
+        },
+        {
+          name: "Gece en az 3 personel",
+          description: "Yoğun bakımda gece vardiyasında minimum 3 personel",
+          rule: {
+            department: 'Yoğun Bakım',
+            role: 'Hemşire',
+            shift: 'Gece',
+            weekType: 'Tümü',
+            minCount: 3,
+            penalty: 200
+          },
+          type: 'staffing'
+        }
+      ],
+      cardiology: [
+        {
+          name: "EKG okuma bilgisi",
+          description: "Kardiyolojide EKG okuma bilgisi olan personel",
+          rule: {
+            department: 'Kardiyoloji',
+            skill: 'Kardiyoloji Deneyimi',
+            shift: 'Gündüz',
+            weekType: 'Hafta İçi',
+            minCount: 1,
+            penalty: 100
+          },
+          type: 'skill'
+        }
+      ]
+    },
+    callcenter: {
+      customer_service: [
+        {
+          name: "Müşteri hizmetlerinde uzman",
+          description: "Müşteri hizmetlerinde deneyimli temsilci bulunması",
+          rule: {
+            department: 'Müşteri Hizmetleri',
+            role: 'Uzman Temsilci',
+            shift: 'Gündüz',
+            weekType: 'Hafta İçi',
+            minCount: 2,
+            penalty: 100
+          },
+          type: 'staffing'
+        },
+        {
+          name: "Çoklu dil bilen personel",
+          description: "Müşteri hizmetlerinde yabancı dil bilen personel",
+          rule: {
+            department: 'Müşteri Hizmetleri',
+            skill: 'Çoklu Dil',
+            shift: 'Gündüz',
+            weekType: 'Tümü',
+            minCount: 1,
+            penalty: 80
+          },
+          type: 'skill'
+        }
+      ],
+      technical: [
+        {
+          name: "Teknik uzman bulunması",
+          description: "Teknik destek vardiyasında uzman personel",
+          rule: {
+            department: 'Teknik Destek',
+            role: 'Uzman Temsilci',
+            shift: 'Gündüz',
+            weekType: 'Hafta İçi',
+            minCount: 1,
+            penalty: 120
+          },
+          type: 'staffing'
+        }
+      ]
+    }
+  };
+
+  // Tooltip açıklamaları
+  const tooltipTexts = {
+    department: {
+      title: "🏥 Departman Nedir?",
+      content: "Kurumunuzun bölümleri. Hastane için: Acil Servis, Yoğun Bakım, Kardiyoloji vb. Çağrı merkezi için: Müşteri Hizmetleri, Teknik Destek vb. Yeni bölüm eklemek için sistem yöneticinizi arayın."
+    },
+    role: {
+      title: "👤 Rol Nedir?",
+      content: "Çalışanın pozisyonu. Hastane için: Doktor, Hemşire, Teknisyen vb. Çağrı merkezi için: Temsilci, Uzman Temsilci, Süpervizör vb."
+    },
+    shift: {
+      title: "🕐 Vardiya Nedir?",
+      content: "Çalışma saatleri. Gündüz (08:00-16:00), Gece (00:00-08:00), Mesai (16:00-00:00) gibi. Vardiya saatleri sistem yöneticisi tarafından ayarlanır."
+    },
+    weekType: {
+      title: "📅 Hafta Türü",
+      content: "Kuralın hangi günlerde geçerli olacağı. Hafta İçi (Pzt-Cum), Hafta Sonu (Cmt-Paz), Tümü (7 gün)"
+    },
+    minCount: {
+      title: "👥 Minimum Personel Sayısı",
+      content: "Bu vardiyada EN AZ kaç kişi olması gerektiğini belirler. Örnek: Acil için → En az 2, Yoğun bakım → En az 3, Genel servis → En az 1"
+    },
+    penalty: {
+      title: "⚠️ Ceza Değeri",
+      content: "Kural ihlal edildiğinde optimizasyona verilen ceza puanı. Yüksek değer = daha önemli kural. Genelde 50-200 arası kullanılır."
+    },
+    skill: {
+      title: "🎓 Yetenek/Sertifika",
+      content: "Özel bilgi veya sertifika gerektiren durumlar. BLS Sertifikası, Acil Servis Deneyimi, Çoklu Dil gibi."
+    }
+  };
+
+  // YAML'dan form verilerine parse etme
+  const parseConfigToRules = (yamlContent: string) => {
+    if (!yamlContent) return;
+    
+    try {
+      console.log('YAML parsing başlıyor...', yamlContent.substring(0, 200));
+      
+      // Mevcut kuralları temizle
+      setStaffingRules([]);
+      setSkillRules([]);
+      
+      // Personel gereksinimlerini parse et  
+      const staffingSection = yamlContent.match(/min_staffing_requirements:\s*([\s\S]*?)(?=\s+max_consecutive_shifts|\s+skill_requirements|\s+min_rest_time|$)/);
+      console.log('Staffing section found:', !!staffingSection);
+      if (staffingSection) {
+        console.log('Staffing content:', staffingSection[1].substring(0, 300));
+        const staffingContent = staffingSection[1].trim();
+        
+        // Eğer content sadece max_consecutive_shifts gibi başka bir field içeriyorsa, staffing rules yok demektir
+        if (!staffingContent || staffingContent.startsWith('max_consecutive_shifts') || staffingContent.startsWith('min_rest_time') || staffingContent.startsWith('skill_requirements')) {
+          console.log('⚠️ min_staffing_requirements bölümü boş - henüz kural tanımlanmamış');
+          setStaffingRules([]); // Boş array set et
+        } else {
+          // Daha flexible regex - her field ayrı parse edelim
+          const ruleBlocks = staffingContent.split(/(?=\s*-\s+shift_pattern:)/).filter(block => block.trim() && block.includes('shift_pattern'));
+          console.log('Rule blocks found:', ruleBlocks.length);
+          ruleBlocks.forEach((block, i) => console.log(`Block ${i}:`, block.substring(0, 100)));
+          
+          if (ruleBlocks.length > 0) {
+          const parsedStaffingRules: StaffingRule[] = [];
+          ruleBlocks.forEach((block, index) => {
+            const shiftPatternMatch = block.match(/shift_pattern:\s*"([^"]+)"/);
+            const roleMatch = block.match(/role:\s*"([^"]+)"/);
+            const departmentMatch = block.match(/department:\s*"([^"]+)"/);
+            const minCountMatch = block.match(/min_count:\s*(\d+)/);
+            const penaltyMatch = block.match(/penalty_if_violated:\s*(\d+)/);
+            
+            if (shiftPatternMatch && roleMatch && departmentMatch && minCountMatch) {
+              const shiftPattern = shiftPatternMatch[1];
+              const role = roleMatch[1];
+              const department = departmentMatch[1];
+              const minCount = minCountMatch[1];
+              const penalty = penaltyMatch ? penaltyMatch[1] : '100';
+              
+              // Shift pattern'i parse et (örn: "*Gece*Hafta*İçi*")
+              let shift = 'Gündüz';
+              let weekType = 'Hafta İçi';
+              
+              if (shiftPattern.includes('Gece')) shift = 'Gece';
+              else if (shiftPattern.includes('Mesai')) shift = 'Mesai';
+              
+              if (shiftPattern.includes('Hafta*Sonu')) weekType = 'Hafta Sonu';
+              else if (shiftPattern.includes('Tümü')) weekType = 'Tümü';
+              
+              parsedStaffingRules.push({
+                id: `existing-${index}`,
+                department,
+                role,
+                shift,
+                weekType,
+                minCount: parseInt(minCount),
+                penalty: parseInt(penalty)
+              });
+            }
+          });
+            setStaffingRules(parsedStaffingRules);
+            console.log(`✅ ${parsedStaffingRules.length} personel kuralı yüklendi:`, parsedStaffingRules);
+          } else {
+            console.log('❌ Personel kuralları parse edilemedi');
+          }
+        }
+      } else {
+        console.log('❌ Staffing section bulunamadı');
+      }
+      
+      // Yetenek gereksinimlerini parse et
+      const skillSection = yamlContent.match(/skill_requirements:\s*([\s\S]*?)(?=\s+n8n_parameters|\s*$)/);
+      if (skillSection) {
+        const skillContent = skillSection[1];
+        // Daha flexible regex - her field ayrı parse edelim  
+        const skillRuleBlocks = skillContent.split(/(?=\s*-\s+shift_pattern:)/).filter(block => block.trim() && block.includes('shift_pattern'));
+        
+        if (skillRuleBlocks.length > 0) {
+          const parsedSkillRules: SkillRule[] = [];
+          skillRuleBlocks.forEach((block, index) => {
+            const shiftPatternMatch = block.match(/shift_pattern:\s*"([^"]+)"/);
+            const skillMatch = block.match(/skill:\s*"([^"]+)"/);
+            const departmentMatch = block.match(/department:\s*"([^"]+)"/);
+            const minCountMatch = block.match(/min_count:\s*(\d+)/);
+            const penaltyMatch = block.match(/penalty_if_violated:\s*(\d+)/);
+            
+            if (shiftPatternMatch && skillMatch && departmentMatch && minCountMatch) {
+              const shiftPattern = shiftPatternMatch[1];
+              const skill = skillMatch[1];
+              const department = departmentMatch[1];
+              const minCount = minCountMatch[1];
+              const penalty = penaltyMatch ? penaltyMatch[1] : '100';
+              
+              // Shift pattern'i parse et
+              let shift = 'Gündüz';
+              let weekType = 'Hafta İçi';
+              
+              if (shiftPattern.includes('Gece')) shift = 'Gece';
+              else if (shiftPattern.includes('Mesai')) shift = 'Mesai';
+              
+              if (shiftPattern.includes('Hafta*Sonu')) weekType = 'Hafta Sonu';
+              else if (shiftPattern.includes('Tümü')) weekType = 'Tümü';
+              
+              parsedSkillRules.push({
+                id: `existing-skill-${index}`,
+                department,
+                skill,
+                shift,
+                weekType,
+                minCount: parseInt(minCount),
+                penalty: parseInt(penalty)
+              });
+            }
+          });
+          setSkillRules(parsedSkillRules);
+        }
+      }
+      
+      // Optimizasyon ağırlıklarını parse et
+      const objectiveSection = yamlContent.match(/objective_weights:\s*([\s\S]*?)(?=\n\s*\w+:|$)/);
+      if (objectiveSection) {
+        const objectiveContent = objectiveSection[1];
+        
+        const minimizeOverstaffing = objectiveContent.match(/minimize_overstaffing:\s*(\d+\.?\d*)/)?.[1];
+        const minimizeUnderstaffing = objectiveContent.match(/minimize_understaffing:\s*(\d+\.?\d*)/)?.[1];
+        const maximizePreferences = objectiveContent.match(/maximize_preferences:\s*(\d+\.?\d*)/)?.[1];
+        const balanceWorkload = objectiveContent.match(/balance_workload:\s*(\d+\.?\d*)/)?.[1];
+        const maximizeShiftCoverage = objectiveContent.match(/maximize_shift_coverage:\s*(\d+\.?\d*)/)?.[1];
+        
+        if (minimizeOverstaffing || minimizeUnderstaffing || maximizePreferences || balanceWorkload || maximizeShiftCoverage) {
+          setOptimizationWeights({
+            minimize_overstaffing: parseFloat(minimizeOverstaffing || '1'),
+            minimize_understaffing: parseFloat(minimizeUnderstaffing || '10'),
+            maximize_preferences: parseFloat(maximizePreferences || '2'),
+            balance_workload: parseFloat(balanceWorkload || '0.5'),
+            maximize_shift_coverage: parseFloat(maximizeShiftCoverage || '1')
+          });
+        }
+      }
+      
+      // Genel kuralları parse et
+      const maxConsecutive = yamlContent.match(/max_consecutive_shifts:\s*(\d+)/)?.[1];
+      const minRest = yamlContent.match(/min_rest_time_hours:\s*(\d+)/)?.[1];
+      const solverTime = yamlContent.match(/solver_time_limit_seconds:\s*(\d+)/)?.[1];
+      
+      if (maxConsecutive || minRest || solverTime) {
+        setGeneralRules({
+          max_consecutive_shifts: parseInt(maxConsecutive || '3'),
+          min_rest_time_hours: parseInt(minRest || '10'),
+          solver_time_limit_seconds: parseInt(solverTime || '60')
+        });
+      }
+      
+      console.log('YAML parsing tamamlandı');
+      
+    } catch (error) {
+      console.error('YAML parsing hatası:', error);
+      setSnackbar({
+        open: true,
+        message: 'Mevcut kurallar yüklenirken bir hata oluştu. YAML formatını kontrol edin.',
+        severity: 'warning'
+      });
+    }
+  };
+
+  // Form verilerini YAML'a dönüştürme
+  const generateYamlFromRules = () => {
+    let yaml = `institution_id: "${selectedConfig.split('.')[0]}"\n`;
+    yaml += `institution_name: "Test ${selectedConfig.includes('hospital') ? 'Hastanesi' : 'Çağrı Merkezi'}"\n`;
+    yaml += `problem_type: "shift_scheduling"\n\n`;
+    
+    yaml += `optimization_core:\n`;
+    yaml += `  solver_time_limit_seconds: ${generalRules.solver_time_limit_seconds}\n`;
+    yaml += `  objective_weights:\n`;
+    yaml += `    minimize_overstaffing: ${optimizationWeights.minimize_overstaffing}\n`;
+    yaml += `    minimize_understaffing: ${optimizationWeights.minimize_understaffing}\n`;
+    yaml += `    maximize_preferences: ${optimizationWeights.maximize_preferences}\n`;
+    yaml += `    balance_workload: ${optimizationWeights.balance_workload}\n`;
+    yaml += `    maximize_shift_coverage: ${optimizationWeights.maximize_shift_coverage}\n\n`;
+    
+    yaml += `rules:\n`;
+    yaml += `  min_staffing_requirements:\n`;
+    
+    staffingRules.forEach(rule => {
+      yaml += `    - shift_pattern: "*${rule.shift}*${rule.weekType.replace(' ', '*')}*"\n`;
+      yaml += `      role: "${rule.role}"\n`;
+      yaml += `      department: "${rule.department}"\n`;
+      yaml += `      min_count: ${rule.minCount}\n`;
+      yaml += `      penalty_if_violated: ${rule.penalty}\n`;
+    });
+    
+    yaml += `  max_consecutive_shifts: ${generalRules.max_consecutive_shifts}\n`;
+    yaml += `  min_rest_time_hours: ${generalRules.min_rest_time_hours}\n\n`;
+    
+    if (skillRules.length > 0) {
+      yaml += `  skill_requirements:\n`;
+      skillRules.forEach(rule => {
+        yaml += `    - shift_pattern: "*${rule.shift}*${rule.weekType.replace(' ', '*')}*"\n`;
+        yaml += `      skill: "${rule.skill}"\n`;
+        yaml += `      department: "${rule.department}"\n`;
+        yaml += `      min_count: ${rule.minCount}\n`;
+        yaml += `      penalty_if_violated: ${rule.penalty}\n`;
+      });
+    }
+    
+    return yaml;
+  };
+
+  // Yeni personel kuralı ekleme
+  const addStaffingRule = () => {
+    const newRule: StaffingRule = {
+      id: Date.now().toString(),
+      department: departments[0],
+      role: roles[0],
+      shift: shifts[0],
+      weekType: weekTypes[0],
+      minCount: 1,
+      penalty: 100
+    };
+    setStaffingRules([...staffingRules, newRule]);
+  };
+
+  // Personel kuralını güncelleme
+  const updateStaffingRule = (id: string, updates: Partial<StaffingRule>) => {
+    setStaffingRules(staffingRules.map(rule => 
+      rule.id === id ? { ...rule, ...updates } : rule
+    ));
+  };
+
+  // Personel kuralını silme
+  const removeStaffingRule = (id: string) => {
+    setStaffingRules(staffingRules.filter(rule => rule.id !== id));
+  };
+
+  // Yetenek kuralı ekleme
+  const addSkillRule = () => {
+    const newRule: SkillRule = {
+      id: Date.now().toString(),
+      department: departments[0],
+      skill: skills[0],
+      shift: shifts[0],
+      weekType: weekTypes[0],
+      minCount: 1,
+      penalty: 100
+    };
+    setSkillRules([...skillRules, newRule]);
+  };
+
+  // Yetenek kuralını güncelleme
+  const updateSkillRule = (id: string, updates: Partial<SkillRule>) => {
+    setSkillRules(skillRules.map(rule => 
+      rule.id === id ? { ...rule, ...updates } : rule
+    ));
+  };
+
+  // Yetenek kuralını silme
+  const removeSkillRule = (id: string) => {
+    setSkillRules(skillRules.filter(rule => rule.id !== id));
+  };
+
+  // Kural doğrulama
+  const validateRules = () => {
+    const errors: string[] = [];
+    
+    staffingRules.forEach((rule, index) => {
+      if (rule.minCount < 1) {
+        errors.push(`Personel Kuralı ${index + 1}: Minimum personel sayısı 1'den az olamaz`);
+      }
+      if (rule.penalty < 0) {
+        errors.push(`Personel Kuralı ${index + 1}: Ceza değeri negatif olamaz`);
+      }
+    });
+
+    skillRules.forEach((rule, index) => {
+      if (rule.minCount < 1) {
+        errors.push(`Yetenek Kuralı ${index + 1}: Minimum kişi sayısı 1'den az olamaz`);
+      }
+    });
+
+    if (generalRules.max_consecutive_shifts < 1) {
+      errors.push('Maksimum ardışık vardiya sayısı 1\'den az olamaz');
+    }
+
+    if (generalRules.min_rest_time_hours < 8) {
+      errors.push('Minimum dinlenme süresi 8 saatten az olamaz');
+    }
+
+    return errors;
+  };
+
+  // Gelişmiş konfigürasyon kaydetme
+  const handleAdvancedSaveConfig = async () => {
+    const errors = validateRules();
+    
+    if (errors.length > 0) {
+      setSnackbar({
+        open: true,
+        message: `Doğrulama hataları: ${errors.join(', ')}`,
+        severity: 'error'
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const yamlContent = ruleMode === 'visual' ? generateYamlFromRules() : configContent;
+      await api.saveConfigurationContent(selectedConfig, yamlContent);
+
+      setSnackbar({
+        open: true,
+        message: 'Çizelgeleme kuralları başarıyla güncellendi',
+        severity: 'success'
+      });
+    } catch (err) {
+      console.error('Konfigürasyon kaydetme hatası:', err);
+      setSnackbar({
+        open: true,
+        message: 'Konfigürasyon kaydedilirken bir hata oluştu',
+        severity: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Örnek senaryo uygulama
+  const applyExampleScenario = (scenario: any) => {
+    if (scenario.type === 'staffing') {
+      const newRule: StaffingRule = {
+        id: Date.now().toString(),
+        ...scenario.rule
+      };
+      setStaffingRules([...staffingRules, newRule]);
+      setRuleCategory(0); // Personel Gereksinimleri sekmesine geç
+    } else if (scenario.type === 'skill') {
+      const newRule: SkillRule = {
+        id: Date.now().toString(),
+        ...scenario.rule
+      };
+      setSkillRules([...skillRules, newRule]);
+      setRuleCategory(1); // Yetenek Gereksinimleri sekmesine geç
+    }
+
+    setRuleMode('visual'); // Görsel editöre geç
+    setShowHelpCenter(false); // Yardım merkezini kapat
+    
+    setSnackbar({
+      open: true,
+      message: `✅ "${scenario.name}" kuralı eklendi! Ayarları kontrol edip kaydedin.`,
+      severity: 'success'
+    });
+  };
+
+  // Smart Tooltip komponenti
+  const SmartTooltip = ({ field, children }: { field: string; children: React.ReactNode }) => {
+    const tooltip = tooltipTexts[field as keyof typeof tooltipTexts];
+    if (!tooltip) return <>{children}</>;
+
+    return (
+      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+        {children}
+        <Tooltip
+          title={
+            <Box sx={{ p: 1 }}>
+              <Typography variant="subtitle2" fontWeight="600" gutterBottom>
+                {tooltip.title}
+              </Typography>
+              <Typography variant="body2">
+                {tooltip.content}
+              </Typography>
+            </Box>
+          }
+          arrow
+          placement="top"
+        >
+          <IconButton size="small" sx={{ color: 'primary.main' }}>
+            <HelpIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    );
+  };
+
+  // Yardım Merkezi komponenti
+  const HelpCenter = () => {
+    const isHospital = selectedConfig.includes("hospital");
+    const currentScenarios = isHospital 
+      ? exampleScenarios.hospital 
+      : exampleScenarios.callcenter;
+
+    return (
+      <Card sx={{
+        p: 3,
+        borderRadius: 2,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+        border: '2px solid #1976d2',
+        bgcolor: 'rgba(25, 118, 210, 0.02)'
+      }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6" fontWeight="600" sx={{ color: '#1976d2' }}>
+            📚 Hızlı Başlangıç Örnekleri
+          </Typography>
+          <IconButton onClick={() => setShowHelpCenter(false)}>
+            <RemoveCircleIcon />
+          </IconButton>
+        </Box>
+
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="body2">
+            Aşağıdaki örneklerden birini seçin, otomatik olarak form doldurulsun ve kuralınızı hızlıca oluşturun!
+          </Typography>
+        </Alert>
+
+        {isHospital ? (
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={4}>
+              <Typography variant="subtitle2" fontWeight="600" sx={{ color: '#d32f2f', mb: 2 }}>
+                🚨 ACİL SERVİS
+              </Typography>
+              {(currentScenarios as any).emergency?.map((scenario: any, index: number) => (
+                <Card key={index} sx={{ p: 2, mb: 2, border: '1px solid rgba(211, 47, 47, 0.2)' }}>
+                  <Typography variant="body2" fontWeight="600" gutterBottom>
+                    {scenario.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" paragraph>
+                    {scenario.description}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    fullWidth
+                    sx={{ bgcolor: '#d32f2f' }}
+                    onClick={() => applyExampleScenario(scenario)}
+                  >
+                    Bu Kuralı Oluştur
+                  </Button>
+                </Card>
+              ))}
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <Typography variant="subtitle2" fontWeight="600" sx={{ color: '#388e3c', mb: 2 }}>
+                🏥 YOĞUN BAKIM
+              </Typography>
+              {(currentScenarios as any).icu?.map((scenario: any, index: number) => (
+                <Card key={index} sx={{ p: 2, mb: 2, border: '1px solid rgba(56, 142, 60, 0.2)' }}>
+                  <Typography variant="body2" fontWeight="600" gutterBottom>
+                    {scenario.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" paragraph>
+                    {scenario.description}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    fullWidth
+                    sx={{ bgcolor: '#388e3c' }}
+                    onClick={() => applyExampleScenario(scenario)}
+                  >
+                    Bu Kuralı Oluştur
+                  </Button>
+                </Card>
+              ))}
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <Typography variant="subtitle2" fontWeight="600" sx={{ color: '#f57c00', mb: 2 }}>
+                ❤️ KARDİYOLOJİ
+              </Typography>
+              {(currentScenarios as any).cardiology?.map((scenario: any, index: number) => (
+                <Card key={index} sx={{ p: 2, mb: 2, border: '1px solid rgba(245, 124, 0, 0.2)' }}>
+                  <Typography variant="body2" fontWeight="600" gutterBottom>
+                    {scenario.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" paragraph>
+                    {scenario.description}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    fullWidth
+                    sx={{ bgcolor: '#f57c00' }}
+                    onClick={() => applyExampleScenario(scenario)}
+                  >
+                    Bu Kuralı Oluştur
+                  </Button>
+                </Card>
+              ))}
+            </Grid>
+          </Grid>
+        ) : (
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle2" fontWeight="600" sx={{ color: '#1976d2', mb: 2 }}>
+                👥 MÜŞTERİ HİZMETLERİ
+              </Typography>
+              {(currentScenarios as any).customer_service?.map((scenario: any, index: number) => (
+                <Card key={index} sx={{ p: 2, mb: 2, border: '1px solid rgba(25, 118, 210, 0.2)' }}>
+                  <Typography variant="body2" fontWeight="600" gutterBottom>
+                    {scenario.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" paragraph>
+                    {scenario.description}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    fullWidth
+                    sx={{ bgcolor: '#1976d2' }}
+                    onClick={() => applyExampleScenario(scenario)}
+                  >
+                    Bu Kuralı Oluştur
+                  </Button>
+                </Card>
+              ))}
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle2" fontWeight="600" sx={{ color: '#7b1fa2', mb: 2 }}>
+                🔧 TEKNİK DESTEK
+              </Typography>
+              {(currentScenarios as any).technical?.map((scenario: any, index: number) => (
+                <Card key={index} sx={{ p: 2, mb: 2, border: '1px solid rgba(123, 31, 162, 0.2)' }}>
+                  <Typography variant="body2" fontWeight="600" gutterBottom>
+                    {scenario.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" paragraph>
+                    {scenario.description}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    fullWidth
+                    sx={{ bgcolor: '#7b1fa2' }}
+                    onClick={() => applyExampleScenario(scenario)}
+                  >
+                    Bu Kuralı Oluştur
+                  </Button>
+                </Card>
+              ))}
+            </Grid>
+          </Grid>
+        )}
+
+        <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(76, 175, 80, 0.1)', borderRadius: 1 }}>
+          <Typography variant="body2" color="success.main" fontWeight="600">
+            💡 İpucu: Örnek kuralı seçtikten sonra, form otomatik doldurulacak. İhtiyaçlarınıza göre ayarlayıp kaydedebilirsiniz.
+          </Typography>
+        </Box>
+      </Card>
+    );
   };
 
   return (
@@ -906,227 +1761,920 @@ const DatasetConfig = () => {
 
       {tabValue === 1 && (
         <Box sx={{ padding: '24px' }}>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
-            <Card sx={{
-              borderRadius: 3,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-              height: '100%',
-              overflow: 'hidden'
-            }}>
-              <Box sx={{
-                p: 3,
-                background: `linear-gradient(45deg, rgba(103, 58, 183, 0.8), rgba(103, 58, 183, 0.6))`,
-                color: 'white'
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={3}>
+              <Card sx={{
+                borderRadius: 3,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                height: '100%',
+                overflow: 'hidden'
               }}>
-                <Typography variant="h6" fontWeight="bold">
-                  Çizelgeleme Kuralları
-                </Typography>
-                <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
-                  Kurumunuza özel çizelgeleme kurallarını yönetin
-                </Typography>
-              </Box>
-
-              <List sx={{ p: 0 }}>
-                {configs.map((config, index) => (
-                  <ListItem
-                    key={config.id}
-                    onClick={() => setSelectedConfig(config.id)}
-                    sx={{
-                      cursor: 'pointer',
-                      py: 2,
-                      px: 3,
-                      borderBottom: index < configs.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
-                      bgcolor: selectedConfig === config.id ? 'rgba(103, 58, 183, 0.08)' : 'transparent',
-                      '&:hover': {
-                        bgcolor: selectedConfig === config.id ? 'rgba(103, 58, 183, 0.12)' : 'rgba(0,0,0,0.02)'
-                      }
-                    }}
-                  >
-                    <ListItemIcon>
-                      <FileIcon sx={{ color: '#673ab7' }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={<Typography variant="subtitle1" fontWeight="600">{config.name}</Typography>}
-                      secondary={
-                        <Chip
-                          size="small"
-                          label={config.id.includes("hospital") ? "Sağlık Kurumu" : "Çağrı Merkezi"}
-                          color={config.id.includes("hospital") ? "success" : "info"}
-                          variant="outlined"
-                          sx={{ mt: 0.5 }}
-                        />
-                      }
-                      secondaryTypographyProps={{ component: 'div' }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-
-              <Box sx={{ p: 3 }}>
-                <Button
-                  variant="contained"
-                  startIcon={<InfoIcon />}
-                  fullWidth
-                  sx={{
-                    borderRadius: 2,
-                    py: 1.2,
-                    bgcolor: '#673ab7',
-                    '&:hover': {
-                      bgcolor: '#5e35b1'
-                    },
-                    boxShadow: '0 4px 10px rgba(103, 58, 183, 0.3)'
-                  }}
-                  onClick={() => {
-                    setSnackbar({
-                      open: true,
-                      message: 'Kural setleri hakkında bilgi almak için sistem yöneticinize başvurun',
-                      severity: 'info'
-                    });
-                  }}
-                >
-                  Kural Setleri Hakkında Bilgi
-                </Button>
-              </Box>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={8}>
-            <Card sx={{
-              borderRadius: 3,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-              height: '100%',
-              overflow: 'hidden'
-            }}>
-              <Box sx={{
-                p: 3,
-                background: `linear-gradient(45deg, rgba(103, 58, 183, 0.05), rgba(103, 58, 183, 0.02))`,
-                borderBottom: '1px solid rgba(0,0,0,0.05)'
-              }}>
-                <Typography variant="h6" fontWeight="bold">
-                  {configs.find(c => c.id === selectedConfig)?.name || 'Konfigürasyon'} Kuralları
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Çizelgeleme kurallarını ve optimizasyon parametrelerini düzenleyin
-                </Typography>
-              </Box>
-
-              <Box sx={{ p: 3 }}>
-                <Alert severity="info" sx={{ mb: 4 }}>
-                  <Typography variant="subtitle2" fontWeight="bold">
-                    Kural Dosyası Hakkında
+                <Box sx={{
+                  p: 3,
+                  background: `linear-gradient(45deg, rgba(103, 58, 183, 0.8), rgba(103, 58, 183, 0.6))`,
+                  color: 'white'
+                }}>
+                  <Typography variant="h6" fontWeight="bold">
+                    Çizelgeleme Kuralları
                   </Typography>
-                  <Typography variant="body2">
-                    Bu dosya, çizelgeleme algoritmasının kullanacağı tüm kuralları ve parametreleri içerir.
-                    Minimum personel gereksinimleri, vardiya kısıtlamaları ve optimizasyon hedefleri burada tanımlanır.
-                  </Typography>
-                </Alert>
-
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Chip
-                    label={selectedConfig.includes("hospital") ? "Sağlık Kurumu" : "Çağrı Merkezi"}
-                    color={selectedConfig.includes("hospital") ? "success" : "info"}
-                    sx={{ mr: 2 }}
-                  />
-                  <Typography variant="h6" fontWeight="600">
-                    {configs.find(c => c.id === selectedConfig)?.name || 'Konfigürasyon'}
+                  <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
+                    Kurumunuza özel çizelgeleme kurallarını yönetin
                   </Typography>
                 </Box>
 
-                <Card sx={{
-                  p: 3,
-                  borderRadius: 2,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                  mb: 4,
-                  border: '1px solid rgba(103, 58, 183, 0.1)',
-                  bgcolor: 'rgba(103, 58, 183, 0.02)'
-                }}>
-                  <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#673ab7' }}>
-                    Kural Tanımları (YAML)
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    Aşağıdaki metin alanında kuralları düzenleyebilirsiniz. Değişiklikleri kaydetmek için "Kuralları Kaydet" butonuna tıklayın.
-                  </Typography>
+                <List sx={{ p: 0 }}>
+                  {configs.map((config, index) => (
+                    <ListItem
+                      key={config.id}
+                      onClick={() => setSelectedConfig(config.id)}
+                      sx={{
+                        cursor: 'pointer',
+                        py: 2,
+                        px: 3,
+                        borderBottom: index < configs.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
+                        bgcolor: selectedConfig === config.id ? 'rgba(103, 58, 183, 0.08)' : 'transparent',
+                        '&:hover': {
+                          bgcolor: selectedConfig === config.id ? 'rgba(103, 58, 183, 0.12)' : 'rgba(0,0,0,0.02)'
+                        }
+                      }}
+                    >
+                      <ListItemIcon>
+                        <FileIcon sx={{ color: '#673ab7' }} />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={<Typography variant="subtitle1" fontWeight="600">{config.name}</Typography>}
+                        secondary={
+                          <Chip
+                            size="small"
+                            label={config.id.includes("hospital") ? "Sağlık Kurumu" : "Çağrı Merkezi"}
+                            color={config.id.includes("hospital") ? "success" : "info"}
+                            variant="outlined"
+                            sx={{ mt: 0.5 }}
+                          />
+                        }
+                        secondaryTypographyProps={{ component: 'div' }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
 
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={16}
-                    value={configContent || 'Konfigürasyon yükleniyor...'}
-                    onChange={(e) => setConfigContent(e.target.value)}
-                  variant="outlined"
-                  InputProps={{
-                    sx: {
-                      borderRadius: 2,
-                      fontFamily: 'monospace'
-                    }
-                  }}
-                  sx={{ mb: 3 }}
-                />
-
-                <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ p: 3 }}>
+                  <Typography variant="subtitle2" fontWeight="600" gutterBottom>
+                    Düzenleme Modu
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                    <Button
+                      variant={ruleMode === 'visual' ? 'contained' : 'outlined'}
+                      size="small"
+                      startIcon={<PreviewIcon />}
+                      onClick={() => setRuleMode('visual')}
+                      sx={{ 
+                        flex: 1, 
+                        fontSize: '0.75rem',
+                        bgcolor: ruleMode === 'visual' ? '#673ab7' : 'transparent',
+                        borderColor: '#673ab7',
+                        color: ruleMode === 'visual' ? 'white' : '#673ab7'
+                      }}
+                    >
+                      Görsel
+                    </Button>
+                    <Button
+                      variant={ruleMode === 'yaml' ? 'contained' : 'outlined'}
+                      size="small"
+                      startIcon={<CodeIcon />}
+                      onClick={() => setRuleMode('yaml')}
+                      sx={{ 
+                        flex: 1, 
+                        fontSize: '0.75rem',
+                        bgcolor: ruleMode === 'yaml' ? '#673ab7' : 'transparent',
+                        borderColor: '#673ab7',
+                        color: ruleMode === 'yaml' ? 'white' : '#673ab7'
+                      }}
+                    >
+                      YAML
+                    </Button>
+                  </Box>
+                  
                   <Button
                     variant="contained"
-                    startIcon={<SaveIcon />}
+                    startIcon={<InfoIcon />}
+                    fullWidth
+                    size="small"
                     sx={{
                       borderRadius: 2,
-                      py: 1.2,
-                      px: 3,
+                      py: 1,
                       bgcolor: '#673ab7',
                       '&:hover': {
                         bgcolor: '#5e35b1'
                       },
                       boxShadow: '0 4px 10px rgba(103, 58, 183, 0.3)'
                     }}
-                      onClick={handleSaveConfig}
+                    onClick={() => setShowHelpCenter(!showHelpCenter)}
                   >
-                    Kuralları Kaydet
-                  </Button>
-                  <Button
-                    variant="outlined"
-                      startIcon={<InfoIcon />}
-                    sx={{
-                      borderRadius: 2,
-                      py: 1.2,
-                        px: 3,
-                        color: '#673ab7',
-                        borderColor: '#673ab7'
-                      }}
-                      onClick={() => {
-                        setSnackbar({
-                          open: true,
-                          message: 'Kural setlerini silmek için sistem yöneticinize başvurun',
-                          severity: 'info'
-                        });
-                      }}
-                    >
-                      Yardım
+                    {showHelpCenter ? 'Yardımı Kapat' : 'Hızlı Örnekler'}
                   </Button>
                 </Box>
-                </Card>
+              </Card>
+            </Grid>
 
-                <Card sx={{
+            <Grid item xs={12} md={9}>
+              <Card sx={{
+                borderRadius: 3,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                height: '100%',
+                overflow: 'hidden'
+              }}>
+                <Box sx={{
                   p: 3,
-                  borderRadius: 2,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                  border: '1px solid rgba(0,0,0,0.05)',
-                  bgcolor: 'rgba(76, 175, 80, 0.05)'
+                  background: `linear-gradient(45deg, rgba(103, 58, 183, 0.05), rgba(103, 58, 183, 0.02))`,
+                  borderBottom: '1px solid rgba(0,0,0,0.05)'
                 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <InfoIcon sx={{ color: 'success.main', mr: 1.5 }} />
-                    <Typography variant="subtitle1" fontWeight="600" color="success.main">
-                      Kural Tanımları Hakkında Bilgi
-                    </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Typography variant="h6" fontWeight="bold">
+                        {configs.find(c => c.id === selectedConfig)?.name || 'Konfigürasyon'} Kuralları
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        {ruleMode === 'visual' ? 'Görsel editör ile kuralları yönetin' : 'YAML editör ile kuralları düzenleyin'}
+                      </Typography>
+                    </Box>
+                    <Chip
+                      label={selectedConfig.includes("hospital") ? "Sağlık Kurumu" : "Çağrı Merkezi"}
+                      color={selectedConfig.includes("hospital") ? "success" : "info"}
+                    />
                   </Box>
-                  <Typography variant="body2" paragraph>
-                    Kural tanımlarını güncelledikten sonra, çizelgeleme işlemi sırasında yeni kurallar otomatik olarak kullanılacaktır.
-                    YAML formatı ve kural tanımları hakkında daha fazla bilgi için sistem yöneticinize başvurun.
-                  </Typography>
-                </Card>
-              </Box>
-            </Card>
+                </Box>
+
+                <Box sx={{ p: 3 }}>
+                  {/* Yardım Merkezi */}
+                  {showHelpCenter && <HelpCenter />}
+                  
+                  {ruleMode === 'visual' ? (
+                    <>
+                      {/* Görsel Editör */}
+                      <Alert severity="info" sx={{ mb: 4 }}>
+                        <Typography variant="subtitle2" fontWeight="bold">
+                          Görsel Kural Editörü
+                        </Typography>
+                        <Typography variant="body2">
+                          Formları doldurarak çizelgeleme kurallarını kolayca oluşturun ve düzenleyin.
+                          Tüm kurallar otomatik olarak doğrulanır ve YAML formatına dönüştürülür.
+                        </Typography>
+                      </Alert>
+
+                      {/* Kural Kategorileri */}
+                      <Box sx={{
+                        borderRadius: 2,
+                        bgcolor: 'background.paper',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                        mb: 4
+                      }}>
+                        <Tabs
+                          value={ruleCategory}
+                          onChange={(e, newValue) => setRuleCategory(newValue)}
+                          variant="fullWidth"
+                          sx={{
+                            '& .MuiTab-root': {
+                              py: 2,
+                              fontWeight: 600,
+                              fontSize: '0.9rem',
+                              minHeight: 'auto'
+                            },
+                            '& .Mui-selected': {
+                              color: 'primary.main',
+                            },
+                            '& .MuiTabs-indicator': {
+                              height: 3,
+                              borderRadius: '3px 3px 0 0'
+                            }
+                          }}
+                        >
+                          {ruleCategories.map((category, index) => (
+                            <Tab
+                              key={category.id}
+                              icon={category.icon}
+                              label={category.label}
+                              iconPosition="start"
+                              sx={{ 
+                                color: category.color,
+                                '&.Mui-selected': { color: category.color }
+                              }}
+                            />
+                          ))}
+                        </Tabs>
+                      </Box>
+
+                      {/* Personel Gereksinimleri */}
+                      {ruleCategory === 0 && (
+                        <Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                            <Typography variant="h6" fontWeight="600" sx={{ color: '#1976d2' }}>
+                              Personel Gereksinimleri
+                            </Typography>
+                            <Button
+                              variant="contained"
+                              startIcon={<AddCircleIcon />}
+                              onClick={addStaffingRule}
+                              sx={{ bgcolor: '#1976d2' }}
+                            >
+                              Yeni Kural Ekle
+                            </Button>
+                          </Box>
+
+                          {staffingRules.length === 0 ? (
+                            <Card sx={{ p: 3, textAlign: 'center', bgcolor: 'rgba(25, 118, 210, 0.05)' }}>
+                              <PeopleIcon sx={{ fontSize: 48, color: '#1976d2', mb: 2 }} />
+                              <Typography variant="h6" gutterBottom>
+                                Henüz personel kuralı tanımlanmamış
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary" paragraph>
+                                Çizelgeleme için minimum personel gereksinimlerini tanımlayın
+                              </Typography>
+                              <Button
+                                variant="contained"
+                                startIcon={<AddCircleIcon />}
+                                onClick={addStaffingRule}
+                                sx={{ bgcolor: '#1976d2' }}
+                              >
+                                İlk Kuralı Ekle
+                              </Button>
+                            </Card>
+                          ) : (
+                            <Grid container spacing={3}>
+                              {staffingRules.map((rule, index) => (
+                                <Grid item xs={12} key={rule.id}>
+                                  <Card sx={{ p: 3, border: '1px solid rgba(25, 118, 210, 0.2)' }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                      <Typography variant="subtitle1" fontWeight="600">
+                                        Personel Kuralı #{index + 1}
+                                      </Typography>
+                                      <IconButton
+                                        color="error"
+                                        onClick={() => removeStaffingRule(rule.id!)}
+                                        size="small"
+                                      >
+                                        <RemoveCircleIcon />
+                                      </IconButton>
+                                    </Box>
+                                    
+                                    <Grid container spacing={3}>
+                                      <Grid item xs={12} sm={6} md={3}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
+                                            Departman
+                                          </Typography>
+                                          <SmartTooltip field="department">
+                                            <FormControl fullWidth size="small">
+                                              <Select
+                                                value={rule.department}
+                                                onChange={(e) => updateStaffingRule(rule.id!, { department: e.target.value })}
+                                                placeholder="Seçiniz"
+                                              >
+                                                {departments.map(dept => (
+                                                  <MenuItem key={dept} value={dept}>{dept}</MenuItem>
+                                                ))}
+                                              </Select>
+                                            </FormControl>
+                                          </SmartTooltip>
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={12} sm={6} md={3}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
+                                            Rol
+                                          </Typography>
+                                          <FormControl fullWidth size="small">
+                                            <Select
+                                              value={rule.role}
+                                              onChange={(e) => updateStaffingRule(rule.id!, { role: e.target.value })}
+                                              placeholder="Seçiniz"
+                                            >
+                                              {roles.map(role => (
+                                                <MenuItem key={role} value={role}>{role}</MenuItem>
+                                              ))}
+                                            </Select>
+                                          </FormControl>
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={12} sm={6} md={2}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
+                                            Vardiya
+                                          </Typography>
+                                          <FormControl fullWidth size="small">
+                                            <Select
+                                              value={rule.shift}
+                                              onChange={(e) => updateStaffingRule(rule.id!, { shift: e.target.value })}
+                                              placeholder="Seçiniz"
+                                            >
+                                              {shifts.map(shift => (
+                                                <MenuItem key={shift} value={shift}>{shift}</MenuItem>
+                                              ))}
+                                            </Select>
+                                          </FormControl>
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={12} sm={6} md={2}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
+                                            Hafta
+                                          </Typography>
+                                          <FormControl fullWidth size="small">
+                                            <Select
+                                              value={rule.weekType}
+                                              onChange={(e) => updateStaffingRule(rule.id!, { weekType: e.target.value })}
+                                              placeholder="Seçiniz"
+                                            >
+                                              {weekTypes.map(week => (
+                                                <MenuItem key={week} value={week}>{week}</MenuItem>
+                                              ))}
+                                            </Select>
+                                          </FormControl>
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={6} sm={3} md={1.5}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
+                                            Min
+                                          </Typography>
+                                          <TextField
+                                            type="number"
+                                            size="small"
+                                            fullWidth
+                                            value={rule.minCount}
+                                            onChange={(e) => updateStaffingRule(rule.id!, { minCount: parseInt(e.target.value) || 1 })}
+                                            inputProps={{ min: 1, style: { textAlign: 'center' } }}
+                                            sx={{ 
+                                              '& .MuiInputBase-input': { 
+                                                textAlign: 'center',
+                                                fontSize: '0.9rem',
+                                                fontWeight: '600'
+                                              }
+                                            }}
+                                          />
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={6} sm={3} md={1.5}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
+                                            Ceza
+                                          </Typography>
+                                          <TextField
+                                            type="number"
+                                            size="small"
+                                            fullWidth
+                                            value={rule.penalty}
+                                            onChange={(e) => updateStaffingRule(rule.id!, { penalty: parseInt(e.target.value) || 100 })}
+                                            inputProps={{ min: 0, style: { textAlign: 'center' } }}
+                                            sx={{ 
+                                              '& .MuiInputBase-input': { 
+                                                textAlign: 'center',
+                                                fontSize: '0.9rem',
+                                                fontWeight: '600'
+                                              }
+                                            }}
+                                          />
+                                        </Box>
+                                      </Grid>
+                                    </Grid>
+                                    
+                                    <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 1 }}>
+                                      <Typography variant="body2" color="text.secondary">
+                                        <strong>Kural Özeti:</strong> {rule.department} departmanında {rule.shift.toLowerCase()} vardiyasında 
+                                        ({rule.weekType.toLowerCase()}) minimum {rule.minCount} {rule.role.toLowerCase()} bulunmalıdır.
+                                      </Typography>
+                                    </Box>
+                                  </Card>
+                                </Grid>
+                              ))}
+                            </Grid>
+                          )}
+                        </Box>
+                      )}
+
+                      {/* Yetenek Gereksinimleri */}
+                      {ruleCategory === 1 && (
+                        <Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                            <Typography variant="h6" fontWeight="600" sx={{ color: '#388e3c' }}>
+                              Yetenek Gereksinimleri
+                            </Typography>
+                            <Button
+                              variant="contained"
+                              startIcon={<AddCircleIcon />}
+                              onClick={addSkillRule}
+                              sx={{ bgcolor: '#388e3c' }}
+                            >
+                              Yeni Yetenek Kuralı
+                            </Button>
+                          </Box>
+
+                          {skillRules.length === 0 ? (
+                            <Card sx={{ p: 3, textAlign: 'center', bgcolor: 'rgba(56, 142, 60, 0.05)' }}>
+                              <SchoolIcon sx={{ fontSize: 48, color: '#388e3c', mb: 2 }} />
+                              <Typography variant="h6" gutterBottom>
+                                Henüz yetenek kuralı tanımlanmamış
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary" paragraph>
+                                Belirli vardiyalar için özel yetenek gereksinimleri tanımlayın
+                              </Typography>
+                              <Button
+                                variant="contained"
+                                startIcon={<AddCircleIcon />}
+                                onClick={addSkillRule}
+                                sx={{ bgcolor: '#388e3c' }}
+                              >
+                                İlk Yetenek Kuralını Ekle
+                              </Button>
+                            </Card>
+                          ) : (
+                            <Grid container spacing={3}>
+                              {skillRules.map((rule, index) => (
+                                <Grid item xs={12} key={rule.id}>
+                                  <Card sx={{ p: 3, border: '1px solid rgba(56, 142, 60, 0.2)' }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                      <Typography variant="subtitle1" fontWeight="600">
+                                        Yetenek Kuralı #{index + 1}
+                                      </Typography>
+                                      <IconButton
+                                        color="error"
+                                        onClick={() => removeSkillRule(rule.id!)}
+                                        size="small"
+                                      >
+                                        <RemoveCircleIcon />
+                                      </IconButton>
+                                    </Box>
+                                    
+                                    <Grid container spacing={3}>
+                                      <Grid item xs={12} sm={6} md={3}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
+                                            Departman
+                                          </Typography>
+                                          <FormControl fullWidth size="small">
+                                            <Select
+                                              value={rule.department}
+                                              onChange={(e) => updateSkillRule(rule.id!, { department: e.target.value })}
+                                              placeholder="Seçiniz"
+                                            >
+                                              {departments.map(dept => (
+                                                <MenuItem key={dept} value={dept}>{dept}</MenuItem>
+                                              ))}
+                                            </Select>
+                                          </FormControl>
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={12} sm={6} md={3}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
+                                            Yetenek
+                                          </Typography>
+                                          <FormControl fullWidth size="small">
+                                            <Select
+                                              value={rule.skill}
+                                              onChange={(e) => updateSkillRule(rule.id!, { skill: e.target.value })}
+                                              placeholder="Seçiniz"
+                                            >
+                                              {skills.map(skill => (
+                                                <MenuItem key={skill} value={skill}>{skill}</MenuItem>
+                                              ))}
+                                            </Select>
+                                          </FormControl>
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={12} sm={6} md={2}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
+                                            Vardiya
+                                          </Typography>
+                                          <FormControl fullWidth size="small">
+                                            <Select
+                                              value={rule.shift}
+                                              onChange={(e) => updateSkillRule(rule.id!, { shift: e.target.value })}
+                                              placeholder="Seçiniz"
+                                            >
+                                              {shifts.map(shift => (
+                                                <MenuItem key={shift} value={shift}>{shift}</MenuItem>
+                                              ))}
+                                            </Select>
+                                          </FormControl>
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={12} sm={6} md={2}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
+                                            Hafta
+                                          </Typography>
+                                          <FormControl fullWidth size="small">
+                                            <Select
+                                              value={rule.weekType}
+                                              onChange={(e) => updateSkillRule(rule.id!, { weekType: e.target.value })}
+                                              placeholder="Seçiniz"
+                                            >
+                                              {weekTypes.map(week => (
+                                                <MenuItem key={week} value={week}>{week}</MenuItem>
+                                              ))}
+                                            </Select>
+                                          </FormControl>
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={6} sm={3} md={1.5}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
+                                            Min
+                                          </Typography>
+                                          <TextField
+                                            type="number"
+                                            size="small"
+                                            fullWidth
+                                            value={rule.minCount}
+                                            onChange={(e) => updateSkillRule(rule.id!, { minCount: parseInt(e.target.value) || 1 })}
+                                            inputProps={{ min: 1, style: { textAlign: 'center' } }}
+                                            sx={{ 
+                                              '& .MuiInputBase-input': { 
+                                                textAlign: 'center',
+                                                fontSize: '0.9rem',
+                                                fontWeight: '600'
+                                              }
+                                            }}
+                                          />
+                                        </Box>
+                                      </Grid>
+                                      <Grid item xs={6} sm={3} md={1.5}>
+                                        <Box>
+                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
+                                            Ceza
+                                          </Typography>
+                                          <TextField
+                                            type="number"
+                                            size="small"
+                                            fullWidth
+                                            value={rule.penalty}
+                                            onChange={(e) => updateSkillRule(rule.id!, { penalty: parseInt(e.target.value) || 100 })}
+                                            inputProps={{ min: 0, style: { textAlign: 'center' } }}
+                                            sx={{ 
+                                              '& .MuiInputBase-input': { 
+                                                textAlign: 'center',
+                                                fontSize: '0.9rem',
+                                                fontWeight: '600'
+                                              }
+                                            }}
+                                          />
+                                        </Box>
+                                      </Grid>
+                                    </Grid>
+                                    
+                                    <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(56, 142, 60, 0.05)', borderRadius: 1 }}>
+                                      <Typography variant="body2" color="text.secondary">
+                                        <strong>Kural Özeti:</strong> {rule.department} departmanında {rule.shift.toLowerCase()} vardiyasında 
+                                        ({rule.weekType.toLowerCase()}) {rule.skill} yeteneğine sahip minimum {rule.minCount} kişi bulunmalıdır.
+                                      </Typography>
+                                    </Box>
+                                  </Card>
+                                </Grid>
+                              ))}
+                            </Grid>
+                          )}
+                        </Box>
+                      )}
+
+                      {/* Optimizasyon Hedefleri */}
+                      {ruleCategory === 2 && (
+                        <Box>
+                          <Typography variant="h6" fontWeight="600" sx={{ color: '#f57c00', mb: 3 }}>
+                            Optimizasyon Hedefleri
+                          </Typography>
+                          
+                          <Card sx={{ p: 3, border: '1px solid rgba(245, 124, 0, 0.2)' }}>
+                            <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+                              Hedef Ağırlıkları
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" paragraph>
+                              Optimizasyon algoritmasının hangi hedeflere ne kadar önem vereceğini belirleyin (0-10 arası)
+                            </Typography>
+                            
+                            <Grid container spacing={3}>
+                              <Grid item xs={12} md={6}>
+                                <Box sx={{ mb: 2 }}>
+                                  <Typography variant="body2" fontWeight="600" gutterBottom>
+                                    Fazla Personeli Minimize Et
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <TextField
+                                      type="number"
+                                      size="small"
+                                      value={optimizationWeights.minimize_overstaffing}
+                                      onChange={(e) => setOptimizationWeights({
+                                        ...optimizationWeights,
+                                        minimize_overstaffing: parseFloat(e.target.value) || 0
+                                      })}
+                                      inputProps={{ min: 0, max: 10, step: 0.1 }}
+                                      sx={{ width: 100 }}
+                                    />
+                                    <Typography variant="body2" color="text.secondary">
+                                      Gereksiz personel atamalarını azaltır
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </Grid>
+                              
+                              <Grid item xs={12} md={6}>
+                                <Box sx={{ mb: 2 }}>
+                                  <Typography variant="body2" fontWeight="600" gutterBottom>
+                                    Eksik Personeli Minimize Et
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <TextField
+                                      type="number"
+                                      size="small"
+                                      value={optimizationWeights.minimize_understaffing}
+                                      onChange={(e) => setOptimizationWeights({
+                                        ...optimizationWeights,
+                                        minimize_understaffing: parseFloat(e.target.value) || 0
+                                      })}
+                                      inputProps={{ min: 0, max: 10, step: 0.1 }}
+                                      sx={{ width: 100 }}
+                                    />
+                                    <Typography variant="body2" color="text.secondary">
+                                      Personel eksikliklerini önler (yüksek öncelik)
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </Grid>
+                              
+                              <Grid item xs={12} md={6}>
+                                <Box sx={{ mb: 2 }}>
+                                  <Typography variant="body2" fontWeight="600" gutterBottom>
+                                    Tercihleri Maksimize Et
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <TextField
+                                      type="number"
+                                      size="small"
+                                      value={optimizationWeights.maximize_preferences}
+                                      onChange={(e) => setOptimizationWeights({
+                                        ...optimizationWeights,
+                                        maximize_preferences: parseFloat(e.target.value) || 0
+                                      })}
+                                      inputProps={{ min: 0, max: 10, step: 0.1 }}
+                                      sx={{ width: 100 }}
+                                    />
+                                    <Typography variant="body2" color="text.secondary">
+                                      Çalışan tercihlerini dikkate alır
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </Grid>
+                              
+                              <Grid item xs={12} md={6}>
+                                <Box sx={{ mb: 2 }}>
+                                  <Typography variant="body2" fontWeight="600" gutterBottom>
+                                    İş Yükünü Dengele
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <TextField
+                                      type="number"
+                                      size="small"
+                                      value={optimizationWeights.balance_workload}
+                                      onChange={(e) => setOptimizationWeights({
+                                        ...optimizationWeights,
+                                        balance_workload: parseFloat(e.target.value) || 0
+                                      })}
+                                      inputProps={{ min: 0, max: 10, step: 0.1 }}
+                                      sx={{ width: 100 }}
+                                    />
+                                    <Typography variant="body2" color="text.secondary">
+                                      Çalışanlar arası iş yükü adaleti
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </Grid>
+                              
+                              <Grid item xs={12}>
+                                <Box sx={{ mb: 2 }}>
+                                  <Typography variant="body2" fontWeight="600" gutterBottom>
+                                    Vardiya Kapsamını Maksimize Et
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <TextField
+                                      type="number"
+                                      size="small"
+                                      value={optimizationWeights.maximize_shift_coverage}
+                                      onChange={(e) => setOptimizationWeights({
+                                        ...optimizationWeights,
+                                        maximize_shift_coverage: parseFloat(e.target.value) || 0
+                                      })}
+                                      inputProps={{ min: 0, max: 10, step: 0.1 }}
+                                      sx={{ width: 100 }}
+                                    />
+                                    <Typography variant="body2" color="text.secondary">
+                                      Tüm vardiyaların etkin şekilde doldurulması
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </Grid>
+                            </Grid>
+                          </Card>
+                        </Box>
+                      )}
+
+                      {/* Genel Kurallar */}
+                      {ruleCategory === 3 && (
+                        <Box>
+                          <Typography variant="h6" fontWeight="600" sx={{ color: '#7b1fa2', mb: 3 }}>
+                            Genel Kurallar
+                          </Typography>
+                          
+                          <Grid container spacing={3}>
+                            <Grid item xs={12} md={4}>
+                              <Card sx={{ p: 3, border: '1px solid rgba(123, 31, 162, 0.2)' }}>
+                                <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+                                  Maksimum Ardışık Vardiya
+                                </Typography>
+                                <TextField
+                                  type="number"
+                                  value={generalRules.max_consecutive_shifts}
+                                  onChange={(e) => setGeneralRules({
+                                    ...generalRules,
+                                    max_consecutive_shifts: parseInt(e.target.value) || 1
+                                  })}
+                                  inputProps={{ min: 1, max: 7 }}
+                                  fullWidth
+                                  helperText="Bir çalışanın üst üste kaç vardiya çalışabileceği"
+                                />
+                              </Card>
+                            </Grid>
+                            
+                            <Grid item xs={12} md={4}>
+                              <Card sx={{ p: 3, border: '1px solid rgba(123, 31, 162, 0.2)' }}>
+                                <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+                                  Minimum Dinlenme Süresi (Saat)
+                                </Typography>
+                                <TextField
+                                  type="number"
+                                  value={generalRules.min_rest_time_hours}
+                                  onChange={(e) => setGeneralRules({
+                                    ...generalRules,
+                                    min_rest_time_hours: parseInt(e.target.value) || 8
+                                  })}
+                                  inputProps={{ min: 8, max: 24 }}
+                                  fullWidth
+                                  helperText="Vardiyalar arası minimum dinlenme süresi"
+                                />
+                              </Card>
+                            </Grid>
+                            
+                            <Grid item xs={12} md={4}>
+                              <Card sx={{ p: 3, border: '1px solid rgba(123, 31, 162, 0.2)' }}>
+                                <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+                                  Çözüm Süresi Limiti (Saniye)
+                                </Typography>
+                                <TextField
+                                  type="number"
+                                  value={generalRules.solver_time_limit_seconds}
+                                  onChange={(e) => setGeneralRules({
+                                    ...generalRules,
+                                    solver_time_limit_seconds: parseInt(e.target.value) || 60
+                                  })}
+                                  inputProps={{ min: 30, max: 300 }}
+                                  fullWidth
+                                  helperText="Optimizasyon algoritmasının maksimum çalışma süresi"
+                                />
+                              </Card>
+                            </Grid>
+                          </Grid>
+                        </Box>
+                      )}
+
+                      {/* Kaydet butonu ve validasyon */}
+                      <Box sx={{ mt: 4, p: 3, bgcolor: 'rgba(76, 175, 80, 0.05)', borderRadius: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Box>
+                            <Typography variant="subtitle1" fontWeight="600" color="success.main">
+                              Kurallar Hazır
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {staffingRules.length} personel kuralı, {skillRules.length} yetenek kuralı tanımlandı
+                            </Typography>
+                          </Box>
+                          <Button
+                            variant="contained"
+                            color="success"
+                            startIcon={<SaveIcon />}
+                            onClick={handleAdvancedSaveConfig}
+                            disabled={loading}
+                            sx={{ px: 4, py: 1.5 }}
+                          >
+                            {loading ? 'Kaydediliyor...' : 'Kuralları Kaydet'}
+                          </Button>
+                        </Box>
+                      </Box>
+                    </>
+                  ) : (
+                    <>
+                      {/* YAML Editör */}
+                      <Alert severity="warning" sx={{ mb: 4 }}>
+                        <Typography variant="subtitle2" fontWeight="bold">
+                          Gelişmiş YAML Editörü
+                        </Typography>
+                        <Typography variant="body2">
+                          YAML formatında doğrudan düzenleme yapıyorsunuz. Syntax hatalarından kaçınmak için dikkatli olun.
+                          Görsel editöre geçmek için yukarıdan "Görsel" sekmesini seçin.
+                        </Typography>
+                      </Alert>
+
+                      <Card sx={{
+                        p: 3,
+                        borderRadius: 2,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        mb: 4,
+                        border: '1px solid rgba(103, 58, 183, 0.1)',
+                        bgcolor: 'rgba(103, 58, 183, 0.02)'
+                      }}>
+                        <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#673ab7' }}>
+                          Kural Tanımları (YAML)
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" paragraph>
+                          Aşağıdaki metin alanında kuralları düzenleyebilirsiniz. Değişiklikleri kaydetmek için "Kuralları Kaydet" butonuna tıklayın.
+                        </Typography>
+
+                        <TextField
+                          fullWidth
+                          multiline
+                          rows={20}
+                          value={configContent || 'Konfigürasyon yükleniyor...'}
+                          onChange={(e) => setConfigContent(e.target.value)}
+                          variant="outlined"
+                          InputProps={{
+                            sx: {
+                              borderRadius: 2,
+                              fontFamily: 'monospace',
+                              fontSize: '0.875rem'
+                            }
+                          }}
+                          sx={{ mb: 3 }}
+                        />
+
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <Button
+                            variant="contained"
+                            startIcon={<SaveIcon />}
+                            sx={{
+                              borderRadius: 2,
+                              py: 1.2,
+                              px: 3,
+                              bgcolor: '#673ab7',
+                              '&:hover': {
+                                bgcolor: '#5e35b1'
+                              },
+                              boxShadow: '0 4px 10px rgba(103, 58, 183, 0.3)'
+                            }}
+                            onClick={handleSaveConfig}
+                            disabled={loading}
+                          >
+                            {loading ? 'Kaydediliyor...' : 'YAML Kuralları Kaydet'}
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            startIcon={<PreviewIcon />}
+                            sx={{
+                              borderRadius: 2,
+                              py: 1.2,
+                              px: 3,
+                              color: '#673ab7',
+                              borderColor: '#673ab7'
+                            }}
+                            onClick={() => setRuleMode('visual')}
+                          >
+                            Görsel Editöre Geç
+                          </Button>
+                        </Box>
+                      </Card>
+
+                      <Card sx={{
+                        p: 3,
+                        borderRadius: 2,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        border: '1px solid rgba(0,0,0,0.05)',
+                        bgcolor: 'rgba(76, 175, 80, 0.05)'
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <InfoIcon sx={{ color: 'success.main', mr: 1.5 }} />
+                          <Typography variant="subtitle1" fontWeight="600" color="success.main">
+                            YAML Formatı Hakkında Bilgi
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" paragraph>
+                          YAML formatında düzenleme yaparken indentasyon (girinti) önemlidir. Boşluk karakteri kullanın, tab karakteri kullanmayın.
+                          Kural tanımları hakkında daha fazla bilgi için sistem yöneticinize başvurun.
+                        </Typography>
+                      </Card>
+                    </>
+                  )}
+                </Box>
+              </Card>
+            </Grid>
           </Grid>
-        </Grid>
         </Box>
       )}
     </Box>

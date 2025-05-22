@@ -1,92 +1,83 @@
-institution_id: "112_cagri_merkezi_bolge_x"
-institution_name: "Bölge X - 112 Acil Çağrı Merkezi"
+institution_id: "cagri_merkezi_config"
+
+institution_name: "Test Çağrı Merkezi"
+
 problem_type: "shift_scheduling"
 
 optimization_core:
-  solver_time_limit_seconds: 120
+  solver_time_limit_seconds: 60
   objective_weights:
-    minimize_overstaffing: 1.5
-    minimize_understaffing: 100
-    maximize_preferences: 1
-    balance_workload: 3.0
-    maximize_shift_coverage: 50
+    minimize_overstaffing: 1
+    minimize_understaffing: 10
+    maximize_preferences: 2
+    balance_workload: 0.5
+    maximize_shift_coverage: 1
 
 rules:
   min_staffing_requirements:
-    # Sabah vardiyaları için Çağrı Alıcı gereksinimleri - Daha genel desen
-    - shift_pattern: "*Genel Çağrı*"
-      role: "Çağrı Alıcı"
-      department: "Genel Çağrı"
-      min_count: 1  # 4'ten 1'e düşürüldü - Test amaçlı daha da gevşetme
-      penalty_if_violated: 200
-
-    # Gece hafta sonu vardiyaları için Çağrı Alıcı gereksinimleri - Kaldırıldı (genel desen yeterli)
-
-    # Polis Yönlendirme departmanı için Yönlendirici gereksinimleri
-    - shift_pattern: "*"
-      role: "Yönlendirici"
-      department: "Polis Yönlendirme"
-      min_count: 1  # 2'den 1'e düşürüldü
-      penalty_if_violated: 300
-
-    # İtfaiye Yönlendirme departmanı için Yönlendirici gereksinimleri
-    - shift_pattern: "*"
-      role: "Yönlendirici"
-      department: "İtfaiye Yönlendirme"
-      min_count: 1  # Aynı kaldı
-      penalty_if_violated: 300
-
-    # Sağlık Yönlendirme departmanı için Yönlendirici gereksinimleri
-    - shift_pattern: "*"
-      role: "Yönlendirici"
-      department: "Sağlık Yönlendirme"
-      min_count: 1  # 2'den 1'e düşürüldü
-      penalty_if_violated: 300
-
-    # Tüm vardiyalar için Vardiya Amiri gereksinimleri
-    - shift_pattern: "*"
-      role: "Vardiya Amiri"
-      department: "Yönetim"
-      min_count: 1
-      penalty_if_violated: 500
-
-  max_consecutive_shifts: 7  # 5'ten 7'ye artırıldı - Çok daha esnek çalışma düzeni
-  min_rest_time_hours: 1   # 6'dan 1'e düşürüldü - Çözümsüzlüğü test etmek için aşırı gevşetme
-
-  skill_requirements:
-    # Polis Yönlendirme departmanı için yetenek gereksinimleri
-    - shift_pattern: "*"
-      skill: "Polis Kriz Protokolleri"
-      department: "Polis Yönlendirme"
-      role: "Yönlendirici"
+    # Müşteri Hizmetleri Gereksinimleri
+    - shift_pattern: "*Gündüz*Hafta*İçi*"
+      role: "Temsilci"
+      department: "Müşteri Hizmetleri"
+      min_count: 2
+      penalty_if_violated: 100
+    - shift_pattern: "*Gece*Hafta*İçi*"
+      role: "Temsilci"
+      department: "Müşteri Hizmetleri"
       min_count: 1
       penalty_if_violated: 150
+    - shift_pattern: "*Gündüz*Hafta*Sonu*"
+      role: "Temsilci"
+      department: "Müşteri Hizmetleri"
+      min_count: 1
+      penalty_if_violated: 80
 
-    # Genel Çağrı departmanı için yetenek gereksinimleri
-    - shift_pattern: "*"
-      skill: "İleri Düzey Stres Yönetimi"
-      department: "Genel Çağrı"
-      role: "Çağrı Alıcı"
-      min_count: 1  # 2'den 1'e düşürüldü
+    # Teknik Destek Gereksinimleri
+    - shift_pattern: "*Gündüz*Hafta*İçi*"
+      role: "Uzman Temsilci"
+      department: "Teknik Destek"
+      min_count: 1
+      penalty_if_violated: 120
+    - shift_pattern: "*Mesai*Hafta*İçi*"
+      role: "Temsilci"
+      department: "Teknik Destek"
+      min_count: 1
       penalty_if_violated: 100
 
-    # Sağlık Yönlendirme departmanı için yetenek gereksinimleri
-    - shift_pattern: "*"
-      skill: "Temel Tıbbi Triyaj Bilgisi"
-      department: "Sağlık Yönlendirme"
-      role: "Yönlendirici"
+    # Satış Departmanı Gereksinimleri
+    - shift_pattern: "*Gündüz*Hafta*İçi*"
+      role: "Uzman Temsilci"
+      department: "Satış"
       min_count: 1
-      penalty_if_violated: 180
+      penalty_if_violated: 90
 
-    # Yönetim departmanı için yetenek gereksinimleri
-    - shift_pattern: "*"
-      skill: "Liderlik ve Koordinasyon"
+    # Yönetim Gözetimi
+    - shift_pattern: "*Gündüz*Hafta*İçi*"
+      role: "Süpervizör"
       department: "Yönetim"
-      role: "Vardiya Amiri"
       min_count: 1
       penalty_if_violated: 200
 
-n8n_parameters:
-  notification_emails:
-    - "112koordinator@bolgex.gov.tr"
-  report_template: "cagri_merkezi_standart_rapor.tpl"
+  max_consecutive_shifts: 3
+  min_rest_time_hours: 10
+
+  # Yetenek/Sertifika Gereksinimleri
+  skill_requirements:
+    - shift_pattern: "*Gündüz*Hafta*İçi*"
+      skill: "Çoklu Dil"
+      department: "Müşteri Hizmetleri"
+      min_count: 1
+      penalty_if_violated: 80
+    - shift_pattern: "*Gündüz*Hafta*İçi*"
+      skill: "Teknik Bilgi"
+      department: "Teknik Destek"
+      min_count: 1
+      penalty_if_violated: 100
+    - shift_pattern: "*Gündüz*Hafta*İçi*"
+      skill: "Satış Deneyimi"
+      department: "Satış"
+      min_count: 1
+      penalty_if_violated: 70
+
+
+
