@@ -1,0 +1,359 @@
+employee_id,skill
+E001,Teşhis ve Tedavi
+E001,İlk Yardım Sertifikası
+E001,Reçete Yazma
+E001,Acil Tıp
+E001,Acil Servis Deneyimi
+E001,Ultrasonografi Yetkinliği
+E002,Temel Hasta Bakımı
+E002,İlk Yardım Sertifikası
+E002,İlaç Yönetimi
+E002,Acil Servis Deneyimi
+E003,Teşhis ve Tedavi
+E003,İlk Yardım Sertifikası
+E003,Reçete Yazma
+E003,Kardiyoloji
+E003,Ultrasonografi Yetkinliği
+E004,Temel Hasta Bakımı
+E004,İlk Yardım Sertifikası
+E004,İlaç Yönetimi
+E004,Onkoloji Hemşireliği
+E005,Teşhis ve Tedavi
+E005,İlk Yardım Sertifikası
+E005,Reçete Yazma
+E005,Genel Cerrahi
+E005,Endoskopi Yetkinliği
+E006,Temel Hasta Bakımı
+E006,İlk Yardım Sertifikası
+E006,İlaç Yönetimi
+E006,Onkoloji Hemşireliği
+E006,Kan Alma Yetkinliği
+E007,Teşhis ve Tedavi
+E007,İlk Yardım Sertifikası
+E007,Reçete Yazma
+E007,Pediatri
+E007,Acil Servis Deneyimi
+E008,Temel Hasta Bakımı
+E008,İlk Yardım Sertifikası
+E008,İlaç Yönetimi
+E008,Pediatri Yetkinliği
+E008,Diyabet Hemşireliği
+E008,Onkoloji Hemşireliği
+E009,Teşhis ve Tedavi
+E009,İlk Yardım Sertifikası
+E009,Reçete Yazma
+E009,Anesteziyoloji
+E009,Yoğun Bakım Sertifikası
+E009,Acil Servis Deneyimi
+E010,Temel Hasta Bakımı
+E010,İlk Yardım Sertifikası
+E010,İlaç Yönetimi
+E010,Yoğun Bakım Sertifikası
+E010,Onkoloji Hemşireliği
+E011,Ekipman Kullanımı
+E011,Temel İlk Yardım
+E011,EKG Çekme
+E012,Ekipman Kullanımı
+E012,Temel İlk Yardım
+E013,Ofis Yönetimi
+E013,Temel Bilgisayar Kullanımı
+E013,Randevu Planlama
+E014,Temel Hasta Bakımı
+E014,İlk Yardım Sertifikası
+E014,İlaç Yönetimi
+E014,Acil Servis Deneyimi
+E015,Ekipman Kullanımı
+E015,Temel İlk Yardım
+E016,Teşhis ve Tedavi
+E016,İlk Yardım Sertifikası
+E016,Reçete Yazma
+E016,Genel Cerrahi
+E016,Ultrasonografi Yetkinliği
+E017,Temel Hasta Bakımı
+E017,İlk Yardım Sertifikası
+E017,İlaç Yönetimi
+E017,Yoğun Bakım Sertifikası
+E017,Pediatri Yetkinliği
+E018,Temel Hasta Bakımı
+E018,İlk Yardım Sertifikası
+E018,İlaç Yönetimi
+E018,Yoğun Bakım Sertifikası
+E019,Temel Hasta Bakımı
+E019,İlk Yardım Sertifikası
+E019,İlaç Yönetimi
+E019,Ameliyathane Deneyimi
+E019,Kan Alma Yetkinliği
+E019,Pediatri Yetkinliği
+E020,Temel Hasta Bakımı
+E020,İlk Yardım Sertifikası
+E020,İlaç Yönetimi
+E020,Yoğun Bakım Sertifikası
+E021,Temel Hasta Bakımı
+E021,İlk Yardım Sertifikası
+E021,İlaç Yönetimi
+E021,Onkoloji Hemşireliği
+E021,Kan Alma Yetkinliği
+E022,Temel Hasta Bakımı
+E022,İlk Yardım Sertifikası
+E022,İlaç Yönetimi
+E022,Ameliyathane Deneyimi
+E022,Acil Servis Deneyimi
+E022,Triyaj Yetkinliği
+E023,Teşhis ve Tedavi
+E023,İlk Yardım Sertifikası
+E023,Reçete Yazma
+E023,Acil Tıp
+E023,Acil Servis Deneyimi
+E023,Laparoskopi Yetkinliği
+E024,Temel Hasta Bakımı
+E024,İlk Yardım Sertifikası
+E024,İlaç Yönetimi
+E024,Yara Bakım Uzmanlığı
+E024,Pediatri Yetkinliği
+E024,Acil Servis Deneyimi
+E025,Temel Hasta Bakımı
+E025,İlk Yardım Sertifikası
+E025,İlaç Yönetimi
+E025,Diyabet Hemşireliği
+E025,Acil Servis Deneyimi
+E025,Kan Alma Yetkinliği
+E026,Temel Hasta Bakımı
+E026,İlk Yardım Sertifikası
+E026,İlaç Yönetimi
+E027,Teşhis ve Tedavi
+E027,İlk Yardım Sertifikası
+E027,Reçete Yazma
+E027,Pediatri
+E028,Temel Hasta Bakımı
+E028,İlk Yardım Sertifikası
+E028,İlaç Yönetimi
+E029,Temel Hasta Bakımı
+E029,İlk Yardım Sertifikası
+E029,İlaç Yönetimi
+E030,Ofis Yönetimi
+E030,Temel Bilgisayar Kullanımı
+E031,Temel Hasta Bakımı
+E031,İlk Yardım Sertifikası
+E031,İlaç Yönetimi
+E032,Ekipman Kullanımı
+E032,Temel İlk Yardım
+E032,Kan Alma Yetkinliği
+E033,Temel Hasta Bakımı
+E033,İlk Yardım Sertifikası
+E033,İlaç Yönetimi
+E033,Ameliyathane Deneyimi
+E033,Triyaj Yetkinliği
+E033,Onkoloji Hemşireliği
+E034,Temel Hasta Bakımı
+E034,İlk Yardım Sertifikası
+E034,İlaç Yönetimi
+E034,Yoğun Bakım Sertifikası
+E035,Temel Hasta Bakımı
+E035,İlk Yardım Sertifikası
+E035,İlaç Yönetimi
+E035,Acil Servis Deneyimi
+E036,Ekipman Kullanımı
+E036,Temel İlk Yardım
+E036,MR Teknisyenliği
+E036,Kan Alma Yetkinliği
+E037,Temel Hasta Bakımı
+E037,İlk Yardım Sertifikası
+E037,İlaç Yönetimi
+E038,Ekipman Kullanımı
+E038,Temel İlk Yardım
+E038,Solunum Terapisti Yetkinliği
+E039,Temel Hasta Bakımı
+E039,İlk Yardım Sertifikası
+E039,İlaç Yönetimi
+E040,Temel Hasta Bakımı
+E040,İlk Yardım Sertifikası
+E040,İlaç Yönetimi
+E040,Yara Bakım Uzmanlığı
+E040,Ameliyathane Deneyimi
+E040,Triyaj Yetkinliği
+E041,Ekipman Kullanımı
+E041,Temel İlk Yardım
+E042,Temel Hasta Bakımı
+E042,İlk Yardım Sertifikası
+E042,İlaç Yönetimi
+E042,Pediatri Yetkinliği
+E042,Triyaj Yetkinliği
+E043,Temel Hasta Bakımı
+E043,İlk Yardım Sertifikası
+E043,İlaç Yönetimi
+E043,Pediatri Yetkinliği
+E043,Ameliyathane Deneyimi
+E044,Ekipman Kullanımı
+E044,Temel İlk Yardım
+E044,Tomografi Teknisyenliği
+E044,MR Teknisyenliği
+E045,Temel Hasta Bakımı
+E045,İlk Yardım Sertifikası
+E045,İlaç Yönetimi
+E045,Acil Servis Deneyimi
+E045,Diyabet Hemşireliği
+E046,Temel Hasta Bakımı
+E046,İlk Yardım Sertifikası
+E046,İlaç Yönetimi
+E046,Yoğun Bakım Sertifikası
+E046,Acil Servis Deneyimi
+E046,Onkoloji Hemşireliği
+E047,Temel Hasta Bakımı
+E047,İlk Yardım Sertifikası
+E047,İlaç Yönetimi
+E048,Temel Hasta Bakımı
+E048,İlk Yardım Sertifikası
+E048,İlaç Yönetimi
+E048,Acil Servis Deneyimi
+E048,Kan Alma Yetkinliği
+E048,Yara Bakım Uzmanlığı
+E049,Ekipman Kullanımı
+E049,Temel İlk Yardım
+E049,Kan Alma Yetkinliği
+E049,Radyoloji Cihazı Kullanımı
+E050,Temel Hasta Bakımı
+E050,İlk Yardım Sertifikası
+E050,İlaç Yönetimi
+E050,Yoğun Bakım Sertifikası
+E050,Acil Servis Deneyimi
+E050,Diyabet Hemşireliği
+E051,Temel Hasta Bakımı
+E051,İlk Yardım Sertifikası
+E051,İlaç Yönetimi
+E051,Yara Bakım Uzmanlığı
+E051,Diyabet Hemşireliği
+E052,Temel Hasta Bakımı
+E052,İlk Yardım Sertifikası
+E052,İlaç Yönetimi
+E052,Diyabet Hemşireliği
+E052,Yara Bakım Uzmanlığı
+E052,Acil Servis Deneyimi
+E053,Teşhis ve Tedavi
+E053,İlk Yardım Sertifikası
+E053,Reçete Yazma
+E053,Radyoloji
+E053,Laparoskopi Yetkinliği
+E053,Ultrasonografi Yetkinliği
+E054,Temel Hasta Bakımı
+E054,İlk Yardım Sertifikası
+E054,İlaç Yönetimi
+E054,Yoğun Bakım Sertifikası
+E054,Triyaj Yetkinliği
+E055,Ekipman Kullanımı
+E055,Temel İlk Yardım
+E055,EKG Çekme
+E056,Temel Hasta Bakımı
+E056,İlk Yardım Sertifikası
+E056,İlaç Yönetimi
+E056,Triyaj Yetkinliği
+E056,Diyabet Hemşireliği
+E056,Ameliyathane Deneyimi
+E057,Temel Hasta Bakımı
+E057,İlk Yardım Sertifikası
+E057,İlaç Yönetimi
+E057,Acil Servis Deneyimi
+E057,Triyaj Yetkinliği
+E058,Temel Hasta Bakımı
+E058,İlk Yardım Sertifikası
+E058,İlaç Yönetimi
+E058,Triyaj Yetkinliği
+E058,Yoğun Bakım Sertifikası
+E059,Temel Hasta Bakımı
+E059,İlk Yardım Sertifikası
+E059,İlaç Yönetimi
+E059,Acil Servis Deneyimi
+E059,Kan Alma Yetkinliği
+E059,Yara Bakım Uzmanlığı
+E060,Temel Hasta Bakımı
+E060,İlk Yardım Sertifikası
+E060,İlaç Yönetimi
+E060,Pediatri Yetkinliği
+E060,Diyabet Hemşireliği
+E060,Ameliyathane Deneyimi
+E061,Teşhis ve Tedavi
+E061,İlk Yardım Sertifikası
+E061,Reçete Yazma
+E061,Pediatri
+E061,Acil Servis Deneyimi
+E062,Temel Hasta Bakımı
+E062,İlk Yardım Sertifikası
+E062,İlaç Yönetimi
+E062,Acil Servis Deneyimi
+E062,Kan Alma Yetkinliği
+E062,Diyabet Hemşireliği
+E063,Temel Hasta Bakımı
+E063,İlk Yardım Sertifikası
+E063,İlaç Yönetimi
+E063,Pediatri Yetkinliği
+E063,Kan Alma Yetkinliği
+E064,Temel Hasta Bakımı
+E064,İlk Yardım Sertifikası
+E064,İlaç Yönetimi
+E064,Acil Servis Deneyimi
+E064,Onkoloji Hemşireliği
+E064,Ameliyathane Deneyimi
+E065,Ekipman Kullanımı
+E065,Temel İlk Yardım
+E066,Teşhis ve Tedavi
+E066,İlk Yardım Sertifikası
+E066,Reçete Yazma
+E066,Anesteziyoloji
+E066,Yoğun Bakım Sertifikası
+E067,Temel Hasta Bakımı
+E067,İlk Yardım Sertifikası
+E067,İlaç Yönetimi
+E067,Pediatri Yetkinliği
+E068,Temel Hasta Bakımı
+E068,İlk Yardım Sertifikası
+E068,İlaç Yönetimi
+E068,Acil Servis Deneyimi
+E069,Temel Hasta Bakımı
+E069,İlk Yardım Sertifikası
+E069,İlaç Yönetimi
+E069,Yoğun Bakım Sertifikası
+E070,Ekipman Kullanımı
+E070,Temel İlk Yardım
+E071,Teşhis ve Tedavi
+E071,İlk Yardım Sertifikası
+E071,Reçete Yazma
+E071,Kardiyoloji
+E071,Endoskopi Yetkinliği
+E071,Laparoskopi Yetkinliği
+E072,Temel Hasta Bakımı
+E072,İlk Yardım Sertifikası
+E072,İlaç Yönetimi
+E073,Temel Hasta Bakımı
+E073,İlk Yardım Sertifikası
+E073,İlaç Yönetimi
+E073,Acil Servis Deneyimi
+E073,Yoğun Bakım Sertifikası
+E074,Teşhis ve Tedavi
+E074,İlk Yardım Sertifikası
+E074,Reçete Yazma
+E074,Acil Tıp
+E074,Acil Servis Deneyimi
+E074,Endoskopi Yetkinliği
+E075,Temel Hasta Bakımı
+E075,İlk Yardım Sertifikası
+E075,İlaç Yönetimi
+E075,Pediatri Yetkinliği
+E075,Triyaj Yetkinliği
+E076,Temel Hasta Bakımı
+E076,İlk Yardım Sertifikası
+E076,İlaç Yönetimi
+E076,Acil Servis Deneyimi
+E076,Yara Bakım Uzmanlığı
+E077,Temel Hasta Bakımı
+E077,İlk Yardım Sertifikası
+E077,İlaç Yönetimi
+E077,Yoğun Bakım Sertifikası
+E078,Temel Hasta Bakımı
+E078,İlk Yardım Sertifikası
+E078,İlaç Yönetimi
+E078,Yara Bakım Uzmanlığı
+E079,Ekipman Kullanımı
+E079,Temel İlk Yardım
+E080,Temel Hasta Bakımı
+E080,İlk Yardım Sertifikası
+E080,İlaç Yönetimi
+E080,Acil Servis Deneyimi

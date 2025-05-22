@@ -1,6 +1,6 @@
-# Proje Yol Haritası (7 Haftalık)
+# Proje Yol Haritası (8 Haftalık)
 
-Bu belge, projenin 7 haftalık geliştirme sürecini ve her haftanın hedeflerini özetlemektedir.
+Bu belge, projenin 8 haftalık geliştirme sürecini ve her haftanın hedeflerini özetlemektedir.
 
 ## 1. Hafta: Temelleri Atma ve Problem Alanını Anlama (✅ Tamamlandı)
 
@@ -144,3 +144,5 @@ Bu belge, projenin 7 haftalık geliştirme sürecini ve her haftanın hedeflerin
     *   📅 Modüler veri üreteci sınıfları
     *   📅 Güncellenmiş dokümantasyon
     *   📅 Test raporları
+
+## 8. Hafta: Üretim Ortamına Hazırlık İyileştirmeleri ve Güvenlik (📅 Planlandı)

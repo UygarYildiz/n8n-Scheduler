@@ -118,6 +118,7 @@ async def upload_file_endpoint(
         filename = fileType if fileType.endswith(".csv") else f"{fileType}.csv"
 
         # Veri seti için temel yolu belirle
+        # Proje dizininden relative path kullan
         base_data_path = os.path.join(get_project_root(), "veri_kaynaklari")
         
         # Veri setine özel klasör yolunu oluştur

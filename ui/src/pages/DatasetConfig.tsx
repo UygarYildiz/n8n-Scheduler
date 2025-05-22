@@ -57,6 +57,7 @@ interface Configuration {
 // Yüklenen dosya bilgisi
 interface UploadedFile {
   fileType: string;
+  fileName: string; // Gerçek dosya adı
   uploadDate: Date;
   status: 'success' | 'error';
 }
@@ -80,8 +81,8 @@ const DatasetConfig = () => {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [configs, setConfigs] = useState<Configuration[]>([]);
 
-  // Yüklenen dosyaları takip etmek için state
-  const [uploadedFiles, setUploadedFiles] = useState<Record<string, UploadedFile>>({});
+  // Yüklenen dosyaları veri setine göre takip etmek için state (dataset -> fileType -> UploadedFile)
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, Record<string, UploadedFile>>>({});
 
   // Yükleme ve hata durumları için state'ler
   const [loading, setLoading] = useState(false);
@@ -121,14 +122,25 @@ const DatasetConfig = () => {
           setSelectedConfig(configsResponse[0].id);
         }
 
-        // Yüklenen dosya durumlarını sıfırla
-        setUploadedFiles({});
-
-        // LocalStorage'dan yüklenen dosya bilgilerini temizle
+        // LocalStorage'dan yüklenen dosya bilgilerini yükle
         try {
-          localStorage.removeItem('uploadedFiles');
+          const savedFiles = localStorage.getItem('uploadedFiles');
+          if (savedFiles) {
+            const parsedFiles = JSON.parse(savedFiles);
+            // Tarih string'lerini Date objelerine dönüştür (nested structure için)
+            Object.keys(parsedFiles).forEach(datasetKey => {
+              if (parsedFiles[datasetKey] && typeof parsedFiles[datasetKey] === 'object') {
+                Object.keys(parsedFiles[datasetKey]).forEach(fileTypeKey => {
+                  if (parsedFiles[datasetKey][fileTypeKey]?.uploadDate) {
+                    parsedFiles[datasetKey][fileTypeKey].uploadDate = new Date(parsedFiles[datasetKey][fileTypeKey].uploadDate);
+                  }
+                });
+              }
+            });
+            setUploadedFiles(parsedFiles);
+          }
         } catch (storageErr) {
-          console.error('LocalStorage temizleme hatası:', storageErr);
+          console.error('LocalStorage okuma hatası:', storageErr);
         }
       } catch (err) {
         console.error('Veri çekme hatası:', err);
@@ -165,8 +177,7 @@ const DatasetConfig = () => {
   const handleSaveConfig = async () => {
     setLoading(true);
     try {
-      // API endpoint'i henüz oluşturulmadı, bu yüzden şimdilik sadece bildirim gösteriyoruz
-      // Gerçek implementasyonda: await api.saveConfigurationContent(selectedConfig, configContent);
+      await api.saveConfigurationContent(selectedConfig, configContent);
 
       setSnackbar({
         open: true,
@@ -198,6 +209,20 @@ const DatasetConfig = () => {
     return fileTypeMap[fileType] || fileType;
   };
 
+  // Seçili veri seti için dosya durumunu döndürür
+  const getFileStatus = (fileType: string): UploadedFile | null => {
+    return uploadedFiles[selectedDataset]?.[fileType] || null;
+  };
+
+  // Yüklenen dosya bilgilerini localStorage'a kaydet
+  const saveUploadedFilesToLocalStorage = (files: Record<string, Record<string, UploadedFile>>) => {
+    try {
+      localStorage.setItem('uploadedFiles', JSON.stringify(files));
+    } catch (err) {
+      console.error('LocalStorage kaydetme hatası:', err);
+    }
+  };
+
   // Dosya yükleme işlevi
   const handleFileUpload = (fileType: string) => {
     const fileInput = document.createElement('input');
@@ -214,14 +239,25 @@ const DatasetConfig = () => {
       try {
         const response = await api.uploadFile(selectedDataset, fileType, file);
 
-        setUploadedFiles(prevFiles => ({
-          ...prevFiles,
-          [fileType]: {
-            fileType,
-            uploadDate: new Date(),
-            status: 'success' as 'success'
+        // Yeni dosya bilgisini veri setine göre oluştur
+        const newUploadedFiles = {
+          ...uploadedFiles,
+          [selectedDataset]: {
+            ...uploadedFiles[selectedDataset],
+            [fileType]: {
+              fileType,
+              fileName: file.name, // Gerçek dosya adını kaydet
+              uploadDate: new Date(),
+              status: 'success' as 'success'
+            }
           }
-        }));
+        };
+
+        // State'i güncelle
+        setUploadedFiles(newUploadedFiles);
+
+        // LocalStorage'a kaydet
+        saveUploadedFilesToLocalStorage(newUploadedFiles);
 
         const readableFileName = getReadableFileName(fileType);
 
@@ -233,14 +269,25 @@ const DatasetConfig = () => {
       } catch (err) {
         console.error('Dosya yükleme hatası:', err);
 
-        setUploadedFiles(prevFiles => ({
-          ...prevFiles,
-          [fileType]: {
-            fileType,
-            uploadDate: new Date(),
-            status: 'error' as 'error'
+        // Hata durumunda da dosya bilgisini veri setine göre güncelle
+        const newUploadedFiles = {
+          ...uploadedFiles,
+          [selectedDataset]: {
+            ...uploadedFiles[selectedDataset],
+            [fileType]: {
+              fileType,
+              fileName: file.name, // Gerçek dosya adını kaydet
+              uploadDate: new Date(),
+              status: 'error' as 'error'
+            }
           }
-        }));
+        };
+
+        // State'i güncelle
+        setUploadedFiles(newUploadedFiles);
+
+        // LocalStorage'a kaydet
+        saveUploadedFilesToLocalStorage(newUploadedFiles);
 
         const readableFileName = getReadableFileName(fileType);
 
@@ -394,21 +441,15 @@ const DatasetConfig = () => {
                 {datasets.map((dataset, index) => (
                   <ListItem
                     key={dataset.id}
-                    selected={selectedDataset === dataset.id}
                     onClick={() => setSelectedDataset(dataset.id)}
                     sx={{
                       cursor: 'pointer',
                       py: 2,
                       px: 3,
                       borderBottom: index < datasets.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
-                      '&.Mui-selected': {
-                        bgcolor: 'rgba(25, 118, 210, 0.08)',
-                        '&:hover': {
-                          bgcolor: 'rgba(25, 118, 210, 0.12)'
-                        }
-                      },
+                      bgcolor: selectedDataset === dataset.id ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
                       '&:hover': {
-                        bgcolor: 'rgba(0,0,0,0.02)'
+                        bgcolor: selectedDataset === dataset.id ? 'rgba(25, 118, 210, 0.12)' : 'rgba(0,0,0,0.02)'
                       }
                     }}
                   >
@@ -538,27 +579,35 @@ const DatasetConfig = () => {
                               Çalışan bilgileri, roller ve departmanlar
                             </Typography>
                           </Box>
-                            {uploadedFiles['employees.csv']?.status === 'success' ? (
-                          <Button
-                            variant="outlined"
-                                size="small"
-                                color="success"
-                                startIcon={<CheckCircleIcon />}
-                                sx={{ borderRadius: 2 }}
-                                onClick={() => handleFileUpload('employees.csv')}
-                              >
-                                Yüklendi
-                              </Button>
+                            {getFileStatus('employees.csv')?.status === 'success' ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              color="success"
+                              startIcon={<CheckCircleIcon />}
+                              sx={{ borderRadius: 2, mb: 1 }}
+                              onClick={() => handleFileUpload('employees.csv')}
+                            >
+                              Yüklendi
+                            </Button>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              {getFileStatus('employees.csv')?.fileName || 'employees.csv'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              {getFileStatus('employees.csv')?.uploadDate?.toLocaleDateString('tr-TR')}
+                            </Typography>
+                          </Box>
                             ) : (
                               <Button
                                 variant="contained"
-                            size="small"
-                            startIcon={<UploadIcon />}
-                            sx={{ borderRadius: 2 }}
+                                size="small"
+                                startIcon={<UploadIcon />}
+                                sx={{ borderRadius: 2 }}
                                 onClick={() => handleFileUpload('employees.csv')}
-                          >
-                            Yükle
-                          </Button>
+                              >
+                                Yükle
+                              </Button>
                             )}
                         </Box>
                       </Card>
@@ -585,27 +634,35 @@ const DatasetConfig = () => {
                               Vardiya tanımları ve zaman aralıkları
                             </Typography>
                           </Box>
-                            {uploadedFiles['shifts.csv']?.status === 'success' ? (
-                          <Button
-                            variant="outlined"
-                                size="small"
-                                color="success"
-                                startIcon={<CheckCircleIcon />}
-                                sx={{ borderRadius: 2 }}
-                                onClick={() => handleFileUpload('shifts.csv')}
-                              >
-                                Yüklendi
-                              </Button>
+                            {getFileStatus('shifts.csv')?.status === 'success' ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              color="success"
+                              startIcon={<CheckCircleIcon />}
+                              sx={{ borderRadius: 2, mb: 1 }}
+                              onClick={() => handleFileUpload('shifts.csv')}
+                            >
+                              Yüklendi
+                            </Button>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              {getFileStatus('shifts.csv')?.fileName || 'shifts.csv'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              {getFileStatus('shifts.csv')?.uploadDate?.toLocaleDateString('tr-TR')}
+                            </Typography>
+                          </Box>
                             ) : (
                               <Button
                                 variant="contained"
-                            size="small"
-                            startIcon={<UploadIcon />}
-                            sx={{ borderRadius: 2 }}
+                                size="small"
+                                startIcon={<UploadIcon />}
+                                sx={{ borderRadius: 2 }}
                                 onClick={() => handleFileUpload('shifts.csv')}
-                          >
-                            Yükle
-                          </Button>
+                              >
+                                Yükle
+                              </Button>
                             )}
                         </Box>
                       </Card>
@@ -652,27 +709,35 @@ const DatasetConfig = () => {
                               Çalışan yetkinlikleri ve uzmanlık alanları
                             </Typography>
                           </Box>
-                            {uploadedFiles['skills.csv']?.status === 'success' ? (
-                          <Button
-                            variant="outlined"
-                                size="small"
-                                color="success"
-                                startIcon={<CheckCircleIcon />}
-                                sx={{ borderRadius: 2, borderColor: '#673ab7', color: '#673ab7' }}
-                                onClick={() => handleFileUpload('skills.csv')}
-                              >
-                                Yüklendi
-                              </Button>
+                            {getFileStatus('skills.csv')?.status === 'success' ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              color="success"
+                              startIcon={<CheckCircleIcon />}
+                              sx={{ borderRadius: 2, mb: 1, borderColor: '#673ab7', color: '#673ab7' }}
+                              onClick={() => handleFileUpload('skills.csv')}
+                            >
+                              Yüklendi
+                            </Button>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              {getFileStatus('skills.csv')?.fileName || 'skills.csv'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              {getFileStatus('skills.csv')?.uploadDate?.toLocaleDateString('tr-TR')}
+                            </Typography>
+                          </Box>
                             ) : (
                               <Button
                                 variant="contained"
-                            size="small"
-                            startIcon={<UploadIcon />}
+                                size="small"
+                                startIcon={<UploadIcon />}
                                 sx={{ borderRadius: 2, bgcolor: '#673ab7', '&:hover': { bgcolor: '#5e35b1' } }}
                                 onClick={() => handleFileUpload('skills.csv')}
-                          >
-                            Yükle
-                          </Button>
+                              >
+                                Yükle
+                              </Button>
                             )}
                         </Box>
                       </Card>
@@ -699,27 +764,35 @@ const DatasetConfig = () => {
                               Çalışan uygunluk bilgileri ve izinler
                             </Typography>
                           </Box>
-                            {uploadedFiles['availability.csv']?.status === 'success' ? (
-                          <Button
-                            variant="outlined"
-                                size="small"
-                                color="success"
-                                startIcon={<CheckCircleIcon />}
-                                sx={{ borderRadius: 2, borderColor: '#673ab7', color: '#673ab7' }}
-                                onClick={() => handleFileUpload('availability.csv')}
-                              >
-                                Yüklendi
-                              </Button>
+                            {getFileStatus('availability.csv')?.status === 'success' ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              color="success"
+                              startIcon={<CheckCircleIcon />}
+                              sx={{ borderRadius: 2, mb: 1, borderColor: '#673ab7', color: '#673ab7' }}
+                              onClick={() => handleFileUpload('availability.csv')}
+                            >
+                              Yüklendi
+                            </Button>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              {getFileStatus('availability.csv')?.fileName || 'availability.csv'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              {getFileStatus('availability.csv')?.uploadDate?.toLocaleDateString('tr-TR')}
+                            </Typography>
+                          </Box>
                             ) : (
                               <Button
                                 variant="contained"
-                            size="small"
-                            startIcon={<UploadIcon />}
+                                size="small"
+                                startIcon={<UploadIcon />}
                                 sx={{ borderRadius: 2, bgcolor: '#673ab7', '&:hover': { bgcolor: '#5e35b1' } }}
                                 onClick={() => handleFileUpload('availability.csv')}
-                          >
-                            Yükle
-                          </Button>
+                              >
+                                Yükle
+                              </Button>
                             )}
                         </Box>
                       </Card>
@@ -745,27 +818,35 @@ const DatasetConfig = () => {
                               Çalışan vardiya tercihleri
                             </Typography>
                           </Box>
-                            {uploadedFiles['preferences.csv']?.status === 'success' ? (
-                          <Button
-                            variant="outlined"
-                                size="small"
-                                color="success"
-                                startIcon={<CheckCircleIcon />}
-                                sx={{ borderRadius: 2, borderColor: '#673ab7', color: '#673ab7' }}
-                                onClick={() => handleFileUpload('preferences.csv')}
-                              >
-                                Yüklendi
-                              </Button>
+                            {getFileStatus('preferences.csv')?.status === 'success' ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              color="success"
+                              startIcon={<CheckCircleIcon />}
+                              sx={{ borderRadius: 2, mb: 1, borderColor: '#673ab7', color: '#673ab7' }}
+                              onClick={() => handleFileUpload('preferences.csv')}
+                            >
+                              Yüklendi
+                            </Button>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              {getFileStatus('preferences.csv')?.fileName || 'preferences.csv'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                              {getFileStatus('preferences.csv')?.uploadDate?.toLocaleDateString('tr-TR')}
+                            </Typography>
+                          </Box>
                             ) : (
                               <Button
                                 variant="contained"
-                            size="small"
-                            startIcon={<UploadIcon />}
+                                size="small"
+                                startIcon={<UploadIcon />}
                                 sx={{ borderRadius: 2, bgcolor: '#673ab7', '&:hover': { bgcolor: '#5e35b1' } }}
                                 onClick={() => handleFileUpload('preferences.csv')}
-                          >
-                            Yükle
-                          </Button>
+                              >
+                                Yükle
+                              </Button>
                             )}
                           </Box>
                         </Card>
@@ -850,21 +931,15 @@ const DatasetConfig = () => {
                 {configs.map((config, index) => (
                   <ListItem
                     key={config.id}
-                    selected={selectedConfig === config.id}
                     onClick={() => setSelectedConfig(config.id)}
                     sx={{
                       cursor: 'pointer',
                       py: 2,
                       px: 3,
                       borderBottom: index < configs.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
-                      '&.Mui-selected': {
-                        bgcolor: 'rgba(103, 58, 183, 0.08)',
-                        '&:hover': {
-                          bgcolor: 'rgba(103, 58, 183, 0.12)'
-                        }
-                      },
+                      bgcolor: selectedConfig === config.id ? 'rgba(103, 58, 183, 0.08)' : 'transparent',
                       '&:hover': {
-                        bgcolor: 'rgba(0,0,0,0.02)'
+                        bgcolor: selectedConfig === config.id ? 'rgba(103, 58, 183, 0.12)' : 'rgba(0,0,0,0.02)'
                       }
                     }}
                   >

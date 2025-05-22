@@ -18,9 +18,8 @@ services:
       - ./configs:/mnt/workflow_configs
       # Kurallar için ayrı bir klasör (opsiyonel)
       - ./configs/kurallar:/configs/kurallar
-      # DOĞRU Veri Kaynağı Eşleştirmeleri:
-      - ./synthetic_data:/mnt/workflow_data/hastane
-      - ./synthetic_data_cagri_merkezi:/mnt/workflow_data/cagri_merkezi
+      # Veri Kaynağı Eşleştirmeleri (proje dizininden relative path):
+      - ./veri_kaynaklari:/mnt/workflow_data
     # user: "1000:1000" # Uncomment if you have permission issues
 
 volumes:
