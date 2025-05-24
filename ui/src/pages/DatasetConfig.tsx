@@ -601,13 +601,349 @@ const DatasetConfig = () => {
       content: "Bu vardiyada EN AZ kaç kişi olması gerektiğini belirler. Örnek: Acil için → En az 2, Yoğun bakım → En az 3, Genel servis → En az 1"
     },
     penalty: {
-      title: "⚠️ Ceza Değeri",
-      content: "Kural ihlal edildiğinde optimizasyona verilen ceza puanı. Yüksek değer = daha önemli kural. Genelde 50-200 arası kullanılır."
+      title: "⭐ Önem Seviyesi (Kritiklik)",
+      content: "Bu kuralın ne kadar önemli olduğunu belirler. Sistem bu değere göre öncelik verir. YÜKSEK = Kesinlikle uyulması gereken kritik kural (örn: Acil Servis'te doktor bulunması). DÜŞÜK = Mümkün olduğunca uyulması istenen kural."
     },
     skill: {
       title: "🎓 Yetenek/Sertifika",
       content: "Özel bilgi veya sertifika gerektiren durumlar. BLS Sertifikası, Acil Servis Deneyimi, Çoklu Dil gibi."
     }
+  };
+
+  // Önem seviyesi kategorileri
+  const importanceLevels = [
+    { value: 50, label: 'Düşük', color: '#4caf50', description: 'Tercihe dayalı, ihlali tolere edilebilir' },
+    { value: 100, label: 'Orta', color: '#ff9800', description: 'Önemli, mümkün olduğunca uyulmalı' },
+    { value: 150, label: 'Yüksek', color: '#f44336', description: 'Kritik, kesinlikle uyulması gereken' },
+    { value: 200, label: 'Çok Yüksek', color: '#9c27b0', description: 'Yasal/güvenlik gereksinimi, ihlal edilemez' }
+  ];
+
+  // Önem seviyesi etiketini getir
+  const getImportanceLabel = (value: number) => {
+    const level = importanceLevels.find(l => l.value === value) || importanceLevels[1];
+    return level;
+  };
+
+  // Önem seviyesi seçici komponenti
+  const ImportanceSelector = ({ value, onChange }: { value: number; onChange: (value: number) => void }) => {
+    const selectedLevel = getImportanceLabel(value);
+    
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Chip
+            size="small"
+            label={selectedLevel.label}
+            sx={{
+              bgcolor: selectedLevel.color,
+              color: 'white',
+              fontWeight: 600,
+              fontSize: '0.75rem'
+            }}
+          />
+          <Typography variant="caption" color="text.secondary">
+            {selectedLevel.description}
+          </Typography>
+        </Box>
+        <FormControl fullWidth size="small">
+          <Select
+            value={value}
+            onChange={(e) => onChange(Number(e.target.value))}
+            renderValue={(val) => {
+              const level = getImportanceLabel(val as number);
+              return (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: '50%',
+                      bgcolor: level.color
+                    }}
+                  />
+                  <Typography variant="body2" fontWeight="600">
+                    {level.label}
+                  </Typography>
+                  <Typography variant="caption" sx={{ ml: 0.5 }}>
+                    ({val})
+                  </Typography>
+                </Box>
+              );
+            }}
+          >
+            {importanceLevels.map((level) => (
+              <MenuItem key={level.value} value={level.value}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      bgcolor: level.color
+                    }}
+                  />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" fontWeight="600">
+                      {level.label} ({level.value})
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {level.description}
+                    </Typography>
+                  </Box>
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  // Kurumsal öncelik şablonları
+  const priorityTemplates = [
+    {
+      id: 'balanced',
+      name: '⚖️ Dengeli Yaklaşım',
+      description: 'Tüm hedeflere eşit önem veren standart ayar',
+      icon: '⚖️',
+      weights: {
+        minimize_overstaffing: 1,
+        minimize_understaffing: 10,
+        maximize_preferences: 2,
+        balance_workload: 0.5,
+        maximize_shift_coverage: 1
+      },
+      useCase: 'Genel amaçlı, çoğu kurum için uygun'
+    },
+    {
+      id: 'cost_efficient',
+      name: '💰 Maliyet Odaklı',
+      description: 'Fazla personel maliyetini minimize eder',
+      icon: '💰',
+      weights: {
+        minimize_overstaffing: 8,
+        minimize_understaffing: 10,
+        maximize_preferences: 1,
+        balance_workload: 0.2,
+        maximize_shift_coverage: 0.5
+      },
+      useCase: 'Bütçe kısıtı olan kurumlar için'
+    },
+    {
+      id: 'employee_satisfaction',
+      name: '😊 Çalışan Memnuniyeti',
+      description: 'Personel tercihlerini ve iş-yaşam dengesini öncelendirir',
+      icon: '😊',
+      weights: {
+        minimize_overstaffing: 0.5,
+        minimize_understaffing: 8,
+        maximize_preferences: 8,
+        balance_workload: 5,
+        maximize_shift_coverage: 1
+      },
+      useCase: 'Personel bağlılığı odaklı kurumlar için'
+    },
+    {
+      id: 'service_quality',
+      name: '🎯 Hizmet Kalitesi',
+      description: 'Eksik personeli önler, tüm vardiyaları doldurur',
+      icon: '🎯',
+      weights: {
+        minimize_overstaffing: 0.2,
+        minimize_understaffing: 15,
+        maximize_preferences: 1,
+        balance_workload: 1,
+        maximize_shift_coverage: 8
+      },
+      useCase: 'Hizmet kalitesi kritik olan kurumlar için'
+    }
+  ];
+
+  // Öncelik şablonu seçici komponenti
+  const PriorityTemplateSelector = () => {
+    const currentTemplate = priorityTemplates.find(template => 
+      template.weights.minimize_overstaffing === optimizationWeights.minimize_overstaffing &&
+      template.weights.minimize_understaffing === optimizationWeights.minimize_understaffing &&
+      template.weights.maximize_preferences === optimizationWeights.maximize_preferences &&
+      template.weights.balance_workload === optimizationWeights.balance_workload &&
+      template.weights.maximize_shift_coverage === optimizationWeights.maximize_shift_coverage
+    );
+
+    return (
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#f57c00' }}>
+          🎯 Kurumunuzun Önceliği Nedir?
+        </Typography>
+        <Typography variant="body2" color="text.secondary" paragraph>
+          Size uygun yaklaşımı seçin, sistem otomatik olarak en iyi ayarları yapacak:
+        </Typography>
+        
+        <Grid container spacing={2}>
+          {priorityTemplates.map((template) => (
+            <Grid item xs={12} sm={6} md={3} key={template.id}>
+              <Card 
+                sx={{ 
+                  p: 2, 
+                  cursor: 'pointer',
+                  border: currentTemplate?.id === template.id ? '2px solid #f57c00' : '1px solid rgba(0,0,0,0.1)',
+                  bgcolor: currentTemplate?.id === template.id ? 'rgba(245, 124, 0, 0.05)' : 'white',
+                  '&:hover': {
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    borderColor: '#f57c00'
+                  },
+                  transition: 'all 0.2s'
+                }}
+                onClick={() => setOptimizationWeights(template.weights)}
+              >
+                <Box sx={{ textAlign: 'center', mb: 1 }}>
+                  <Typography variant="h4" sx={{ mb: 1 }}>
+                    {template.icon}
+                  </Typography>
+                  <Typography variant="subtitle2" fontWeight="600">
+                    {template.name}
+                  </Typography>
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mb: 1 }}>
+                  {template.description}
+                </Typography>
+                <Typography variant="caption" sx={{ 
+                  display: 'block', 
+                  textAlign: 'center',
+                  fontStyle: 'italic',
+                  color: 'primary.main'
+                }}>
+                  {template.useCase}
+                </Typography>
+                {currentTemplate?.id === template.id && (
+                  <Box sx={{ textAlign: 'center', mt: 1 }}>
+                    <Chip 
+                      size="small" 
+                      label="Seçili" 
+                      color="warning"
+                      sx={{ fontSize: '0.7rem' }}
+                    />
+                  </Box>
+                )}
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    );
+  };
+
+  // Gelişmiş ayarlar komponenti  
+  const AdvancedWeightSettings = () => {
+    const weightSettings = [
+      {
+        key: 'minimize_understaffing',
+        title: '🚨 Personel Eksikliğini Önle',
+        description: 'Vardiyalarda yeterli personel bulunması',
+        impact: 'Yüksek değer = Kesinlikle personel eksikliği olmasın',
+        color: '#f44336'
+      },
+      {
+        key: 'minimize_overstaffing', 
+        title: '💰 Fazla Personel Maliyetini Azalt',
+        description: 'Gereksiz personel atamalarını önler',
+        impact: 'Yüksek değer = Maliyet optimizasyonu önceliği',
+        color: '#ff9800'
+      },
+      {
+        key: 'maximize_preferences',
+        title: '😊 Çalışan Tercihlerini Dikkate Al',
+        description: 'Personelin vardiya tercihlerini karşılar',
+        impact: 'Yüksek değer = Çalışan memnuniyeti önceliği',
+        color: '#4caf50'
+      },
+      {
+        key: 'balance_workload',
+        title: '⚖️ İş Yükünü Eşit Dağıt',
+        description: 'Çalışanlar arası adil vardiya dağılımı',
+        impact: 'Yüksek değer = Adaletli iş yükü dağılımı',
+        color: '#9c27b0'
+      },
+      {
+        key: 'maximize_shift_coverage',
+        title: '🎯 Tüm Vardiyaları Doldur',
+        description: 'Hiçbir vardiya boş kalmasın',
+        impact: 'Yüksek değer = Tam vardiya kapsamı',
+        color: '#2196f3'
+      }
+    ];
+
+    return (
+      <Box>
+        <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#f57c00' }}>
+          🛠️ Gelişmiş Ayarlar (İsteğe Bağlı)
+        </Typography>
+        <Typography variant="body2" color="text.secondary" paragraph>
+          Özel ihtiyaçlarınız için ince ayar yapabilirsiniz:
+        </Typography>
+        
+        <Grid container spacing={3}>
+          {weightSettings.map((setting) => (
+            <Grid item xs={12} md={6} key={setting.key}>
+              <Card sx={{ p: 2, border: `1px solid ${setting.color}20` }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <Box 
+                    sx={{ 
+                      width: 12, 
+                      height: 12, 
+                      borderRadius: '50%', 
+                      bgcolor: setting.color, 
+                      mr: 1 
+                    }} 
+                  />
+                  <Typography variant="subtitle2" fontWeight="600">
+                    {setting.title}
+                  </Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  {setting.description}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                  <TextField
+                    type="number"
+                    size="small"
+                    value={optimizationWeights[setting.key as keyof OptimizationWeights]}
+                    onChange={(e) => setOptimizationWeights({
+                      ...optimizationWeights,
+                      [setting.key]: parseFloat(e.target.value) || 0
+                    })}
+                    inputProps={{ min: 0, max: 15, step: 0.1 }}
+                    sx={{ width: 80 }}
+                  />
+                  <Box sx={{ flex: 1, mx: 1 }}>
+                    <Box 
+                      sx={{ 
+                        height: 6, 
+                        bgcolor: '#f0f0f0', 
+                        borderRadius: 3,
+                        position: 'relative'
+                      }}
+                    >
+                      <Box 
+                        sx={{ 
+                          height: '100%', 
+                          bgcolor: setting.color,
+                          borderRadius: 3,
+                          width: `${Math.min((optimizationWeights[setting.key as keyof OptimizationWeights] / 15) * 100, 100)}%`,
+                          transition: 'width 0.3s'
+                        }} 
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                  {setting.impact}
+                </Typography>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    );
   };
 
   // YAML'dan form verilerine parse etme
@@ -832,7 +1168,7 @@ const DatasetConfig = () => {
       shift: shifts[0],
       weekType: weekTypes[0],
       minCount: 1,
-      penalty: 100
+      penalty: 100 // Varsayılan: Orta önem seviyesi
     };
     setStaffingRules([...staffingRules, newRule]);
   };
@@ -858,7 +1194,7 @@ const DatasetConfig = () => {
       shift: shifts[0],
       weekType: weekTypes[0],
       minCount: 1,
-      penalty: 100
+      penalty: 100 // Varsayılan: Orta önem seviyesi
     };
     setSkillRules([...skillRules, newRule]);
   };
@@ -2024,7 +2360,7 @@ const DatasetConfig = () => {
                                     </Box>
                                     
                                     <Grid container spacing={3}>
-                                      <Grid item xs={12} sm={6} md={3}>
+                                      <Grid item xs={12} sm={6} md={2.4}>
                                         <SmartTooltip field="department" label="Departman">
                                           <FormControl fullWidth size="small">
                                             <Select
@@ -2039,7 +2375,7 @@ const DatasetConfig = () => {
                                           </FormControl>
                                         </SmartTooltip>
                                       </Grid>
-                                      <Grid item xs={12} sm={6} md={3}>
+                                      <Grid item xs={12} sm={6} md={2.4}>
                                         <SmartTooltip field="role" label="Rol">
                                           <FormControl fullWidth size="small">
                                             <Select
@@ -2054,7 +2390,7 @@ const DatasetConfig = () => {
                                           </FormControl>
                                         </SmartTooltip>
                                       </Grid>
-                                      <Grid item xs={12} sm={6} md={2}>
+                                      <Grid item xs={12} sm={6} md={2.4}>
                                         <SmartTooltip field="shift" label="Vardiya">
                                           <FormControl fullWidth size="small">
                                             <Select
@@ -2069,7 +2405,7 @@ const DatasetConfig = () => {
                                           </FormControl>
                                         </SmartTooltip>
                                       </Grid>
-                                      <Grid item xs={12} sm={6} md={2}>
+                                      <Grid item xs={12} sm={6} md={2.4}>
                                         <SmartTooltip field="weekType" label="Hafta">
                                           <FormControl fullWidth size="small">
                                             <Select
@@ -2084,8 +2420,8 @@ const DatasetConfig = () => {
                                           </FormControl>
                                         </SmartTooltip>
                                       </Grid>
-                                      <Grid item xs={6} sm={3} md={1.5}>
-                                        <SmartTooltip field="minCount" label="Min">
+                                      <Grid item xs={12} sm={6} md={2.4}>
+                                        <SmartTooltip field="minCount" label="Min Kişi">
                                           <TextField
                                             type="number"
                                             size="small"
@@ -2103,22 +2439,11 @@ const DatasetConfig = () => {
                                           />
                                         </SmartTooltip>
                                       </Grid>
-                                      <Grid item xs={6} sm={3} md={1.5}>
-                                        <SmartTooltip field="penalty" label="Ceza">
-                                          <TextField
-                                            type="number"
-                                            size="small"
-                                            fullWidth
+                                      <Grid item xs={12} md={8}>
+                                        <SmartTooltip field="penalty" label="Önem Seviyesi">
+                                          <ImportanceSelector
                                             value={rule.penalty}
-                                            onChange={(e) => updateStaffingRule(rule.id!, { penalty: parseInt(e.target.value) || 100 })}
-                                            inputProps={{ min: 0, style: { textAlign: 'center' } }}
-                                            sx={{ 
-                                              '& .MuiInputBase-input': { 
-                                                textAlign: 'center',
-                                                fontSize: '0.9rem',
-                                                fontWeight: '600'
-                                              }
-                                            }}
+                                            onChange={(value) => updateStaffingRule(rule.id!, { penalty: value })}
                                           />
                                         </SmartTooltip>
                                       </Grid>
@@ -2128,6 +2453,17 @@ const DatasetConfig = () => {
                                       <Typography variant="body2" color="text.secondary">
                                         <strong>Kural Özeti:</strong> {rule.department} departmanında {rule.shift.toLowerCase()} vardiyasında 
                                         ({rule.weekType.toLowerCase()}) minimum {rule.minCount} {rule.role.toLowerCase()} bulunmalıdır.
+                                        <br />
+                                        <strong>Önem Seviyesi:</strong> <Chip 
+                                          size="small" 
+                                          label={getImportanceLabel(rule.penalty).label}
+                                          sx={{ 
+                                            ml: 1, 
+                                            bgcolor: getImportanceLabel(rule.penalty).color, 
+                                            color: 'white',
+                                            fontSize: '0.75rem'
+                                          }} 
+                                        />
                                       </Typography>
                                     </Box>
                                   </Card>
@@ -2192,7 +2528,7 @@ const DatasetConfig = () => {
                                     </Box>
                                     
                                     <Grid container spacing={3}>
-                                      <Grid item xs={12} sm={6} md={3}>
+                                      <Grid item xs={12} sm={6} md={2.4}>
                                         <SmartTooltip field="department" label="Departman">
                                           <FormControl fullWidth size="small">
                                             <Select
@@ -2207,7 +2543,7 @@ const DatasetConfig = () => {
                                           </FormControl>
                                         </SmartTooltip>
                                       </Grid>
-                                      <Grid item xs={12} sm={6} md={3}>
+                                      <Grid item xs={12} sm={6} md={2.4}>
                                         <SmartTooltip field="skill" label="Yetenek">
                                           <FormControl fullWidth size="small">
                                             <Select
@@ -2222,11 +2558,8 @@ const DatasetConfig = () => {
                                           </FormControl>
                                         </SmartTooltip>
                                       </Grid>
-                                      <Grid item xs={12} sm={6} md={2}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
-                                            Vardiya
-                                          </Typography>
+                                      <Grid item xs={12} sm={6} md={2.4}>
+                                        <SmartTooltip field="shift" label="Vardiya">
                                           <FormControl fullWidth size="small">
                                             <Select
                                               value={rule.shift}
@@ -2238,13 +2571,10 @@ const DatasetConfig = () => {
                                               ))}
                                             </Select>
                                           </FormControl>
-                                        </Box>
+                                        </SmartTooltip>
                                       </Grid>
-                                      <Grid item xs={12} sm={6} md={2}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
-                                            Hafta
-                                          </Typography>
+                                      <Grid item xs={12} sm={6} md={2.4}>
+                                        <SmartTooltip field="weekType" label="Hafta">
                                           <FormControl fullWidth size="small">
                                             <Select
                                               value={rule.weekType}
@@ -2256,13 +2586,10 @@ const DatasetConfig = () => {
                                               ))}
                                             </Select>
                                           </FormControl>
-                                        </Box>
+                                        </SmartTooltip>
                                       </Grid>
-                                      <Grid item xs={6} sm={3} md={1.5}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
-                                            Min
-                                          </Typography>
+                                      <Grid item xs={12} sm={6} md={2.4}>
+                                        <SmartTooltip field="minCount" label="Min Kişi">
                                           <TextField
                                             type="number"
                                             size="small"
@@ -2278,29 +2605,15 @@ const DatasetConfig = () => {
                                               }
                                             }}
                                           />
-                                        </Box>
+                                        </SmartTooltip>
                                       </Grid>
-                                      <Grid item xs={6} sm={3} md={1.5}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
-                                            Ceza
-                                          </Typography>
-                                          <TextField
-                                            type="number"
-                                            size="small"
-                                            fullWidth
+                                      <Grid item xs={12} md={8}>
+                                        <SmartTooltip field="penalty" label="Önem Seviyesi">
+                                          <ImportanceSelector
                                             value={rule.penalty}
-                                            onChange={(e) => updateSkillRule(rule.id!, { penalty: parseInt(e.target.value) || 100 })}
-                                            inputProps={{ min: 0, style: { textAlign: 'center' } }}
-                                            sx={{ 
-                                              '& .MuiInputBase-input': { 
-                                                textAlign: 'center',
-                                                fontSize: '0.9rem',
-                                                fontWeight: '600'
-                                              }
-                                            }}
+                                            onChange={(value) => updateSkillRule(rule.id!, { penalty: value })}
                                           />
-                                        </Box>
+                                        </SmartTooltip>
                                       </Grid>
                                     </Grid>
                                     
@@ -2308,6 +2621,17 @@ const DatasetConfig = () => {
                                       <Typography variant="body2" color="text.secondary">
                                         <strong>Kural Özeti:</strong> {rule.department} departmanında {rule.shift.toLowerCase()} vardiyasında 
                                         ({rule.weekType.toLowerCase()}) {rule.skill} yeteneğine sahip minimum {rule.minCount} kişi bulunmalıdır.
+                                        <br />
+                                        <strong>Önem Seviyesi:</strong> <Chip 
+                                          size="small" 
+                                          label={getImportanceLabel(rule.penalty).label}
+                                          sx={{ 
+                                            ml: 1, 
+                                            bgcolor: getImportanceLabel(rule.penalty).color, 
+                                            color: 'white',
+                                            fontSize: '0.75rem'
+                                          }} 
+                                        />
                                       </Typography>
                                     </Box>
                                   </Card>
@@ -2322,139 +2646,29 @@ const DatasetConfig = () => {
                       {ruleCategory === 2 && (
                         <Box>
                           <Typography variant="h6" fontWeight="600" sx={{ color: '#f57c00', mb: 3 }}>
-                            Optimizasyon Hedefleri
+                            Kurumsal Öncelikler ve Hedefler
                           </Typography>
                           
-                          <Card sx={{ p: 3, border: '1px solid rgba(245, 124, 0, 0.2)' }}>
-                            <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-                              Hedef Ağırlıkları
+                          <Alert severity="info" sx={{ mb: 4 }}>
+                            <Typography variant="subtitle2" fontWeight="bold">
+                              Kurumunuzun Yaklaşımını Belirleyin
                             </Typography>
-                            <Typography variant="body2" color="text.secondary" paragraph>
-                              Optimizasyon algoritmasının hangi hedeflere ne kadar önem vereceğini belirleyin (0-10 arası)
+                            <Typography variant="body2">
+                              Çizelgeleme sistemi sizin önceliklerinize göre çalışır. Önce genel yaklaşımınızı seçin, 
+                              sonrasında isteğe bağlı olarak detay ayarları yapabilirsiniz.
                             </Typography>
-                            
-                            <Grid container spacing={3}>
-                              <Grid item xs={12} md={6}>
-                                <Box sx={{ mb: 2 }}>
-                                  <Typography variant="body2" fontWeight="600" gutterBottom>
-                                    Fazla Personeli Minimize Et
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                    <TextField
-                                      type="number"
-                                      size="small"
-                                      value={optimizationWeights.minimize_overstaffing}
-                                      onChange={(e) => setOptimizationWeights({
-                                        ...optimizationWeights,
-                                        minimize_overstaffing: parseFloat(e.target.value) || 0
-                                      })}
-                                      inputProps={{ min: 0, max: 10, step: 0.1 }}
-                                      sx={{ width: 100 }}
-                                    />
-                                    <Typography variant="body2" color="text.secondary">
-                                      Gereksiz personel atamalarını azaltır
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                              </Grid>
-                              
-                              <Grid item xs={12} md={6}>
-                                <Box sx={{ mb: 2 }}>
-                                  <Typography variant="body2" fontWeight="600" gutterBottom>
-                                    Eksik Personeli Minimize Et
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                    <TextField
-                                      type="number"
-                                      size="small"
-                                      value={optimizationWeights.minimize_understaffing}
-                                      onChange={(e) => setOptimizationWeights({
-                                        ...optimizationWeights,
-                                        minimize_understaffing: parseFloat(e.target.value) || 0
-                                      })}
-                                      inputProps={{ min: 0, max: 10, step: 0.1 }}
-                                      sx={{ width: 100 }}
-                                    />
-                                    <Typography variant="body2" color="text.secondary">
-                                      Personel eksikliklerini önler (yüksek öncelik)
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                              </Grid>
-                              
-                              <Grid item xs={12} md={6}>
-                                <Box sx={{ mb: 2 }}>
-                                  <Typography variant="body2" fontWeight="600" gutterBottom>
-                                    Tercihleri Maksimize Et
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                    <TextField
-                                      type="number"
-                                      size="small"
-                                      value={optimizationWeights.maximize_preferences}
-                                      onChange={(e) => setOptimizationWeights({
-                                        ...optimizationWeights,
-                                        maximize_preferences: parseFloat(e.target.value) || 0
-                                      })}
-                                      inputProps={{ min: 0, max: 10, step: 0.1 }}
-                                      sx={{ width: 100 }}
-                                    />
-                                    <Typography variant="body2" color="text.secondary">
-                                      Çalışan tercihlerini dikkate alır
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                              </Grid>
-                              
-                              <Grid item xs={12} md={6}>
-                                <Box sx={{ mb: 2 }}>
-                                  <Typography variant="body2" fontWeight="600" gutterBottom>
-                                    İş Yükünü Dengele
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                    <TextField
-                                      type="number"
-                                      size="small"
-                                      value={optimizationWeights.balance_workload}
-                                      onChange={(e) => setOptimizationWeights({
-                                        ...optimizationWeights,
-                                        balance_workload: parseFloat(e.target.value) || 0
-                                      })}
-                                      inputProps={{ min: 0, max: 10, step: 0.1 }}
-                                      sx={{ width: 100 }}
-                                    />
-                                    <Typography variant="body2" color="text.secondary">
-                                      Çalışanlar arası iş yükü adaleti
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                              </Grid>
-                              
-                              <Grid item xs={12}>
-                                <Box sx={{ mb: 2 }}>
-                                  <Typography variant="body2" fontWeight="600" gutterBottom>
-                                    Vardiya Kapsamını Maksimize Et
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                    <TextField
-                                      type="number"
-                                      size="small"
-                                      value={optimizationWeights.maximize_shift_coverage}
-                                      onChange={(e) => setOptimizationWeights({
-                                        ...optimizationWeights,
-                                        maximize_shift_coverage: parseFloat(e.target.value) || 0
-                                      })}
-                                      inputProps={{ min: 0, max: 10, step: 0.1 }}
-                                      sx={{ width: 100 }}
-                                    />
-                                    <Typography variant="body2" color="text.secondary">
-                                      Tüm vardiyaların etkin şekilde doldurulması
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                              </Grid>
-                            </Grid>
-                          </Card>
+                          </Alert>
+                          
+                          <PriorityTemplateSelector />
+                          
+                          <Box sx={{ 
+                            border: '1px solid rgba(245, 124, 0, 0.2)', 
+                            borderRadius: 2, 
+                            p: 3,
+                            bgcolor: 'rgba(245, 124, 0, 0.02)'
+                          }}>
+                            <AdvancedWeightSettings />
+                          </Box>
                         </Box>
                       )}
 

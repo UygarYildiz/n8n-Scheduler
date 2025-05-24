@@ -29,8 +29,7 @@ import {
   AccordionDetails,
   Tooltip,
   IconButton,
-  Tabs,
-  Tab,
+
   Dialog,
   DialogActions,
   DialogContent,
@@ -47,7 +46,6 @@ import {
   Business as BusinessIcon,
   People as PeopleIcon,
   AttachMoney as MoneyIcon,
-  Balance as BalanceIcon,
   CheckCircle as CheckCircleIcon,
   CalendarMonth as CalendarIcon
 } from '@mui/icons-material';
@@ -66,8 +64,6 @@ const OptimizationParams = () => {
     return 'hospital_test_config.yaml';
   });
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState('balanced');
-  const [optimizationGoal, setOptimizationGoal] = useState('balanced');
 
   // Hedef fonksiyon ağırlıkları
   const [weights, setWeights] = useState({
@@ -98,103 +94,7 @@ const OptimizationParams = () => {
     });
   };
 
-  const handleProfileChange = (event: React.MouseEvent<HTMLElement>, newProfile: string) => {
-    if (newProfile !== null) {
-      setSelectedProfile(newProfile);
 
-      // Profil değiştiğinde ağırlıkları güncelle
-      switch(newProfile) {
-        case 'balanced':
-          setWeights({
-            minimize_understaffing: 100,
-            minimize_overstaffing: 1,
-            maximize_preferences: 2,
-            balance_workload: 3,
-            maximize_shift_coverage: 50
-          });
-          break;
-        case 'employee_focused':
-          setWeights({
-            minimize_understaffing: 80,
-            minimize_overstaffing: 1,
-            maximize_preferences: 10,
-            balance_workload: 8,
-            maximize_shift_coverage: 30
-          });
-          break;
-        case 'cost_focused':
-          setWeights({
-            minimize_understaffing: 100,
-            minimize_overstaffing: 5,
-            maximize_preferences: 1,
-            balance_workload: 1,
-            maximize_shift_coverage: 70
-          });
-          break;
-        case 'quality_focused':
-          setWeights({
-            minimize_understaffing: 150,
-            minimize_overstaffing: 1,
-            maximize_preferences: 3,
-            balance_workload: 2,
-            maximize_shift_coverage: 80
-          });
-          break;
-      }
-    }
-  };
-
-  const handleOptimizationGoalChange = (event: React.SyntheticEvent, newValue: string) => {
-    setOptimizationGoal(newValue);
-
-    // Optimizasyon hedefi değiştiğinde ağırlıkları güncelle
-    let newWeights = { ...weights };
-
-    switch(newValue) {
-      case 'balanced':
-        newWeights = {
-          minimize_understaffing: 100,
-          minimize_overstaffing: 1,
-          maximize_preferences: 2,
-          balance_workload: 3,
-          maximize_shift_coverage: 50
-        };
-        break;
-      case 'employee_satisfaction':
-        newWeights = {
-          minimize_understaffing: 80,
-          minimize_overstaffing: 1,
-          maximize_preferences: 10,
-          balance_workload: 8,
-          maximize_shift_coverage: 30
-        };
-        break;
-      case 'cost_efficiency':
-        newWeights = {
-          minimize_understaffing: 100,
-          minimize_overstaffing: 5,
-          maximize_preferences: 1,
-          balance_workload: 1,
-          maximize_shift_coverage: 70
-        };
-        break;
-      case 'service_quality':
-        newWeights = {
-          minimize_understaffing: 150,
-          minimize_overstaffing: 1,
-          maximize_preferences: 3,
-          balance_workload: 2,
-          maximize_shift_coverage: 80
-        };
-        break;
-    }
-
-    setWeights(newWeights);
-
-    // Konsola ağırlık değerlerini yazdır
-    console.log(`Optimizasyon Hedefi: ${newValue}`);
-    console.log('Ağırlık Değerleri:', newWeights);
-  };
 
   const handleOptimizationStart = async () => {
     setLoading(true);
@@ -207,16 +107,14 @@ const OptimizationParams = () => {
       console.log('Optimizasyon Başlatılıyor:');
       console.log('Seçilen Veri Seti:', selectedDataset);
       console.log('Seçilen Konfigürasyon:', selectedConfig);
-      console.log('Optimizasyon Hedefi:', optimizationGoal);
-      console.log('Ağırlık Değerleri:', weights);
       console.log('Çözücü Parametreleri:', solverParams);
 
-      // API üzerinden n8n webhook'unu tetikle
+      // API üzerinden n8n webhook'unu tetikle - ağırlıklar konfigürasyondan gelecek
       const result = await api.startOptimization(
         selectedDataset,
         selectedConfig,
-        optimizationGoal,
-        weights,
+        'config-based', // Konfigürasyon dosyasından değerler kullanılacak
+        weights, // Mevcut weights kullanılacak ama konfigürasyondan override edilecek
         solverParams
       );
 
@@ -340,10 +238,10 @@ const OptimizationParams = () => {
           borderBottom: '1px solid rgba(0, 0, 0, 0.05)'
         }}>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
-            Çizelge Oluşturma
+            Optimizasyon
           </Typography>
           <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
-            Kurumunuza özel çizelge oluşturma sürecini başlatın
+            Konfigürasyona göre çizelge oluşturun
           </Typography>
         </Box>
       </Box>
@@ -442,7 +340,7 @@ const OptimizationParams = () => {
       )}
 
       <Grid container spacing={4}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={7}>
           <Card sx={{
             borderRadius: 3,
             boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
@@ -608,7 +506,7 @@ const OptimizationParams = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={5}>
           <Card sx={{
             borderRadius: 3,
             boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
@@ -621,101 +519,54 @@ const OptimizationParams = () => {
               color: 'white'
             }}>
               <Typography variant="h6" fontWeight="bold">
-                Çizelgeleme Hedefi
+                Konfigürasyon Durumu
               </Typography>
               <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
-                Çizelgeleme sürecinde öncelik verilecek hedefleri seçin
+                Mevcut çizelgeleme ayarları ve kuralları
               </Typography>
             </Box>
 
             <Box sx={{ p: 3 }}>
+              <Alert severity="info" sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" fontWeight="bold">
+                  📋 Konfigürasyon Kontrol Paneli
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Çizelgeleme kuralları ve optimizasyon hedefleri önceden tanımlanmıştır. 
+                  Değişiklik yapmak istiyorsanız konfigürasyon sayfasını kullanın.
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<SettingsIcon />}
+                  onClick={() => navigate('/dataset-config')}
+                  sx={{ 
+                    bgcolor: 'primary.main',
+                    '&:hover': { bgcolor: 'primary.dark' }
+                  }}
+                >
+                  Konfigürasyonu Düzenle
+                </Button>
+              </Alert>
+
               <Box sx={{
-                mb: 4,
                 p: 3,
-                bgcolor: 'rgba(76, 175, 80, 0.03)',
                 borderRadius: 3,
-                border: '1px solid rgba(76, 175, 80, 0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2
+                border: '1px solid rgba(76, 175, 80, 0.2)',
+                bgcolor: 'rgba(76, 175, 80, 0.03)',
+                mb: 3
               }}>
-                <BalanceIcon sx={{ color: '#4caf50', fontSize: '2rem' }} />
-                <Box>
-                  <Typography variant="subtitle2" fontWeight="600" gutterBottom>
-                    Çizelgeleme Önceliği
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Çizelgeleme sürecinde hangi hedeflere öncelik verilmesini istediğinizi seçin.
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <CheckCircleIcon sx={{ color: '#4caf50', mr: 1 }} />
+                  <Typography variant="subtitle2" fontWeight="600">
+                    Aktif Konfigürasyon
                   </Typography>
                 </Box>
-              </Box>
-
-              <Tabs
-                value={optimizationGoal}
-                onChange={handleOptimizationGoalChange}
-                variant="fullWidth"
-                sx={{
-                  mb: 4,
-                  '& .MuiTab-root': {
-                    minHeight: '60px',
-                    fontWeight: 600
-                  },
-                  '& .Mui-selected': {
-                    color: '#4caf50',
-                  },
-                  '& .MuiTabs-indicator': {
-                    backgroundColor: '#4caf50'
-                  }
-                }}
-              >
-                <Tab
-                  value="balanced"
-                  label="Dengeli"
-                  icon={<BalanceIcon />}
-                  iconPosition="start"
-                />
-                <Tab
-                  value="employee_satisfaction"
-                  label="Çalışan Odaklı"
-                  icon={<PeopleIcon />}
-                  iconPosition="start"
-                />
-                <Tab
-                  value="cost_efficiency"
-                  label="Maliyet Odaklı"
-                  icon={<MoneyIcon />}
-                  iconPosition="start"
-                />
-                <Tab
-                  value="service_quality"
-                  label="Hizmet Odaklı"
-                  icon={<BusinessIcon />}
-                  iconPosition="start"
-                />
-              </Tabs>
-
-              <Box sx={{
-                p: 3,
-                borderRadius: 3,
-                border: '1px solid rgba(76, 175, 80, 0.1)',
-                bgcolor: 'rgba(76, 175, 80, 0.03)',
-                mb: 4
-              }}>
-                <Typography variant="subtitle2" fontWeight="600" gutterBottom>
-                  {optimizationGoal === 'balanced' && 'Dengeli Çizelgeleme'}
-                  {optimizationGoal === 'employee_satisfaction' && 'Çalışan Odaklı Çizelgeleme'}
-                  {optimizationGoal === 'cost_efficiency' && 'Maliyet Odaklı Çizelgeleme'}
-                  {optimizationGoal === 'service_quality' && 'Hizmet Odaklı Çizelgeleme'}
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  <strong>Kural Seti:</strong> {configs.find(c => c.id === selectedConfig)?.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {optimizationGoal === 'balanced' &&
-                    'Bu seçenek, tüm hedefler arasında dengeli bir çizelge oluşturur. Hem çalışan memnuniyeti hem de kurum gereksinimleri gözetilir.'}
-                  {optimizationGoal === 'employee_satisfaction' &&
-                    'Bu seçenek, çalışan tercihlerine ve iş yükü dengesine öncelik veren bir çizelge oluşturur. Çalışan memnuniyeti ön plandadır.'}
-                  {optimizationGoal === 'cost_efficiency' &&
-                    'Bu seçenek, fazla personel maliyetini minimize eden ve kaynakları verimli kullanan bir çizelge oluşturur. Maliyet optimizasyonu ön plandadır.'}
-                  {optimizationGoal === 'service_quality' &&
-                    'Bu seçenek, hizmet kalitesini maksimize eden ve tüm vardiyaların yeterli personelle doldurulmasını sağlayan bir çizelge oluşturur.'}
+                  <strong>Durum:</strong> Çizelgeleme için hazır ✅
                 </Typography>
               </Box>
 
@@ -723,16 +574,16 @@ const OptimizationParams = () => {
                 <>
                   <Divider sx={{ my: 3 }}>
                     <Typography variant="caption" color="text.secondary">
-                      Gelişmiş Ayarlar
+                      Gelişmiş Çözücü Ayarları
                     </Typography>
                   </Divider>
 
                   <Box sx={{ mb: 4 }}>
                     <Typography variant="subtitle2" fontWeight="600" gutterBottom>
-                      Maksimum Çalışma Süresi
+                      Maksimum İşlem Süresi
                     </Typography>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-                      Algoritmanın çözüm araması için izin verilen maksimum süre (saniye)
+                      Çizelge hesaplama süresi limiti (saniye)
                     </Typography>
 
                     <Grid container spacing={2} alignItems="center">
@@ -773,7 +624,7 @@ const OptimizationParams = () => {
                           size="small"
                           InputProps={{
                             inputProps: { min: 10, max: 3600 },
-                            endAdornment: <Typography variant="caption" sx={{ ml: 1 }}>saniye</Typography>,
+                            endAdornment: <Typography variant="caption" sx={{ ml: 1 }}>sn</Typography>,
                             sx: { borderRadius: 2 }
                           }}
                         />
@@ -791,10 +642,10 @@ const OptimizationParams = () => {
                   }}>
                     <Box>
                       <Typography variant="subtitle2" fontWeight="600">
-                        Gelişmiş Çözücü Kullan
+                        Gelişmiş Optimizasyon
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        Daha yavaş ama karmaşık durumlarda daha iyi sonuçlar
+                        Daha kapsamlı arama algoritması (daha yavaş)
                       </Typography>
                     </Box>
                     <Switch
@@ -834,7 +685,7 @@ const OptimizationParams = () => {
                 Çizelge Oluşturmaya Hazırsınız
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                Seçtiğiniz kurum ve çizelgeleme hedefi doğrultusunda çizelge oluşturma işlemini başlatabilirsiniz.
+                Seçtiğiniz kurum için önceden tanımlanmış konfigürasyon kullanılarak çizelge oluşturulacak.
               </Typography>
 
               <Box sx={{
@@ -865,11 +716,7 @@ const OptimizationParams = () => {
                   <Typography variant="body2">
                     <strong>Kurum:</strong> {datasets.find(d => d.id === selectedDataset)?.name} &nbsp;|&nbsp;
                     <strong>Kural Seti:</strong> {configs.find(c => c.id === selectedConfig)?.name} &nbsp;|&nbsp;
-                    <strong>Çizelgeleme Hedefi:</strong> {
-                      optimizationGoal === 'balanced' ? 'Dengeli' :
-                      optimizationGoal === 'employee_satisfaction' ? 'Çalışan Odaklı' :
-                      optimizationGoal === 'cost_efficiency' ? 'Maliyet Odaklı' : 'Hizmet Odaklı'
-                    }
+                    <strong>Çözücü Süresi:</strong> {solverParams.time_limit} saniye
                   </Typography>
                 </Box>
               </Box>
