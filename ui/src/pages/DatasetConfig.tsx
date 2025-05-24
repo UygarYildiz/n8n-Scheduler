@@ -1608,6 +1608,7 @@ const DatasetConfig = () => {
         >
           <Tab label="Kurumsal Veri Kaynakları" />
           <Tab label="Çizelgeleme Kuralları" />
+          <Tab label="Kullanım Kılavuzu" />
         </Tabs>
       </Box>
 
@@ -2865,6 +2866,496 @@ const DatasetConfig = () => {
                       </Card>
                     </>
                   )}
+                </Box>
+              </Card>
+            </Grid>
+          </Grid>
+        </Box>
+      )}
+
+      {tabValue === 2 && (
+        <Box sx={{ padding: '24px' }}>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <Card sx={{
+                borderRadius: 3,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                overflow: 'hidden'
+              }}>
+                <Box sx={{
+                  p: 3,
+                  background: `linear-gradient(45deg, rgba(63, 81, 181, 0.8), rgba(63, 81, 181, 0.6))`,
+                  color: 'white'
+                }}>
+                  <Typography variant="h5" fontWeight="bold">
+                    📚 Sistem Yöneticisi Kullanım Kılavuzu
+                  </Typography>
+                  <Typography variant="body1" sx={{ mt: 1, opacity: 0.9 }}>
+                    Çizelgeleme sistemini etkili bir şekilde yönetmek için kapsamlı rehber
+                  </Typography>
+                </Box>
+
+                <Box sx={{ p: 4 }}>
+                  {/* Başlangıç Rehberi */}
+                  <Box sx={{ mb: 6 }}>
+                    <Typography variant="h6" fontWeight="700" gutterBottom sx={{ color: '#3f51b5', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      🚀 Sistem Kurulumu ve Başlangıç
+                    </Typography>
+                    
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={6}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(63, 81, 181, 0.1)' }}>
+                          <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#3f51b5' }}>
+                            1️⃣ İlk Kurulum Adımları
+                          </Typography>
+                          <Box component="ul" sx={{ pl: 3, mt: 2 }}>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}><strong>Veri Kaynağı Seçimi:</strong> Kurumunuza uygun veri setini (Hastane/Çağrı Merkezi) seçin</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}><strong>Temel Dosyalar:</strong> Çalışanlar ve Vardiyalar dosyalarını öncelikle yükleyin</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}><strong>Kural Seti:</strong> Kurumunuza uygun konfigürasyonu seçin</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}><strong>Test Çalıştırması:</strong> Basit bir kural ile ilk testinizi yapın</Typography></li>
+                          </Box>
+                        </Card>
+                      </Grid>
+                      
+                      <Grid item xs={12} md={6}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(255, 152, 0, 0.1)' }}>
+                          <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#ff9800' }}>
+                            ⚠️ Önemli Ön Bilgiler
+                          </Typography>
+                          <Alert severity="warning" sx={{ mb: 2 }}>
+                            <Typography variant="caption">
+                              <strong>DİKKAT:</strong> Kural değişiklikleri tüm gelecek çizelgeleri etkiler!
+                            </Typography>
+                          </Alert>
+                          <Box component="ul" sx={{ pl: 3 }}>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Değişiklikler anında kaydedilir</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Test ortamında deneme yapın</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Yedekleme düzenli yapın</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Personel bilgilendirmesi unutmayın</Typography></li>
+                          </Box>
+                        </Card>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  {/* Veri Dosyası Yönetimi */}
+                  <Box sx={{ mb: 6 }}>
+                    <Typography variant="h6" fontWeight="700" gutterBottom sx={{ color: '#4caf50', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      📁 Veri Dosyası Yönetimi
+                    </Typography>
+                    
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={4}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(76, 175, 80, 0.1)' }}>
+                          <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#4caf50' }}>
+                            📊 Temel Dosyalar (Zorunlu)
+                          </Typography>
+                          <Box>
+                            <Typography variant="body2" fontWeight="600" sx={{ color: '#1976d2', mb: 1 }}>
+                              employees.csv - Çalışanlar
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', mb: 2, pl: 2, borderLeft: '2px solid #1976d2' }}>
+                              Çalışan ID, Ad, Soyad, Departman, Rol, Başlangıç tarihi
+                            </Typography>
+                            
+                            <Typography variant="body2" fontWeight="600" sx={{ color: '#1976d2', mb: 1 }}>
+                              shifts.csv - Vardiyalar
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', pl: 2, borderLeft: '2px solid #1976d2' }}>
+                              Vardiya ID, Adı, Başlangıç saati, Bitiş saati, Departman
+                            </Typography>
+                          </Box>
+                        </Card>
+                      </Grid>
+                      
+                      <Grid item xs={12} md={4}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(103, 58, 183, 0.1)' }}>
+                          <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#673ab7' }}>
+                            ⭐ Ek Dosyalar (Kalite Artırır)
+                          </Typography>
+                          <Box>
+                            <Typography variant="body2" fontWeight="600" sx={{ color: '#673ab7', mb: 1 }}>
+                              skills.csv - Yetkinlikler
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', mb: 2, pl: 2, borderLeft: '2px solid #673ab7' }}>
+                              Çalışan ID, Yetenek, Seviye, Sertifika tarihi
+                            </Typography>
+                            
+                            <Typography variant="body2" fontWeight="600" sx={{ color: '#673ab7', mb: 1 }}>
+                              preferences.csv - Tercihler
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', pl: 2, borderLeft: '2px solid #673ab7' }}>
+                              Çalışan ID, Vardiya ID, Tercih puanı (1-5)
+                            </Typography>
+                          </Box>
+                        </Card>
+                      </Grid>
+                      
+                      <Grid item xs={12} md={4}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(255, 87, 34, 0.1)' }}>
+                          <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#ff5722' }}>
+                            🔧 Dosya Formatı İpuçları
+                          </Typography>
+                          <Box component="ul" sx={{ pl: 3 }}>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>UTF-8 kodlama kullanın</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Virgülle ayrılmış değerler (CSV)</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>İlk satır başlık olmalı</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Boş hücre bırakmayın</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Tarih formatı: GG/AA/YYYY</Typography></li>
+                          </Box>
+                        </Card>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  {/* Kural Oluşturma Rehberi */}
+                  <Box sx={{ mb: 6 }}>
+                    <Typography variant="h6" fontWeight="700" gutterBottom sx={{ color: '#e91e63', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      ⚖️ Çizelgeleme Kuralları Rehberi
+                    </Typography>
+                    
+                    <Alert severity="info" sx={{ mb: 3 }}>
+                      <Typography variant="subtitle2" fontWeight="600">
+                        💡 Kural Oluşturma Felsefesi
+                      </Typography>
+                      <Typography variant="body2">
+                        Kuralları basit tutun ve aşamalı olarak ekleyin. Çok karmaşık kurallar çözüm bulunmasını zorlaştırabilir.
+                      </Typography>
+                    </Alert>
+                    
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={6}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(233, 30, 99, 0.1)' }}>
+                          <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#e91e63' }}>
+                            👥 Personel Gereksinimleri
+                          </Typography>
+                          
+                          <Box sx={{ mb: 3 }}>
+                            <Typography variant="body2" fontWeight="600" sx={{ color: '#1976d2', mb: 1 }}>
+                              📋 Örnekler:
+                            </Typography>
+                            <Box component="ul" sx={{ pl: 3 }}>
+                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Acil Serviste gece en az 2 hemşire"</Typography></li>
+                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Çağrı merkezinde gündüz en az 5 temsilci"</Typography></li>
+                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Yoğun bakımda 7/24 en az 1 doktor"</Typography></li>
+                            </Box>
+                          </Box>
+                          
+                          <Box>
+                            <Typography variant="body2" fontWeight="600" sx={{ color: '#ff5722', mb: 1 }}>
+                              🎯 Önem Seviyeleri:
+                            </Typography>
+                            <Box sx={{ pl: 2 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                <Box sx={{ width: 12, height: 12, bgcolor: '#4caf50', borderRadius: '50%' }}></Box>
+                                <Typography variant="caption">Düşük (50): İsteğe bağlı</Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                <Box sx={{ width: 12, height: 12, bgcolor: '#ff9800', borderRadius: '50%' }}></Box>
+                                <Typography variant="caption">Orta (100): Önemli</Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                <Box sx={{ width: 12, height: 12, bgcolor: '#f44336', borderRadius: '50%' }}></Box>
+                                <Typography variant="caption">Yüksek (150): Kritik</Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Box sx={{ width: 12, height: 12, bgcolor: '#9c27b0', borderRadius: '50%' }}></Box>
+                                <Typography variant="caption">Çok Yüksek (200): Yasal</Typography>
+                              </Box>
+                            </Box>
+                          </Box>
+                        </Card>
+                      </Grid>
+                      
+                      <Grid item xs={12} md={6}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(76, 175, 80, 0.1)' }}>
+                          <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#4caf50' }}>
+                            🎓 Yetenek Gereksinimleri
+                          </Typography>
+                          
+                          <Box sx={{ mb: 3 }}>
+                            <Typography variant="body2" fontWeight="600" sx={{ color: '#1976d2', mb: 1 }}>
+                              📋 Örnekler:
+                            </Typography>
+                            <Box component="ul" sx={{ pl: 3 }}>
+                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Acilde BLS sertifikalı personel"</Typography></li>
+                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Teknik destek ekibinde sertifikalı uzman"</Typography></li>
+                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Çoklu dil bilen müşteri temsilcisi"</Typography></li>
+                            </Box>
+                          </Box>
+                          
+                          <Alert severity="success" sx={{ mb: 2 }}>
+                            <Typography variant="caption">
+                              <strong>İPUCU:</strong> Yetenek kuralları personel geliştirme planlamanızı da destekler
+                            </Typography>
+                          </Alert>
+                          
+                          <Box>
+                            <Typography variant="body2" fontWeight="600" sx={{ color: '#ff5722', mb: 1 }}>
+                              📈 Başarı Faktörleri:
+                            </Typography>
+                            <Box component="ul" sx={{ pl: 3 }}>
+                              <li><Typography variant="caption">Mevcut personel profilini analiz edin</Typography></li>
+                              <li><Typography variant="caption">Eğitim ihtiyaçlarını belirleyin</Typography></li>
+                              <li><Typography variant="caption">Adil dağılım sağlayın</Typography></li>
+                            </Box>
+                          </Box>
+                        </Card>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  {/* Optimizasyon Rehberi */}
+                  <Box sx={{ mb: 6 }}>
+                    <Typography variant="h6" fontWeight="700" gutterBottom sx={{ color: '#ff9800', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      🎯 Kurumsal Öncelik Belirleme
+                    </Typography>
+                    
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={3}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(76, 175, 80, 0.2)', bgcolor: 'rgba(76, 175, 80, 0.02)' }}>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ color: '#4caf50', textAlign: 'center' }}>
+                            ⚖️ Dengeli Yaklaşım
+                          </Typography>
+                          <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mb: 2, fontStyle: 'italic' }}>
+                            "Genel amaçlı, çoğu kurum için uygun"
+                          </Typography>
+                          <Box component="ul" sx={{ pl: 2 }}>
+                            <li><Typography variant="caption">Yeni başlayan kurumlar için</Typography></li>
+                            <li><Typography variant="caption">Standart operasyonlar</Typography></li>
+                            <li><Typography variant="caption">Risk almak istemeyenler</Typography></li>
+                          </Box>
+                        </Card>
+                      </Grid>
+                      
+                      <Grid item xs={12} md={3}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(255, 152, 0, 0.2)', bgcolor: 'rgba(255, 152, 0, 0.02)' }}>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ color: '#ff9800', textAlign: 'center' }}>
+                            💰 Maliyet Odaklı
+                          </Typography>
+                          <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mb: 2, fontStyle: 'italic' }}>
+                            "Bütçe kısıtı olan kurumlar"
+                          </Typography>
+                          <Box component="ul" sx={{ pl: 2 }}>
+                            <li><Typography variant="caption">Fazla personel maliyetini minimize eder</Typography></li>
+                            <li><Typography variant="caption">Ekonomik zorluk dönemleri</Typography></li>
+                            <li><Typography variant="caption">Verimliliği öncelendirir</Typography></li>
+                          </Box>
+                        </Card>
+                      </Grid>
+                      
+                      <Grid item xs={12} md={3}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(33, 150, 243, 0.2)', bgcolor: 'rgba(33, 150, 243, 0.02)' }}>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ color: '#2196f3', textAlign: 'center' }}>
+                            😊 Çalışan Memnuniyeti
+                          </Typography>
+                          <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mb: 2, fontStyle: 'italic' }}>
+                            "Personel bağlılığı odaklı"
+                          </Typography>
+                          <Box component="ul" sx={{ pl: 2 }}>
+                            <li><Typography variant="caption">Personel tercihlerini dikkate alır</Typography></li>
+                            <li><Typography variant="caption">İş-yaşam dengesini öncelendirir</Typography></li>
+                            <li><Typography variant="caption">Devir hızını azaltır</Typography></li>
+                          </Box>
+                        </Card>
+                      </Grid>
+                      
+                      <Grid item xs={12} md={3}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(244, 67, 54, 0.2)', bgcolor: 'rgba(244, 67, 54, 0.02)' }}>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ color: '#f44336', textAlign: 'center' }}>
+                            🎯 Hizmet Kalitesi
+                          </Typography>
+                          <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mb: 2, fontStyle: 'italic' }}>
+                            "Müşteri memnuniyeti kritik"
+                          </Typography>
+                          <Box component="ul" sx={{ pl: 2 }}>
+                            <li><Typography variant="caption">Eksik personeli önler</Typography></li>
+                            <li><Typography variant="caption">7/24 hizmet sunan kurumlar</Typography></li>
+                            <li><Typography variant="caption">Acil durum hazırlığı</Typography></li>
+                          </Box>
+                        </Card>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  {/* Sık Sorulan Sorular */}
+                  <Box sx={{ mb: 6 }}>
+                    <Typography variant="h6" fontWeight="700" gutterBottom sx={{ color: '#9c27b0', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      ❓ Sık Sorulan Sorular
+                    </Typography>
+                    
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={6}>
+                        <Card sx={{ p: 3, border: '1px solid rgba(156, 39, 176, 0.1)' }}>
+                          <Typography variant="subtitle2" fontWeight="600" sx={{ color: '#9c27b0', mb: 2 }}>
+                            🤔 Genel Sorular
+                          </Typography>
+                          
+                          <Box sx={{ mb: 3 }}>
+                            <Typography variant="body2" fontWeight="600" gutterBottom>
+                              S: Kuralları kaç kere değiştirebilirim?
+                            </Typography>
+                            <Typography variant="caption" sx={{ pl: 2, borderLeft: '2px solid #9c27b0' }}>
+                              C: Limitsiz. Ancak her değişiklik gelecek çizelgeleri etkiler, test ortamında deneme yapmanız önerilir.
+                            </Typography>
+                          </Box>
+                          
+                          <Box sx={{ mb: 3 }}>
+                            <Typography variant="body2" fontWeight="600" gutterBottom>
+                              S: Çok karmaşık kurallar oluşturursam ne olur?
+                            </Typography>
+                            <Typography variant="caption" sx={{ pl: 2, borderLeft: '2px solid #9c27b0' }}>
+                              C: Sistem çözüm bulamayabilir veya çok uzun sürebilir. Basit kurallarla başlayıp kademeli ekleyin.
+                            </Typography>
+                          </Box>
+                          
+                          <Box>
+                            <Typography variant="body2" fontWeight="600" gutterBottom>
+                              S: Personel sayım kural gereksinimlerinden az ise?
+                            </Typography>
+                            <Typography variant="caption" sx={{ pl: 2, borderLeft: '2px solid #9c27b0' }}>
+                              C: Sistem mevcut personelle en iyi çözümü bulur, ancak eksiklik raporlanır.
+                            </Typography>
+                          </Box>
+                        </Card>
+                      </Grid>
+                      
+                      <Grid item xs={12} md={6}>
+                        <Card sx={{ p: 3, border: '1px solid rgba(244, 67, 54, 0.1)' }}>
+                          <Typography variant="subtitle2" fontWeight="600" sx={{ color: '#f44336', mb: 2 }}>
+                            🔧 Teknik Sorular
+                          </Typography>
+                          
+                          <Box sx={{ mb: 3 }}>
+                            <Typography variant="body2" fontWeight="600" gutterBottom>
+                              S: Dosya yükleme hatası alıyorum?
+                            </Typography>
+                            <Typography variant="caption" sx={{ pl: 2, borderLeft: '2px solid #f44336' }}>
+                              C: Dosya formatını kontrol edin. UTF-8 kodlama, CSV format, virgülle ayrılmış değerler gerekli.
+                            </Typography>
+                          </Box>
+                          
+                          <Box sx={{ mb: 3 }}>
+                            <Typography variant="body2" fontWeight="600" gutterBottom>
+                              S: Çizelge oluşturma çok uzun sürüyor?
+                            </Typography>
+                            <Typography variant="caption" sx={{ pl: 2, borderLeft: '2px solid #f44336' }}>
+                              C: Kural sayısını azaltın, çözücü süresini artırın veya basit kurallarla başlayın.
+                            </Typography>
+                          </Box>
+                          
+                          <Box>
+                            <Typography variant="body2" fontWeight="600" gutterBottom>
+                              S: Yedekleme nasıl yapılır?
+                            </Typography>
+                            <Typography variant="caption" sx={{ pl: 2, borderLeft: '2px solid #f44336' }}>
+                              C: Konfigürasyon dosyalarını düzenli olarak kaydedin ve veri dosyalarının yedeğini alın.
+                            </Typography>
+                          </Box>
+                        </Card>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  {/* En İyi Pratikler */}
+                  <Box sx={{ mb: 6 }}>
+                    <Typography variant="h6" fontWeight="700" gutterBottom sx={{ color: '#4caf50', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      ⭐ En İyi Pratikler
+                    </Typography>
+                    
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={4}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(76, 175, 80, 0.1)' }}>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ color: '#4caf50' }}>
+                            📅 Planlama Stratejisi
+                          </Typography>
+                          <Box component="ol" sx={{ pl: 3 }}>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Aylık periyodlarla planlayın</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Özel günleri önceden işaretleyin</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Personel izinlerini güncel tutun</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Tatil dönemlerini dikkate alın</Typography></li>
+                          </Box>
+                        </Card>
+                      </Grid>
+                      
+                      <Grid item xs={12} md={4}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(255, 152, 0, 0.1)' }}>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ color: '#ff9800' }}>
+                            👥 Ekip Yönetimi
+                          </Typography>
+                          <Box component="ol" sx={{ pl: 3 }}>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Personel geri bildirimlerini toplayın</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Adil vardiya dağılımını sağlayın</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Yedek personel planı yapın</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Sürekli iyileştirme uygulayın</Typography></li>
+                          </Box>
+                        </Card>
+                      </Grid>
+                      
+                      <Grid item xs={12} md={4}>
+                        <Card sx={{ p: 3, height: '100%', border: '1px solid rgba(63, 81, 181, 0.1)' }}>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ color: '#3f51b5' }}>
+                            🔍 İzleme ve Kontrol
+                          </Typography>
+                          <Box component="ol" sx={{ pl: 3 }}>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Çizelge performansını takip edin</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Kural etkinliğini analiz edin</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Düzenli raporlama yapın</Typography></li>
+                            <li><Typography variant="body2" sx={{ mb: 1 }}>Sistem güncellemelerini takip edin</Typography></li>
+                          </Box>
+                        </Card>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  {/* Hızlı Başlangıç Checklist */}
+                  <Box>
+                    <Typography variant="h6" fontWeight="700" gutterBottom sx={{ color: '#f44336', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      ✅ Hızlı Başlangıç Kontrol Listesi
+                    </Typography>
+                    
+                    <Card sx={{ p: 4, border: '1px solid rgba(244, 67, 54, 0.1)', bgcolor: 'rgba(244, 67, 54, 0.02)' }}>
+                      <Grid container spacing={4}>
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ color: '#f44336' }}>
+                            📋 İlk Kurulum (Zorunlu)
+                          </Typography>
+                          <Box component="ul" sx={{ pl: 3, '& li': { mb: 1 } }}>
+                            <li><Typography variant="body2">[ ] Kurum tipini seçtim (Hastane/Çağrı Merkezi)</Typography></li>
+                            <li><Typography variant="body2">[ ] employees.csv dosyasını yükledim</Typography></li>
+                            <li><Typography variant="body2">[ ] shifts.csv dosyasını yükledim</Typography></li>
+                            <li><Typography variant="body2">[ ] İlk personel kuralımı oluşturdum</Typography></li>
+                            <li><Typography variant="body2">[ ] Kurumsal önceliği belirledim</Typography></li>
+                            <li><Typography variant="body2">[ ] Test çizelgesi oluşturdum</Typography></li>
+                          </Box>
+                        </Grid>
+                        
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom sx={{ color: '#ff9800' }}>
+                            🚀 İyileştirmeler (Önerilen)
+                          </Typography>
+                          <Box component="ul" sx={{ pl: 3, '& li': { mb: 1 } }}>
+                            <li><Typography variant="body2">[ ] skills.csv dosyasını yükledim</Typography></li>
+                            <li><Typography variant="body2">[ ] preferences.csv dosyasını yükledim</Typography></li>
+                            <li><Typography variant="body2">[ ] Yetenek kuralları oluşturdum</Typography></li>
+                            <li><Typography variant="body2">[ ] Personel geri bildirimi aldım</Typography></li>
+                            <li><Typography variant="body2">[ ] Kuralları optimize ettim</Typography></li>
+                            <li><Typography variant="body2">[ ] Yedekleme planı oluşturdum</Typography></li>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                      
+                      <Alert severity="success" sx={{ mt: 3 }}>
+                        <Typography variant="subtitle2" fontWeight="600">
+                          🎉 Tebrikler! Sistem Kullanıma Hazır
+                        </Typography>
+                        <Typography variant="body2">
+                          Temel kurulumu tamamladığınızda, artık etkili çizelgeleme yapabilirsiniz. 
+                          İyileştirmeler zamanla ekleyebilirsiniz.
+                        </Typography>
+                      </Alert>
+                    </Card>
+                  </Box>
                 </Box>
               </Card>
             </Grid>
