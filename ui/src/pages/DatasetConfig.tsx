@@ -969,31 +969,37 @@ const DatasetConfig = () => {
   };
 
   // Smart Tooltip komponenti
-  const SmartTooltip = ({ field, children }: { field: string; children: React.ReactNode }) => {
+  const SmartTooltip = ({ field, label, children }: { field: string; label: string; children: React.ReactNode }) => {
     const tooltip = tooltipTexts[field as keyof typeof tooltipTexts];
-    if (!tooltip) return <>{children}</>;
 
     return (
-      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+          <Typography variant="body2" fontWeight="600" sx={{ color: '#1976d2' }}>
+            {label}
+          </Typography>
+          {tooltip && (
+            <Tooltip
+              title={
+                <Box sx={{ p: 1 }}>
+                  <Typography variant="subtitle2" fontWeight="600" gutterBottom>
+                    {tooltip.title}
+                  </Typography>
+                  <Typography variant="body2">
+                    {tooltip.content}
+                  </Typography>
+                </Box>
+              }
+              arrow
+              placement="top"
+            >
+              <IconButton size="small" sx={{ color: 'primary.main' }}>
+                <HelpIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
         {children}
-        <Tooltip
-          title={
-            <Box sx={{ p: 1 }}>
-              <Typography variant="subtitle2" fontWeight="600" gutterBottom>
-                {tooltip.title}
-              </Typography>
-              <Typography variant="body2">
-                {tooltip.content}
-              </Typography>
-            </Box>
-          }
-          arrow
-          placement="top"
-        >
-          <IconButton size="small" sx={{ color: 'primary.main' }}>
-            <HelpIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
       </Box>
     );
   };
@@ -2019,30 +2025,22 @@ const DatasetConfig = () => {
                                     
                                     <Grid container spacing={3}>
                                       <Grid item xs={12} sm={6} md={3}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
-                                            Departman
-                                          </Typography>
-                                          <SmartTooltip field="department">
-                                            <FormControl fullWidth size="small">
-                                              <Select
-                                                value={rule.department}
-                                                onChange={(e) => updateStaffingRule(rule.id!, { department: e.target.value })}
-                                                placeholder="Seçiniz"
-                                              >
-                                                {departments.map(dept => (
-                                                  <MenuItem key={dept} value={dept}>{dept}</MenuItem>
-                                                ))}
-                                              </Select>
-                                            </FormControl>
-                                          </SmartTooltip>
-                                        </Box>
+                                        <SmartTooltip field="department" label="Departman">
+                                          <FormControl fullWidth size="small">
+                                            <Select
+                                              value={rule.department}
+                                              onChange={(e) => updateStaffingRule(rule.id!, { department: e.target.value })}
+                                              placeholder="Seçiniz"
+                                            >
+                                              {departments.map(dept => (
+                                                <MenuItem key={dept} value={dept}>{dept}</MenuItem>
+                                              ))}
+                                            </Select>
+                                          </FormControl>
+                                        </SmartTooltip>
                                       </Grid>
                                       <Grid item xs={12} sm={6} md={3}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
-                                            Rol
-                                          </Typography>
+                                        <SmartTooltip field="role" label="Rol">
                                           <FormControl fullWidth size="small">
                                             <Select
                                               value={rule.role}
@@ -2054,13 +2052,10 @@ const DatasetConfig = () => {
                                               ))}
                                             </Select>
                                           </FormControl>
-                                        </Box>
+                                        </SmartTooltip>
                                       </Grid>
                                       <Grid item xs={12} sm={6} md={2}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
-                                            Vardiya
-                                          </Typography>
+                                        <SmartTooltip field="shift" label="Vardiya">
                                           <FormControl fullWidth size="small">
                                             <Select
                                               value={rule.shift}
@@ -2072,13 +2067,10 @@ const DatasetConfig = () => {
                                               ))}
                                             </Select>
                                           </FormControl>
-                                        </Box>
+                                        </SmartTooltip>
                                       </Grid>
                                       <Grid item xs={12} sm={6} md={2}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
-                                            Hafta
-                                          </Typography>
+                                        <SmartTooltip field="weekType" label="Hafta">
                                           <FormControl fullWidth size="small">
                                             <Select
                                               value={rule.weekType}
@@ -2090,13 +2082,10 @@ const DatasetConfig = () => {
                                               ))}
                                             </Select>
                                           </FormControl>
-                                        </Box>
+                                        </SmartTooltip>
                                       </Grid>
                                       <Grid item xs={6} sm={3} md={1.5}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
-                                            Min
-                                          </Typography>
+                                        <SmartTooltip field="minCount" label="Min">
                                           <TextField
                                             type="number"
                                             size="small"
@@ -2112,13 +2101,10 @@ const DatasetConfig = () => {
                                               }
                                             }}
                                           />
-                                        </Box>
+                                        </SmartTooltip>
                                       </Grid>
                                       <Grid item xs={6} sm={3} md={1.5}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#1976d2' }}>
-                                            Ceza
-                                          </Typography>
+                                        <SmartTooltip field="penalty" label="Ceza">
                                           <TextField
                                             type="number"
                                             size="small"
@@ -2134,7 +2120,7 @@ const DatasetConfig = () => {
                                               }
                                             }}
                                           />
-                                        </Box>
+                                        </SmartTooltip>
                                       </Grid>
                                     </Grid>
                                     
@@ -2207,10 +2193,7 @@ const DatasetConfig = () => {
                                     
                                     <Grid container spacing={3}>
                                       <Grid item xs={12} sm={6} md={3}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
-                                            Departman
-                                          </Typography>
+                                        <SmartTooltip field="department" label="Departman">
                                           <FormControl fullWidth size="small">
                                             <Select
                                               value={rule.department}
@@ -2222,13 +2205,10 @@ const DatasetConfig = () => {
                                               ))}
                                             </Select>
                                           </FormControl>
-                                        </Box>
+                                        </SmartTooltip>
                                       </Grid>
                                       <Grid item xs={12} sm={6} md={3}>
-                                        <Box>
-                                          <Typography variant="body2" fontWeight="600" sx={{ mb: 1.5, color: '#388e3c' }}>
-                                            Yetenek
-                                          </Typography>
+                                        <SmartTooltip field="skill" label="Yetenek">
                                           <FormControl fullWidth size="small">
                                             <Select
                                               value={rule.skill}
@@ -2240,7 +2220,7 @@ const DatasetConfig = () => {
                                               ))}
                                             </Select>
                                           </FormControl>
-                                        </Box>
+                                        </SmartTooltip>
                                       </Grid>
                                       <Grid item xs={12} sm={6} md={2}>
                                         <Box>
