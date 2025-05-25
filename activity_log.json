@@ -1,6 +1,15 @@
 [
   {
     "id": "act21",
+    "date": "25.05.2025 22:09",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748200176
+  },
+  {
+    "id": "act21",
     "date": "25.05.2025 14:39",
     "action": "Çizelgeleme tamamlandı",
     "detail": "Başarılı optimizasyon",
@@ -169,14 +178,5 @@
     "color": "info.main",
     "icon": "CloudUploadIcon",
     "timestamp": 1747943428
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:50",
-    "action": "Veri dosyası güncellendi",
-    "detail": "cagri_merkezi veri setindeki availability.csv dosyası güncellendi",
-    "color": "info.main",
-    "icon": "CloudUploadIcon",
-    "timestamp": 1747943418
   }
 ]

@@ -12,24 +12,82 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator, ValidationError
 from datetime import date, datetime, time as dt_time # time ile çakışmaması için dt_time
 
-# API modüllerini içe aktar
+# Authentication ve Database modüllerini içe aktar
+import os
+import sys
+
+# Current directory'yi sys.path'e ekle
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 try:
-    from optimization_core.dashboard_api import router as dashboard_router
-    from optimization_core.management_api import router as management_router
-    from optimization_core.results_api import router as results_router
-    from optimization_core.webhook_api import router as webhook_router
-    from optimization_core.activity_logger import log_optimization_activity
-    from optimization_core.cp_model_builder import ShiftSchedulingModelBuilder
-    from optimization_core.utils import get_project_root, load_json_file, save_json_file, format_error_response
-except ImportError:
-    # Doğrudan çalıştırıldığında (development) farklı import yolu
+    # Önce authentication modüllerini dene
+    from auth_api import router as auth_router
+    from database import test_connection
+    print("✅ Authentication modülleri başarıyla yüklendi!")
+except ImportError as e:
+    print(f"❌ Authentication modülleri yüklenemedi: {e}")
+    # Temel bir auth router oluştur
+    from fastapi import APIRouter, HTTPException
+    auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
+    
+    @auth_router.get("/health")
+    async def auth_health():
+        return {"status": "Auth module not available", "error": str(e)}
+    
+    @auth_router.post("/login")
+    async def dummy_login():
+        return {"message": "Auth module not available", "error": "Module import failed"}
+    
+    def test_connection():
+        return False
+
+# Diğer modüller (opsiyonel)
+try:
     from dashboard_api import router as dashboard_router
-    from management_api import router as management_router
+    from management_api import router as management_router  
     from results_api import router as results_router
     from webhook_api import router as webhook_router
+    print("✅ Tüm API modülleri yüklendi!")
+except ImportError as e:
+    print(f"⚠️ Bazı modüller yüklenemedi: {e}")
+    # Dummy router'lar oluştur
+    from fastapi import APIRouter
+    dashboard_router = APIRouter()
+    management_router = APIRouter()
+    results_router = APIRouter()
+    webhook_router = APIRouter()
+
+# Utility functions (opsiyonel)
+try:
     from activity_logger import log_optimization_activity
     from cp_model_builder import ShiftSchedulingModelBuilder
     from utils import get_project_root, load_json_file, save_json_file, format_error_response
+except ImportError:
+    # Dummy functions
+    def log_optimization_activity(*args, **kwargs):
+        pass
+    
+    class ShiftSchedulingModelBuilder:
+        def __init__(self, *args, **kwargs):
+            pass
+        def build_model(self):
+            pass
+        def solve_model(self):
+            return "ERROR", {"error": "CP-SAT solver not available"}
+    
+    def get_project_root():
+        return "."
+    
+    def load_json_file(*args):
+        return {}
+    
+    def save_json_file(*args):
+        pass
+    
+    def format_error_response(*args):
+        return {"error": "Function not available"}
 
 # --- Logging Kurulumu ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -141,10 +199,36 @@ app.add_middleware(
 )
 
 # API router'larını ekle
+app.include_router(auth_router, tags=["Authentication"])
 app.include_router(dashboard_router, tags=["Dashboard"])
 app.include_router(management_router, tags=["Management"])
 app.include_router(results_router, tags=["Results"])
 app.include_router(webhook_router, tags=["Webhook"])
+
+# Basit health check endpoint'i
+@app.get("/health")
+async def health_check():
+    """API sağlık kontrolü"""
+    return {
+        "status": "healthy",
+        "message": "Optimizasyon API çalışıyor!",
+        "timestamp": datetime.now().isoformat(),
+        "database_connection": test_connection()
+    }
+
+# --- Startup Event ---
+@app.on_event("startup")
+async def startup_event():
+    """Uygulama başlatıldığında çalışır"""
+    logger.info("Optimizasyon API başlatılıyor...")
+    
+    # Database bağlantısını test et
+    if test_connection():
+        logger.info("✅ MySQL veritabanı bağlantısı başarılı!")
+    else:
+        logger.error("❌ MySQL veritabanı bağlantısı başarısız!")
+    
+    logger.info("🚀 Optimizasyon API hazır!")
 
 # --- Hata Yönetimi (Validation Errors için) ---
 @app.exception_handler(RequestValidationError)
@@ -407,6 +491,20 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
     total_api_time = end_time - start_time
     logger.info(f"Optimizasyon isteği tamamlandı. Toplam API süresi: {total_api_time:.2f}s")
     return response
+
+# --- API Router'larını Include Et ---
+# Authentication router'ı ekle
+app.include_router(auth_router)
+
+# Diğer router'ları da ekle (eğer yüklendiyse)
+try:
+    app.include_router(dashboard_router, prefix="/api")
+    app.include_router(management_router, prefix="/api")
+    app.include_router(results_router, prefix="/api")
+    app.include_router(webhook_router, prefix="/api")
+    logger.info("✅ Tüm API router'ları başarıyla eklendi!")
+except Exception as e:
+    logger.warning(f"⚠️ Bazı router'lar eklenemedi: {e}")
 
 # --- API Endpoints ---
 # /api/results, /api/shifts ve /api/employees endpoint'leri ayrı modüllere taşındı

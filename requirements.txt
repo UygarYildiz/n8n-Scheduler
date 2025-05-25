@@ -4,3 +4,12 @@ pydantic>=2.0.0
 ortools>=9.6.0
 PyYAML>=6.0
 requests>=2.28.0
+
+# Veritabanı ve Authentication
+mysql-connector-python>=8.0.33
+SQLAlchemy>=2.0.0
+bcrypt>=4.0.0
+python-jose[cryptography]>=3.3.0
+python-multipart>=0.0.6
+PyJWT>=2.8.0
+email-validator>=2.0.0

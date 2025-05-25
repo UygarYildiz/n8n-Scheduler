@@ -16,21 +16,10 @@ import {
   Switch,
   FormControlLabel,
   Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  IconButton,
   Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
   Snackbar,
   Chip,
   Avatar,
-  Tooltip,
   CircularProgress,
   LinearProgress
 } from '@mui/material';
@@ -38,12 +27,7 @@ import {
   Save as SaveIcon,
   Refresh as ResetIcon,
   Person as PersonIcon,
-  VpnKey as KeyIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Settings as SettingsIcon,
   Api as ApiIcon,
-  Edit as EditIcon,
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
   Language as LanguageIcon,
@@ -54,19 +38,8 @@ import {
   Storage as StorageIcon,
   Speed as SpeedIcon,
   Info as InfoIcon,
-  AdminPanelSettings as AdminIcon
+  Settings as SettingsIcon
 } from '@mui/icons-material';
-import { api } from '../services/api';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'Admin' | 'Planlamacı' | 'Görüntüleyici';
-  createdAt: string;
-  lastLogin?: string;
-  active: boolean;
-}
 
 interface ApiSettings {
   apiUrl: string;
@@ -113,36 +86,6 @@ const Settings = () => {
     compactView: false
   });
 
-  const [users, setUsers] = useState<User[]>([
-    { 
-      id: 'U001', 
-      name: 'Sistem Yöneticisi', 
-      email: 'admin@hastane.gov.tr', 
-      role: 'Admin',
-      createdAt: '2023-01-15',
-      lastLogin: '2024-01-15 14:30:00',
-      active: true
-    },
-    { 
-      id: 'U002', 
-      name: 'Dr. Ayşe Kaya', 
-      email: 'ayse.kaya@hastane.gov.tr', 
-      role: 'Planlamacı',
-      createdAt: '2023-03-20',
-      lastLogin: '2024-01-15 12:15:00',
-      active: true
-    },
-    { 
-      id: 'U003', 
-      name: 'Hemşire Koordinatörü', 
-      email: 'koordinator@hastane.gov.tr', 
-      role: 'Görüntüleyici',
-      createdAt: '2023-06-10',
-      lastLogin: '2024-01-14 16:45:00',
-      active: true
-    }
-  ]);
-
   const [systemInfo, setSystemInfo] = useState<SystemInfo>({
     appVersion: '1.2.3',
     apiVersion: '2.1.0',
@@ -158,18 +101,7 @@ const Settings = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [testingApi, setTestingApi] = useState(false);
   const [apiTestResult, setApiTestResult] = useState<{ success: boolean; message: string } | null>(null);
-  const [userDialogOpen, setUserDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
-
-  // Yeni kullanıcı form state'i
-  const [newUser, setNewUser] = useState({
-    name: '',
-    email: '',
-    role: 'Görüntüleyici' as User['role']
-  });
 
   // Sayfa yüklendiğinde ayarları localStorage'dan yükle
   useEffect(() => {
@@ -182,7 +114,6 @@ const Settings = () => {
     try {
       const savedApiSettings = localStorage.getItem('apiSettings');
       const savedUserPreferences = localStorage.getItem('userPreferences');
-      const savedUsers = localStorage.getItem('systemUsers');
 
       if (savedApiSettings) {
         setApiSettings(JSON.parse(savedApiSettings));
@@ -197,10 +128,6 @@ const Settings = () => {
           document.body.classList.add('dark-mode');
         }
       }
-
-      if (savedUsers) {
-        setUsers(JSON.parse(savedUsers));
-      }
     } catch (error) {
       console.error('Ayarlar yüklenirken hata:', error);
     }
@@ -211,7 +138,6 @@ const Settings = () => {
     try {
       localStorage.setItem('apiSettings', JSON.stringify(apiSettings));
       localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
-      localStorage.setItem('systemUsers', JSON.stringify(users));
       return true;
     } catch (error) {
       console.error('Ayarlar kaydedilirken hata:', error);
@@ -223,10 +149,10 @@ const Settings = () => {
   const fetchSystemInfo = async () => {
     try {
       // Gerçek API çağrısı simülasyonu
-      const info = await api.getSystemInfo();
-      if (info) {
-        setSystemInfo(info);
-      }
+      // const info = await api.getSystemInfo();
+      // if (info) {
+      //   setSystemInfo(info);
+      // }
     } catch (error) {
       console.error('Sistem bilgileri alınamadı:', error);
     }
@@ -240,8 +166,7 @@ const Settings = () => {
     try {
       // API endpoint'ini test et
       const response = await fetch(`${apiSettings.apiUrl}/health`, {
-        method: 'GET',
-        timeout: apiSettings.timeout
+        method: 'GET'
       });
 
       if (response.ok) {
@@ -391,96 +316,6 @@ const Settings = () => {
     });
   };
 
-  // Yeni kullanıcı ekle
-  const handleAddUser = () => {
-    if (!newUser.name || !newUser.email) {
-      setSnackbar({ 
-        open: true, 
-        message: 'Ad ve e-posta alanları zorunludur!', 
-        severity: 'error' 
-      });
-      return;
-    }
-
-    const user: User = {
-      id: `U${Date.now()}`,
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      createdAt: new Date().toISOString().split('T')[0],
-      active: true
-    };
-
-    setUsers([...users, user]);
-    setNewUser({ name: '', email: '', role: 'Görüntüleyici' });
-    setUserDialogOpen(false);
-    
-    setSnackbar({ 
-      open: true, 
-      message: 'Kullanıcı başarıyla eklendi!', 
-      severity: 'success' 
-    });
-  };
-
-  // Kullanıcıyı düzenle
-  const handleEditUser = (user: User) => {
-    setEditingUser(user);
-    setNewUser({ name: user.name, email: user.email, role: user.role });
-    setUserDialogOpen(true);
-  };
-
-  // Kullanıcı düzenlemeyi kaydet
-  const handleSaveEditUser = () => {
-    if (!editingUser || !newUser.name || !newUser.email) return;
-
-    setUsers(users.map(user => 
-      user.id === editingUser.id 
-        ? { ...user, name: newUser.name, email: newUser.email, role: newUser.role }
-        : user
-    ));
-
-    setEditingUser(null);
-    setNewUser({ name: '', email: '', role: 'Görüntüleyici' });
-    setUserDialogOpen(false);
-    
-    setSnackbar({ 
-      open: true, 
-      message: 'Kullanıcı bilgileri güncellendi!', 
-      severity: 'success' 
-    });
-  };
-
-  // Kullanıcıyı sil
-  const handleDeleteUser = (user: User) => {
-    setUserToDelete(user);
-    setDeleteDialogOpen(true);
-  };
-
-  // Kullanıcı silmeyi onayla
-  const confirmDeleteUser = () => {
-    if (!userToDelete) return;
-
-    setUsers(users.filter(user => user.id !== userToDelete.id));
-    setUserToDelete(null);
-    setDeleteDialogOpen(false);
-    
-    setSnackbar({ 
-      open: true, 
-      message: 'Kullanıcı başarıyla silindi!', 
-      severity: 'success' 
-    });
-  };
-
-  // Rol rengini getir
-  const getRoleColor = (role: User['role']) => {
-    switch (role) {
-      case 'Admin': return '#f44336';
-      case 'Planlamacı': return '#ff9800';
-      case 'Görüntüleyici': return '#4caf50';
-      default: return '#9e9e9e';
-    }
-  };
-
   // Server status rengini getir
   const getServerStatusColor = (status: SystemInfo['serverStatus']) => {
     switch (status) {
@@ -505,12 +340,12 @@ const Settings = () => {
             Sistem Ayarları
           </Typography>
           <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
-            API bağlantıları, kullanıcı tercihleri ve sistem yönetimi
+            API bağlantıları, kullanıcı tercihleri ve sistem konfigürasyonu
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
             <Chip
               icon={<SettingsIcon />}
-              label="Sistem Yöneticisi Paneli"
+              label="Sistem Konfigürasyonu"
               color="primary"
               variant="outlined"
             />
@@ -781,118 +616,6 @@ const Settings = () => {
           </Card>
         </Grid>
         
-        {/* Kullanıcı Yönetimi */}
-        <Grid item xs={12}>
-          <Card sx={{
-            borderRadius: 3,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
-          }}>
-            <CardHeader
-              avatar={
-                <Avatar sx={{ bgcolor: '#4caf50' }}>
-                  <AdminIcon />
-                </Avatar>
-              }
-              title="Kullanıcı Yönetimi"
-              subheader={`Toplam ${users.length} kullanıcı • ${users.filter(u => u.active).length} aktif`}
-              action={
-                <Button 
-                  variant="contained" 
-                  startIcon={<AddIcon />}
-                  onClick={() => {
-                    setEditingUser(null);
-                    setNewUser({ name: '', email: '', role: 'Görüntüleyici' });
-                    setUserDialogOpen(true);
-                  }}
-                  sx={{ borderRadius: 2 }}
-                >
-                  Yeni Kullanıcı
-                </Button>
-              }
-            />
-            
-            <CardContent>
-              <List>
-                {users.map((user) => (
-                  <ListItem
-                    key={user.id}
-                    sx={{ 
-                      borderRadius: 2, 
-                      mb: 1,
-                      bgcolor: 'rgba(0,0,0,0.02)',
-                      '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
-                    }}
-                    secondaryAction={
-                      <Box>
-                        <Tooltip title="Düzenle">
-                          <IconButton 
-                            edge="end" 
-                            onClick={() => handleEditUser(user)}
-                            sx={{ mr: 1 }}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Sil">
-                          <IconButton 
-                            edge="end" 
-                            onClick={() => handleDeleteUser(user)}
-                            color="error"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    }
-                  >
-                    <ListItemIcon>
-                      <Avatar sx={{ bgcolor: getRoleColor(user.role) }}>
-                        {user.name.charAt(0).toUpperCase()}
-                      </Avatar>
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Typography variant="subtitle1" fontWeight="600">
-                            {user.name}
-                          </Typography>
-                          <Chip 
-                            label={user.role} 
-                            size="small" 
-                            sx={{ 
-                              bgcolor: getRoleColor(user.role), 
-                              color: 'white',
-                              fontSize: '0.75rem'
-                            }} 
-                          />
-                          {user.active && (
-                            <Chip 
-                              label="Aktif" 
-                              size="small" 
-                              color="success" 
-                              variant="outlined"
-                            />
-                          )}
-                        </Box>
-                      }
-                      secondary={
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            📧 {user.email}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            📅 Kayıt: {user.createdAt} • Son giriş: {user.lastLogin || 'Hiç'}
-                          </Typography>
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        </Grid>
-        
         {/* Sistem Bilgileri */}
         <Grid item xs={12}>
           <Card sx={{
@@ -1036,71 +759,6 @@ const Settings = () => {
           </Box>
         </Grid>
       </Grid>
-
-      {/* Kullanıcı Ekleme/Düzenleme Dialog */}
-      <Dialog open={userDialogOpen} onClose={() => setUserDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingUser ? 'Kullanıcı Düzenle' : 'Yeni Kullanıcı Ekle'}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Ad Soyad"
-            fullWidth
-            variant="outlined"
-            value={newUser.name}
-            onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="E-posta"
-            type="email"
-            fullWidth
-            variant="outlined"
-            value={newUser.email}
-            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-          />
-          <FormControl fullWidth margin="dense">
-            <InputLabel>Rol</InputLabel>
-            <Select
-              value={newUser.role}
-              label="Rol"
-              onChange={(e) => setNewUser({ ...newUser, role: e.target.value as User['role'] })}
-            >
-              <MenuItem value="Admin">Admin</MenuItem>
-              <MenuItem value="Planlamacı">Planlamacı</MenuItem>
-              <MenuItem value="Görüntüleyici">Görüntüleyici</MenuItem>
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setUserDialogOpen(false)}>İptal</Button>
-          <Button 
-            onClick={editingUser ? handleSaveEditUser : handleAddUser}
-            variant="contained"
-          >
-            {editingUser ? 'Güncelle' : 'Ekle'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Kullanıcı Silme Onay Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Kullanıcıyı Sil</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            "{userToDelete?.name}" kullanıcısını silmek istediğinizden emin misiniz? 
-            Bu işlem geri alınamaz.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>İptal</Button>
-          <Button onClick={confirmDeleteUser} color="error" variant="contained">
-            Sil
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

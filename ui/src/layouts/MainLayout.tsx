@@ -31,9 +31,11 @@ import {
   Notifications as NotificationsIcon,
   Person as PersonIcon,
   Brightness4 as DarkModeIcon,
-  Search as SearchIcon
+  Search as SearchIcon,
+  Security as SecurityIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { usePermissions } from '../hooks/usePermissions';
 
 const drawerWidth = 240;
 
@@ -42,19 +44,25 @@ const MainLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  const { canAccessPage } = usePermissions();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-    { text: 'Veri Seti ve Konfigürasyon', icon: <DatasetIcon />, path: '/dataset-config' },
-    { text: 'Optimizasyon Parametreleri', icon: <TuneIcon />, path: '/optimization-params' },
-    { text: 'Sonuçlar ve Raporlar', icon: <AssessmentIcon />, path: '/results' },
-    { text: 'Vardiya Çizelgesi', icon: <CalendarIcon />, path: '/schedule-view' },
-    { text: 'Ayarlar', icon: <SettingsIcon />, path: '/settings' },
+  const allMenuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', requiredPage: 'DASHBOARD' as const },
+    { text: 'Yönetici Paneli', icon: <PersonIcon />, path: '/admin', requiredPage: 'ADMIN_PANEL' as const },
+    { text: 'Veri Seti ve Konfigürasyon', icon: <DatasetIcon />, path: '/dataset-config', requiredPage: 'DATASET_CONFIG' as const },
+    { text: 'Optimizasyon Parametreleri', icon: <TuneIcon />, path: '/optimization-params', requiredPage: 'OPTIMIZATION_PARAMS' as const },
+    { text: 'Sonuçlar ve Raporlar', icon: <AssessmentIcon />, path: '/results', requiredPage: 'RESULTS' as const },
+    { text: 'Vardiya Çizelgesi', icon: <CalendarIcon />, path: '/schedule-view', requiredPage: 'SCHEDULE_VIEW' as const },
+    { text: 'Oturum Yönetimi', icon: <SecurityIcon />, path: '/session-management', requiredPage: 'SESSION_MANAGEMENT' as const },
+    { text: 'Ayarlar', icon: <SettingsIcon />, path: '/settings', requiredPage: 'SETTINGS' as const },
   ];
+
+  // Kullanıcının erişim yetkisi olan menü öğelerini filtrele
+  const menuItems = allMenuItems.filter(item => canAccessPage(item.requiredPage));
 
   const drawer = (
     <div>

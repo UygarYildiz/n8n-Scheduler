@@ -1,6 +1,27 @@
 version: '3.7'
 
 services:
+  # MySQL Veritabanı Servisi
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: bitirme_root_2024
+      MYSQL_DATABASE: optimization_db
+      MYSQL_USER: optimization_user
+      MYSQL_PASSWORD: optimization_pass_2024
+      # UTF-8 sorunlarını önlemek için
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - optimization_network
+
   n8n:
     image: n8nio/n8n
     restart: unless-stopped
@@ -21,6 +42,15 @@ services:
       # Veri Kaynağı Eşleştirmeleri (proje dizininden relative path):
       - ./veri_kaynaklari:/mnt/workflow_data
     # user: "1000:1000" # Uncomment if you have permission issues
+    depends_on:
+      - mysql
+    networks:
+      - optimization_network
 
 volumes:
   n8n_data: # Define the volume if not using local path mapping above
+  mysql_data: # MySQL veri kalıcılığı için
+
+networks:
+  optimization_network:
+    driver: bridge
