@@ -1,6 +1,114 @@
 [
   {
     "id": "act21",
+    "date": "25.05.2025 14:39",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748173173
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 14:39",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748173148
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 14:30",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748172617
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 14:29",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748172581
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 14:16",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748171797
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 14:16",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748171773
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 14:15",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748171737
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 14:15",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748171708
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 14:14",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748171656
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 14:13",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748171616
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 14:12",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748171571
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 14:12",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748171525
+  },
+  {
+    "id": "act21",
     "date": "24.05.2025 13:13",
     "action": "Çizelgeleme tamamlandı",
     "detail": "Başarılı optimizasyon",
@@ -70,113 +178,5 @@
     "color": "info.main",
     "icon": "CloudUploadIcon",
     "timestamp": 1747943418
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:50",
-    "action": "Veri dosyası güncellendi",
-    "detail": "cagri_merkezi veri setindeki skills.csv dosyası güncellendi",
-    "color": "info.main",
-    "icon": "CloudUploadIcon",
-    "timestamp": 1747943415
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:49",
-    "action": "Veri dosyası güncellendi",
-    "detail": "cagri_merkezi veri setindeki shifts.csv dosyası güncellendi",
-    "color": "info.main",
-    "icon": "CloudUploadIcon",
-    "timestamp": 1747943399
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:49",
-    "action": "Veri dosyası güncellendi",
-    "detail": "cagri_merkezi veri setindeki employees.csv dosyası güncellendi",
-    "color": "info.main",
-    "icon": "CloudUploadIcon",
-    "timestamp": 1747943393
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:49",
-    "action": "Veri dosyası güncellendi",
-    "detail": "hastane veri setindeki preferences.csv dosyası güncellendi",
-    "color": "info.main",
-    "icon": "CloudUploadIcon",
-    "timestamp": 1747943383
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:49",
-    "action": "Veri dosyası güncellendi",
-    "detail": "hastane veri setindeki availability.csv dosyası güncellendi",
-    "color": "info.main",
-    "icon": "CloudUploadIcon",
-    "timestamp": 1747943377
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:49",
-    "action": "Veri dosyası güncellendi",
-    "detail": "hastane veri setindeki skills.csv dosyası güncellendi",
-    "color": "info.main",
-    "icon": "CloudUploadIcon",
-    "timestamp": 1747943374
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:49",
-    "action": "Veri dosyası güncellendi",
-    "detail": "hastane veri setindeki shifts.csv dosyası güncellendi",
-    "color": "info.main",
-    "icon": "CloudUploadIcon",
-    "timestamp": 1747943367
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:20",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747941652
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:20",
-    "action": "Veri dosyası güncellendi",
-    "detail": "hastane veri setindeki employees.csv dosyası güncellendi",
-    "color": "info.main",
-    "icon": "CloudUploadIcon",
-    "timestamp": 1747941641
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:20",
-    "action": "Çizelgeleme tamamlanamadı",
-    "detail": "Uygun çözüm bulunamadı",
-    "color": "error.main",
-    "icon": "ErrorIcon",
-    "timestamp": 1747941610
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 21:54",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1747940063
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 21:54",
-    "action": "Veri dosyası güncellendi",
-    "detail": "hastane veri setindeki employees.csv dosyası güncellendi",
-    "color": "info.main",
-    "icon": "CloudUploadIcon",
-    "timestamp": 1747940045
   }
 ]

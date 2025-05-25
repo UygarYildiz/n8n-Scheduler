@@ -98,45 +98,28 @@ async def get_dashboard_data():
             if result_metrics.get("skill_coverage_ratio") is not None:
                 metrics.skillCoverage = int(result_metrics["skill_coverage_ratio"] * 100)
 
-            # Tercih skoru
-            if result_metrics.get("positive_preferences_met_count") is not None:
-                # Tercih sayılarını al
+            # Tercih skoru - Results.tsx ile aynı hesaplama mantığını kullan
+            if (result_metrics.get("positive_preferences_met_count") is not None and 
+                result_metrics.get("total_positive_preferences_count") is not None):
+                
+                # Tercih sayılarını doğrudan optimizasyon sonucundan al
                 positive_preferences_met = result_metrics.get("positive_preferences_met_count", 0)
-
-                # Log mesajlarını kontrol et
-                import re
-                import os
-
-                # Log dosyasını bul
-                log_file_path = os.path.join(get_project_root(), "optimization_core", "logs", "app.log")
-                total_positive_preferences = 37  # Varsayılan değer
-
-                try:
-                    if os.path.exists(log_file_path):
-                        with open(log_file_path, 'r') as log_file:
-                            log_content = log_file.read()
-                            # Log mesajlarından toplam pozitif tercih sayısını bul
-                            match = re.search(r'Toplam Pozitif Tercih Sayısı=(\d+)', log_content)
-                            if match:
-                                total_positive_preferences = int(match.group(1))
-                                logger.info(f"Log dosyasından toplam pozitif tercih sayısı bulundu: {total_positive_preferences}")
-                except Exception as e:
-                    logger.warning(f"Log dosyası okunamadı: {e}")
+                total_positive_preferences = result_metrics.get("total_positive_preferences_count", 0)
 
                 # Tercih karşılama oranını hesapla (yüzde olarak)
                 if total_positive_preferences > 0:
-                    # Pozitif tercihlerin karşılanma oranı
+                    # Pozitif tercihlerin karşılanma oranı - Results.tsx ile aynı formül
                     preference_percentage = (positive_preferences_met / total_positive_preferences) * 100
                     metrics.preferenceScore = min(100, max(0, int(preference_percentage)))
                     logger.info(f"Çalışan memnuniyeti hesaplaması: {positive_preferences_met} / {total_positive_preferences} = {preference_percentage:.2f}% -> {metrics.preferenceScore}%")
                 else:
-                    # Eğer pozitif tercih yoksa, %100 göster
-                    metrics.preferenceScore = 100
-                    logger.info("Pozitif tercih bulunamadı, memnuniyet %100 olarak ayarlandı")
+                    # Eğer pozitif tercih yoksa, %0 göster (Results.tsx ile tutarlı)
+                    metrics.preferenceScore = 0
+                    logger.info("Pozitif tercih bulunamadı, memnuniyet %0 olarak ayarlandı")
             else:
-                # Eğer pozitif tercih sayısı yoksa, varsayılan değer kullan
+                # Eğer tercih verileri yoksa, varsayılan değer kullan
                 metrics.preferenceScore = 0
-                logger.warning("Pozitif tercih sayısı bulunamadı, memnuniyet %0 olarak ayarlandı")
+                logger.warning("Tercih verileri bulunamadı, memnuniyet %0 olarak ayarlandı")
 
             # İş yükü dengesi
             if result_metrics.get("workload_distribution_std_dev") is not None:
