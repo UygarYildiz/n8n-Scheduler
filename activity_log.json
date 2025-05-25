@@ -1,6 +1,15 @@
 [
   {
     "id": "act21",
+    "date": "26.05.2025 00:03",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748207024
+  },
+  {
+    "id": "act21",
     "date": "25.05.2025 23:27",
     "action": "Çizelgeleme tamamlandı",
     "detail": "Başarılı optimizasyon",
@@ -169,14 +178,5 @@
     "color": "info.main",
     "icon": "SettingsIcon",
     "timestamp": 1747944569
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 23:09",
-    "action": "Konfigürasyon güncellendi",
-    "detail": "cagri_merkezi_config.yaml konfigürasyonu güncellendi",
-    "color": "info.main",
-    "icon": "SettingsIcon",
-    "timestamp": 1747944550
   }
 ]

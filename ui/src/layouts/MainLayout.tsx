@@ -32,7 +32,8 @@ import {
   Person as PersonIcon,
   Brightness4 as DarkModeIcon,
   Search as SearchIcon,
-  Security as SecurityIcon
+  Security as SecurityIcon,
+  History as HistoryIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
@@ -58,6 +59,7 @@ const MainLayout = () => {
     { text: 'Sonuçlar ve Raporlar', icon: <AssessmentIcon />, path: '/results', requiredPage: 'RESULTS' as const },
     { text: 'Vardiya Çizelgesi', icon: <CalendarIcon />, path: '/schedule-view', requiredPage: 'SCHEDULE_VIEW' as const },
     { text: 'Oturum Yönetimi', icon: <SecurityIcon />, path: '/session-management', requiredPage: 'SESSION_MANAGEMENT' as const },
+    { text: 'İşlem Takibi', icon: <HistoryIcon />, path: '/audit-logs', requiredPage: 'ADMIN_PANEL' as const },
     { text: 'Ayarlar', icon: <SettingsIcon />, path: '/settings', requiredPage: 'SETTINGS' as const },
   ];
 

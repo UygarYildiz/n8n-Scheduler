@@ -1,5 +1,5 @@
 # Authentication API endpoints
-from fastapi import APIRouter, Depends, HTTPException, status, Form, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Form, Query, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
@@ -16,13 +16,18 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 try:
-    from database import get_db, User, Role, Organization, UserSession
+    from database import get_db, User, Role, Organization, UserSession, AuditLog, AuditAction
     from auth_utils import (
         authenticate_user, create_access_token, get_user_by_token, 
         create_user_session, revoke_user_session, revoke_all_user_sessions,
         check_permission, get_user_info, hash_password, verify_token
     )
     from auth_middleware import get_current_active_user, get_admin_user, get_super_admin_user
+    from audit_utils import (
+        log_login_success, log_login_failed, log_logout, log_session_revoked,
+        log_user_created, log_user_updated, log_user_deleted, log_user_status_changed,
+        get_audit_logs
+    )
     print("✅ Auth modülü bağımlılıkları başarıyla yüklendi!")
 except ImportError as e:
     print(f"❌ Auth modülü bağımlılık hatası: {e}")
@@ -71,6 +76,24 @@ except ImportError as e:
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 security = HTTPBearer()
+
+# Helper functions
+def get_client_info(request: Request) -> tuple[Optional[str], Optional[str]]:
+    """Request'ten IP adresi ve User Agent bilgilerini al"""
+    # IP adresi
+    ip_address = None
+    if hasattr(request, 'client') and request.client:
+        ip_address = request.client.host
+    
+    # X-Forwarded-For header'ını kontrol et (proxy arkasında ise)
+    forwarded_for = request.headers.get('X-Forwarded-For')
+    if forwarded_for:
+        ip_address = forwarded_for.split(',')[0].strip()
+    
+    # User Agent
+    user_agent = request.headers.get('User-Agent')
+    
+    return ip_address, user_agent
 
 # Pydantic modelleri
 class LoginRequest(BaseModel):
@@ -167,12 +190,24 @@ def require_permission(permission: str):
 @router.post("/login", response_model=LoginResponse)
 async def login(
     login_data: LoginRequest,
+    request: Request,
     db: Session = Depends(get_db)
 ):
     """Kullanıcı girişi"""
+    ip_address, user_agent = get_client_info(request)
+    
     user = authenticate_user(db, login_data.username, login_data.password)
     
     if not user:
+        # Başarısız giriş kaydı
+        log_login_failed(
+            db=db,
+            username=login_data.username,
+            reason="Invalid credentials",
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+        
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -209,6 +244,14 @@ async def login(
     user.last_login = datetime.now(timezone.utc)
     db.commit()
     
+    # Başarılı giriş kaydı
+    log_login_success(
+        db=db,
+        user_id=user.id,
+        ip_address=ip_address,
+        user_agent=user_agent
+    )
+    
     return LoginResponse(
         access_token=access_token,
         expires_in=60 * 24 * 60,  # 24 saat (saniye cinsinden)
@@ -217,25 +260,48 @@ async def login(
 
 @router.post("/logout", response_model=MessageResponse)
 async def logout(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ):
     """Kullanıcı çıkışı"""
+    ip_address, user_agent = get_client_info(request)
     token = credentials.credentials
     payload = verify_token(token)
     
     if payload and payload.get("jti"):
         revoke_user_session(db, payload["jti"])
+        
+        # Çıkış kaydı
+        if payload.get("user_id"):
+            log_logout(
+                db=db,
+                user_id=payload["user_id"],
+                logout_type="single",
+                ip_address=ip_address,
+                user_agent=user_agent
+            )
     
     return MessageResponse(message="Successfully logged out")
 
 @router.post("/logout-all", response_model=MessageResponse)
 async def logout_all(
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Kullanıcının tüm oturumlarını sonlandır"""
+    ip_address, user_agent = get_client_info(request)
     revoked_count = revoke_all_user_sessions(db, current_user.id)
+    
+    # Tüm oturumlardan çıkış kaydı
+    log_logout(
+        db=db,
+        user_id=current_user.id,
+        logout_type="all",
+        ip_address=ip_address,
+        user_agent=user_agent
+    )
     
     return MessageResponse(
         message=f"Successfully logged out from {revoked_count} sessions"
@@ -249,10 +315,12 @@ async def get_profile(current_user: User = Depends(get_current_active_user)):
 @router.post("/register", response_model=UserResponse)
 async def register(
     register_data: RegisterRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_admin_user)
 ):
     """Yeni kullanıcı kaydı (sadece yetkili kullanıcılar)"""
+    ip_address, user_agent = get_client_info(request)
     
     # Username ve email kontrolü
     existing_user = db.query(User).filter(
@@ -300,6 +368,15 @@ async def register(
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    
+    # Kullanıcı oluşturma kaydı
+    log_user_created(
+        db=db,
+        admin_user_id=current_user.id,
+        new_user_id=new_user.id,
+        ip_address=ip_address,
+        user_agent=user_agent
+    )
     
     return UserResponse(**get_user_info(new_user))
 
@@ -437,10 +514,12 @@ async def get_all_sessions(
 @router.delete("/sessions/{session_id}")
 async def revoke_session(
     session_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
     """Belirli bir oturumu sonlandır"""
+    ip_address, user_agent = get_client_info(request)
     
     # Session'ı bul
     session = db.query(UserSession).filter(UserSession.id == session_id).first()
@@ -462,6 +541,17 @@ async def revoke_session(
     # Session'ı iptal et
     session.is_revoked = True
     db.commit()
+    
+    # Oturum sonlandırma kaydı (sadece admin başkasının oturumunu sonlandırıyorsa)
+    if session.user_id != current_user.id:
+        log_session_revoked(
+            db=db,
+            admin_user_id=current_user.id,
+            target_user_id=session.user_id,
+            session_id=session_id,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
     
     return MessageResponse(
         message=f"Session {session_id} successfully revoked"
@@ -565,10 +655,12 @@ async def get_all_users(
 async def update_user(
     user_id: int,
     update_data: RegisterRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_admin_user)
 ):
     """Kullanıcı bilgilerini güncelle (sadece admin)"""
+    ip_address, user_agent = get_client_info(request)
     
     # Kullanıcıyı bul
     user = db.query(User).filter(User.id == user_id).first()
@@ -608,6 +700,23 @@ async def update_user(
                 detail="Role not found"
             )
     
+    # Değişiklikleri takip et
+    changes = {}
+    if user.username != update_data.username:
+        changes["username"] = {"old": user.username, "new": update_data.username}
+    if user.email != update_data.email:
+        changes["email"] = {"old": user.email, "new": update_data.email}
+    if user.first_name != update_data.first_name:
+        changes["first_name"] = {"old": user.first_name, "new": update_data.first_name}
+    if user.last_name != update_data.last_name:
+        changes["last_name"] = {"old": user.last_name, "new": update_data.last_name}
+    if user.organization_id != update_data.organization_id:
+        changes["organization_id"] = {"old": user.organization_id, "new": update_data.organization_id}
+    if user.role_id != update_data.role_id:
+        changes["role_id"] = {"old": user.role_id, "new": update_data.role_id}
+    if update_data.password:
+        changes["password"] = {"old": "***", "new": "*** (updated)"}
+    
     # Kullanıcı bilgilerini güncelle
     user.username = update_data.username
     user.email = update_data.email
@@ -624,15 +733,28 @@ async def update_user(
     db.commit()
     db.refresh(user)
     
+    # Kullanıcı güncelleme kaydı
+    if changes:
+        log_user_updated(
+            db=db,
+            admin_user_id=current_user.id,
+            target_user_id=user_id,
+            changes=changes,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+    
     return UserResponse(**get_user_info(user))
 
 @router.delete("/users/{user_id}")
 async def delete_user(
     user_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_admin_user)
 ):
     """Kullanıcıyı sil (sadece admin)"""
+    ip_address, user_agent = get_client_info(request)
     
     # Kullanıcıyı bul
     user = db.query(User).filter(User.id == user_id).first()
@@ -649,6 +771,10 @@ async def delete_user(
             detail="Cannot delete your own account"
         )
     
+    # Silme öncesi bilgileri kaydet
+    deleted_username = user.username
+    deleted_email = user.email
+    
     # Kullanıcının tüm oturumlarını iptal et
     revoke_all_user_sessions(db, user_id)
     
@@ -656,17 +782,29 @@ async def delete_user(
     db.delete(user)
     db.commit()
     
+    # Kullanıcı silme kaydı
+    log_user_deleted(
+        db=db,
+        admin_user_id=current_user.id,
+        deleted_username=deleted_username,
+        deleted_email=deleted_email,
+        ip_address=ip_address,
+        user_agent=user_agent
+    )
+    
     return MessageResponse(
-        message=f"User {user.username} successfully deleted"
+        message=f"User {deleted_username} successfully deleted"
     )
 
 @router.patch("/users/{user_id}/toggle-status")
 async def toggle_user_status(
     user_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_admin_user)
 ):
     """Kullanıcı durumunu aktif/pasif yap (sadece admin)"""
+    ip_address, user_agent = get_client_info(request)
     
     # Kullanıcıyı bul
     user = db.query(User).filter(User.id == user_id).first()
@@ -683,6 +821,9 @@ async def toggle_user_status(
             detail="Cannot deactivate your own account"
         )
     
+    # Eski durumu kaydet
+    old_status = user.is_active
+    
     # Durumu değiştir
     user.is_active = not user.is_active
     user.updated_at = datetime.now(timezone.utc)
@@ -692,6 +833,16 @@ async def toggle_user_status(
         revoke_all_user_sessions(db, user_id)
     
     db.commit()
+    
+    # Kullanıcı durum değişikliği kaydı
+    log_user_status_changed(
+        db=db,
+        admin_user_id=current_user.id,
+        target_user_id=user_id,
+        new_status=user.is_active,
+        ip_address=ip_address,
+        user_agent=user_agent
+    )
     
     status_text = "activated" if user.is_active else "deactivated"
     return MessageResponse(
@@ -746,6 +897,148 @@ async def get_admin_stats(
             {"organization": org, "count": count} for org, count in org_distribution
         ],
         "active_sessions": active_sessions,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+# Audit Log Endpoints
+@router.get("/audit-logs")
+async def get_audit_logs_endpoint(
+    limit: int = Query(50, ge=1, le=100, description="Maksimum kayıt sayısı"),
+    offset: int = Query(0, ge=0, description="Başlangıç offset'i"),
+    user_id: Optional[int] = Query(None, description="Belirli kullanıcının logları"),
+    action: Optional[str] = Query(None, description="İşlem türü filtresi"),
+    success: Optional[bool] = Query(None, description="Başarılı/başarısız filtresi"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user)
+):
+    """Audit logları listele (sadece admin)"""
+    
+    # Action string'ini enum'a çevir
+    action_enum = None
+    if action:
+        try:
+            action_enum = AuditAction(action)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid action: {action}"
+            )
+    
+    result = get_audit_logs(
+        db=db,
+        limit=limit,
+        offset=offset,
+        user_id=user_id,
+        action=action_enum,
+        success=success
+    )
+    
+    return result
+
+@router.get("/audit-logs/actions")
+async def get_audit_actions(
+    current_user: User = Depends(get_admin_user)
+):
+    """Mevcut audit action türlerini listele (sadece admin)"""
+    
+    actions = []
+    for action in AuditAction:
+        action_info = {
+            "value": action.value,
+            "name": action.name,
+            "description": get_action_description(action)
+        }
+        actions.append(action_info)
+    
+    return {
+        "actions": actions,
+        "total_count": len(actions)
+    }
+
+def get_action_description(action: AuditAction) -> str:
+    """Action için açıklama döndür"""
+    descriptions = {
+        AuditAction.LOGIN_SUCCESS: "Başarılı giriş",
+        AuditAction.LOGIN_FAILED: "Başarısız giriş denemesi",
+        AuditAction.LOGOUT: "Çıkış",
+        AuditAction.LOGOUT_ALL: "Tüm oturumlardan çıkış",
+        AuditAction.SESSION_REVOKED: "Oturum sonlandırma",
+        AuditAction.USER_CREATED: "Kullanıcı oluşturma",
+        AuditAction.USER_UPDATED: "Kullanıcı güncelleme",
+        AuditAction.USER_DELETED: "Kullanıcı silme",
+        AuditAction.USER_STATUS_CHANGED: "Kullanıcı durum değişikliği",
+        AuditAction.PASSWORD_CHANGED: "Şifre değişikliği",
+        AuditAction.PROFILE_UPDATED: "Profil güncelleme",
+        AuditAction.ADMIN_ACCESS: "Admin erişimi"
+    }
+    return descriptions.get(action, action.value)
+
+@router.get("/audit-logs/stats")
+async def get_audit_stats(
+    days: int = Query(7, ge=1, le=30, description="Son X gün"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user)
+):
+    """Audit log istatistikleri (sadece admin)"""
+    
+    # Son X günün başlangıcı
+    start_date = datetime.now(timezone.utc) - timedelta(days=days)
+    
+    # Toplam log sayısı
+    total_logs = db.query(AuditLog).filter(
+        AuditLog.created_at >= start_date
+    ).count()
+    
+    # Başarılı/başarısız işlemler
+    successful_logs = db.query(AuditLog).filter(
+        AuditLog.created_at >= start_date,
+        AuditLog.success == True
+    ).count()
+    
+    failed_logs = db.query(AuditLog).filter(
+        AuditLog.created_at >= start_date,
+        AuditLog.success == False
+    ).count()
+    
+    # Action türlerine göre dağılım
+    action_stats = db.query(AuditLog.action, func.count(AuditLog.id)).filter(
+        AuditLog.created_at >= start_date
+    ).group_by(AuditLog.action).all()
+    
+    # En aktif kullanıcılar
+    user_stats = db.query(
+        AuditLog.user_id, 
+        User.username,
+        func.count(AuditLog.id).label('log_count')
+    ).join(User, AuditLog.user_id == User.id).filter(
+        AuditLog.created_at >= start_date,
+        AuditLog.user_id.isnot(None)
+    ).group_by(AuditLog.user_id, User.username).order_by(
+        func.count(AuditLog.id).desc()
+    ).limit(10).all()
+    
+    return {
+        "period_days": days,
+        "total_logs": total_logs,
+        "successful_logs": successful_logs,
+        "failed_logs": failed_logs,
+        "success_rate": round((successful_logs / total_logs * 100) if total_logs > 0 else 0, 2),
+        "action_distribution": [
+            {
+                "action": action.value,
+                "description": get_action_description(action),
+                "count": count
+            }
+            for action, count in action_stats
+        ],
+        "top_users": [
+            {
+                "user_id": user_id,
+                "username": username,
+                "log_count": log_count
+            }
+            for user_id, username, log_count in user_stats
+        ],
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 

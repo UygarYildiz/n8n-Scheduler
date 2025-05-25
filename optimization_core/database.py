@@ -28,6 +28,25 @@ class OrganizationType(str, enum.Enum):
     cagri_merkezi = "cagri_merkezi"
     diger = "diger"
 
+class AuditAction(str, enum.Enum):
+    # Authentication actions
+    LOGIN_SUCCESS = "login_success"
+    LOGIN_FAILED = "login_failed"
+    LOGOUT = "logout"
+    LOGOUT_ALL = "logout_all"
+    SESSION_REVOKED = "session_revoked"
+    
+    # User management actions
+    USER_CREATED = "user_created"
+    USER_UPDATED = "user_updated"
+    USER_DELETED = "user_deleted"
+    USER_STATUS_CHANGED = "user_status_changed"
+    
+    # System actions
+    PASSWORD_CHANGED = "password_changed"
+    PROFILE_UPDATED = "profile_updated"
+    ADMIN_ACCESS = "admin_access"
+
 # SQLAlchemy Modelleri
 class Organization(Base):
     __tablename__ = "organizations"
@@ -91,6 +110,24 @@ class UserSession(Base):
     
     # İlişkiler
     user = relationship("User", back_populates="sessions")
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    action = Column(Enum(AuditAction), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Nullable for failed logins
+    target_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # For admin actions on other users
+    description = Column(Text, nullable=False)
+    details = Column(JSON, nullable=True)  # Additional structured data
+    ip_address = Column(String(45), nullable=True)  # IPv4/IPv6 support
+    user_agent = Column(Text, nullable=True)
+    success = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+    
+    # İlişkiler
+    user = relationship("User", foreign_keys=[user_id])
+    target_user = relationship("User", foreign_keys=[target_user_id])
 
 # Database session dependency
 def get_db():
