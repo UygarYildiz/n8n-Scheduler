@@ -8,10 +8,17 @@ from datetime import datetime
 import enum
 
 # Database URL
-DATABASE_URL = "mysql+mysqlconnector://optimization_user:optimization_pass_2024@localhost:3306/optimization_db"
+DATABASE_URL = "mysql+mysqlconnector://optimization_user:optimization_pass_2024@localhost:3306/optimization_db?charset=utf8mb4"
 
 # SQLAlchemy setup
-engine = create_engine(DATABASE_URL, echo=False)
+engine = create_engine(
+    DATABASE_URL, 
+    echo=False,
+    connect_args={
+        "charset": "utf8mb4",
+        "use_unicode": True
+    }
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

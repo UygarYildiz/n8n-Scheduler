@@ -189,7 +189,20 @@ async def login(
     
     access_token, jti, expires_at = create_access_token(token_data)
     
-    # Session kaydet
+    # Eski session'ları temizle (kullanıcı başına max 2 session)
+    existing_sessions = db.query(UserSession).filter(
+        UserSession.user_id == user.id,
+        UserSession.is_revoked == False,
+        UserSession.expires_at > datetime.now(timezone.utc)
+    ).order_by(UserSession.created_at.desc()).all()
+    
+    # 2'den fazla aktif session varsa eski olanları revoke et
+    if len(existing_sessions) >= 2:
+        for old_session in existing_sessions[1:]:  # İlk 1'i bırak, geri kalanını sil
+            old_session.is_revoked = True
+        db.commit()
+    
+    # Yeni session kaydet
     create_user_session(db, user.id, jti, expires_at)
     
     # Last login güncelle
@@ -366,8 +379,8 @@ async def get_user_sessions(
                 "token_jti": session.token_jti,
                 "user_id": session.user_id,
                 "username": user.username if user else "Unknown",
-                "created_at": session.created_at.isoformat(),
-                "expires_at": session.expires_at.isoformat(),
+                "created_at": session.created_at.replace(tzinfo=timezone.utc).isoformat(),
+                "expires_at": session.expires_at.replace(tzinfo=timezone.utc).isoformat(),
                 "is_current": False,  # Bu bilgiyi token'dan alacağız
                 "user_agent": None,  # Gelecekte eklenebilir
                 "ip_address": None   # Gelecekte eklenebilir
@@ -407,8 +420,8 @@ async def get_all_sessions(
             "full_name": f"{user.first_name} {user.last_name}",
             "organization": user.organization.name if user.organization else None,
             "role": user.role.display_name if user.role else None,
-            "created_at": session.created_at.isoformat(),
-            "expires_at": session.expires_at.isoformat(),
+            "created_at": session.created_at.replace(tzinfo=timezone.utc).isoformat(),
+            "expires_at": session.expires_at.replace(tzinfo=timezone.utc).isoformat(),
             "duration": str(datetime.now(timezone.utc) - session.created_at.replace(tzinfo=timezone.utc)),
             "user_agent": None,  # Gelecekte eklenebilir
             "ip_address": None   # Gelecekte eklenebilir
@@ -490,12 +503,13 @@ async def get_session_stats(
         UserSession.expires_at > datetime.now(timezone.utc)
     ).count()
     
-    # Aktif kullanıcı sayısı
-    active_users = db.query(UserSession).join(User).filter(
+    # Aktif kullanıcı sayısı (benzersiz kullanıcı ID'leri)
+    active_user_ids = db.query(UserSession.user_id).join(User).filter(
         UserSession.is_revoked == False,
         UserSession.expires_at > datetime.now(timezone.utc),
         User.is_active == True
-    ).distinct(UserSession.user_id).count()
+    ).distinct().all()
+    active_users = len(active_user_ids)
     
     # Bugün oluşturulan oturum sayısı
     today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)

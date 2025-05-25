@@ -1,6 +1,24 @@
 [
   {
     "id": "act21",
+    "date": "25.05.2025 23:27",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748204867
+  },
+  {
+    "id": "act21",
+    "date": "25.05.2025 23:10",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748203844
+  },
+  {
+    "id": "act21",
     "date": "25.05.2025 22:09",
     "action": "Çizelgeleme tamamlandı",
     "detail": "Başarılı optimizasyon",
@@ -160,23 +178,5 @@
     "color": "info.main",
     "icon": "SettingsIcon",
     "timestamp": 1747944550
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 23:08",
-    "action": "Konfigürasyon güncellendi",
-    "detail": "cagri_merkezi_config.yaml konfigürasyonu güncellendi",
-    "color": "info.main",
-    "icon": "SettingsIcon",
-    "timestamp": 1747944526
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 22:50",
-    "action": "Veri dosyası güncellendi",
-    "detail": "cagri_merkezi veri setindeki preferences.csv dosyası güncellendi",
-    "color": "info.main",
-    "icon": "CloudUploadIcon",
-    "timestamp": 1747943428
   }
 ]

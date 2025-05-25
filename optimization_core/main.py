@@ -189,6 +189,13 @@ app = FastAPI(
     version="0.2.0" # Versiyon güncellendi
 )
 
+# UTF-8 encoding için middleware
+@app.middleware("http")
+async def add_utf8_header(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
+    return response
+
 # CORS middleware ekle
 app.add_middleware(
     CORSMiddleware,

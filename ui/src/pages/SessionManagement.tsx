@@ -39,6 +39,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { sessionService, SessionInfo, SessionStats } from '../services/sessionService';
 import { formatDistanceToNow, parseISO } from 'date-fns';
+import { toZonedTime, format as formatTz } from 'date-fns-tz';
 import { tr } from 'date-fns/locale';
 
 interface TabPanelProps {
@@ -141,8 +142,14 @@ const SessionManagement: React.FC = () => {
 
   const formatDuration = (createdAt: string) => {
     try {
-      return formatDistanceToNow(parseISO(createdAt), { 
-        addSuffix: true, 
+      // UTC zamanını parse et
+      const utcDate = parseISO(createdAt + (createdAt.includes('Z') ? '' : 'Z'));
+      // Türkiye saatine çevir
+      const turkeyTime = toZonedTime(utcDate, 'Europe/Istanbul');
+      const now = new Date();
+      
+      return formatDistanceToNow(turkeyTime, { 
+        addSuffix: false, 
         locale: tr 
       });
     } catch {
@@ -152,7 +159,15 @@ const SessionManagement: React.FC = () => {
 
   const formatDateTime = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleString('tr-TR');
+      // UTC zamanını parse et
+      const utcDate = parseISO(dateString + (dateString.includes('Z') ? '' : 'Z'));
+      // Türkiye saatine çevir
+      const turkeyTime = toZonedTime(utcDate, 'Europe/Istanbul');
+      
+      return formatTz(turkeyTime, 'dd.MM.yyyy HH:mm:ss', {
+        timeZone: 'Europe/Istanbul',
+        locale: tr
+      });
     } catch {
       return 'Bilinmiyor';
     }

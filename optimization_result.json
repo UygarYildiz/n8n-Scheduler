@@ -1,7 +1,7 @@
 {
   "status": "OPTIMAL",
   "solver_status_message": "Optimal çözüm bulundu.",
-  "processing_time_seconds": 4.316621780395508,
+  "processing_time_seconds": 4.044002056121826,
   "objective_value": -50.0,
   "solution": {
     "assignments": [
@@ -22,13 +22,13 @@
       },
       {
         "employee_id": "E002",
-        "shift_id": "S0013",
+        "shift_id": "S0046",
         "date": "2025-05-22"
       },
       {
         "employee_id": "E003",
-        "shift_id": "S0083",
-        "date": "2025-05-25"
+        "shift_id": "S0084",
+        "date": "2025-05-26"
       },
       {
         "employee_id": "E004",
@@ -37,28 +37,23 @@
       },
       {
         "employee_id": "E005",
-        "shift_id": "S0044",
-        "date": "2025-05-21"
+        "shift_id": "S0021",
+        "date": "2025-05-23"
       },
       {
         "employee_id": "E006",
-        "shift_id": "S0034",
-        "date": "2025-05-27"
+        "shift_id": "S0057",
+        "date": "2025-05-26"
       },
       {
         "employee_id": "E007",
-        "shift_id": "S0050",
+        "shift_id": "S0015",
         "date": "2025-05-22"
       },
       {
         "employee_id": "E008",
-        "shift_id": "S0003",
-        "date": "2025-05-21"
-      },
-      {
-        "employee_id": "E009",
-        "shift_id": "S0008",
-        "date": "2025-05-21"
+        "shift_id": "S0034",
+        "date": "2025-05-27"
       },
       {
         "employee_id": "E009",
@@ -67,18 +62,18 @@
       },
       {
         "employee_id": "E010",
-        "shift_id": "S0067",
+        "shift_id": "S0003",
         "date": "2025-05-21"
       },
       {
         "employee_id": "E011",
-        "shift_id": "S0055",
-        "date": "2025-05-23"
+        "shift_id": "S0013",
+        "date": "2025-05-22"
       },
       {
         "employee_id": "E012",
-        "shift_id": "S0048",
-        "date": "2025-05-22"
+        "shift_id": "S0037",
+        "date": "2025-05-27"
       },
       {
         "employee_id": "E013",
@@ -87,43 +82,43 @@
       },
       {
         "employee_id": "E014",
-        "shift_id": "S0002",
-        "date": "2025-05-21"
+        "shift_id": "S0048",
+        "date": "2025-05-22"
       },
       {
         "employee_id": "E015",
-        "shift_id": "S0077",
-        "date": "2025-05-24"
+        "shift_id": "S0005",
+        "date": "2025-05-21"
       },
       {
         "employee_id": "E016",
-        "shift_id": "S0014",
-        "date": "2025-05-22"
-      },
-      {
-        "employee_id": "E017",
-        "shift_id": "S0069",
-        "date": "2025-05-22"
-      },
-      {
-        "employee_id": "E018",
-        "shift_id": "S0059",
-        "date": "2025-05-26"
-      },
-      {
-        "employee_id": "E019",
-        "shift_id": "S0064",
+        "shift_id": "S0074",
         "date": "2025-05-27"
       },
       {
+        "employee_id": "E017",
+        "shift_id": "S0067",
+        "date": "2025-05-21"
+      },
+      {
+        "employee_id": "E018",
+        "shift_id": "S0075",
+        "date": "2025-05-27"
+      },
+      {
+        "employee_id": "E019",
+        "shift_id": "S0016",
+        "date": "2025-05-22"
+      },
+      {
         "employee_id": "E020",
-        "shift_id": "S0082",
-        "date": "2025-05-25"
+        "shift_id": "S0071",
+        "date": "2025-05-23"
       },
       {
         "employee_id": "E021",
-        "shift_id": "S0020",
-        "date": "2025-05-23"
+        "shift_id": "S0047",
+        "date": "2025-05-22"
       },
       {
         "employee_id": "E022",
@@ -132,63 +127,58 @@
       },
       {
         "employee_id": "E023",
-        "shift_id": "S0017",
-        "date": "2025-05-23"
-      },
-      {
-        "employee_id": "E023",
-        "shift_id": "S0025",
-        "date": "2025-05-26"
-      },
-      {
-        "employee_id": "E023",
         "shift_id": "S0040",
         "date": "2025-05-27"
       },
       {
+        "employee_id": "E023",
+        "shift_id": "S0079",
+        "date": "2025-05-25"
+      },
+      {
         "employee_id": "E024",
-        "shift_id": "S0006",
+        "shift_id": "S0002",
         "date": "2025-05-21"
       },
       {
         "employee_id": "E025",
-        "shift_id": "S0028",
-        "date": "2025-05-26"
+        "shift_id": "S0083",
+        "date": "2025-05-25"
       },
       {
         "employee_id": "E026",
-        "shift_id": "S0052",
-        "date": "2025-05-23"
-      },
-      {
-        "employee_id": "E027",
-        "shift_id": "S0039",
-        "date": "2025-05-27"
-      },
-      {
-        "employee_id": "E028",
-        "shift_id": "S0016",
-        "date": "2025-05-22"
-      },
-      {
-        "employee_id": "E029",
         "shift_id": "S0031",
         "date": "2025-05-26"
       },
       {
-        "employee_id": "E030",
+        "employee_id": "E027",
+        "shift_id": "S0082",
+        "date": "2025-05-25"
+      },
+      {
+        "employee_id": "E028",
         "shift_id": "S0068",
         "date": "2025-05-22"
       },
       {
+        "employee_id": "E029",
+        "shift_id": "S0022",
+        "date": "2025-05-23"
+      },
+      {
+        "employee_id": "E030",
+        "shift_id": "S0004",
+        "date": "2025-05-21"
+      },
+      {
         "employee_id": "E031",
-        "shift_id": "S0057",
-        "date": "2025-05-26"
+        "shift_id": "S0049",
+        "date": "2025-05-22"
       },
       {
         "employee_id": "E032",
-        "shift_id": "S0012",
-        "date": "2025-05-22"
+        "shift_id": "S0020",
+        "date": "2025-05-23"
       },
       {
         "employee_id": "E033",
@@ -202,8 +192,13 @@
       },
       {
         "employee_id": "E034",
-        "shift_id": "S0004",
-        "date": "2025-05-21"
+        "shift_id": "S0050",
+        "date": "2025-05-22"
+      },
+      {
+        "employee_id": "E035",
+        "shift_id": "S0065",
+        "date": "2025-05-27"
       },
       {
         "employee_id": "E035",
@@ -212,18 +207,18 @@
       },
       {
         "employee_id": "E036",
-        "shift_id": "S0049",
-        "date": "2025-05-22"
+        "shift_id": "S0056",
+        "date": "2025-05-26"
       },
       {
         "employee_id": "E037",
-        "shift_id": "S0053",
-        "date": "2025-05-23"
+        "shift_id": "S0027",
+        "date": "2025-05-26"
       },
       {
         "employee_id": "E038",
-        "shift_id": "S0085",
-        "date": "2025-05-26"
+        "shift_id": "S0014",
+        "date": "2025-05-22"
       },
       {
         "employee_id": "E039",
@@ -237,17 +232,17 @@
       },
       {
         "employee_id": "E040",
-        "shift_id": "S0027",
-        "date": "2025-05-26"
+        "shift_id": "S0043",
+        "date": "2025-05-21"
       },
       {
         "employee_id": "E041",
-        "shift_id": "S0037",
-        "date": "2025-05-27"
+        "shift_id": "S0066",
+        "date": "2025-05-21"
       },
       {
         "employee_id": "E042",
-        "shift_id": "S0007",
+        "shift_id": "S0042",
         "date": "2025-05-21"
       },
       {
@@ -257,8 +252,8 @@
       },
       {
         "employee_id": "E044",
-        "shift_id": "S0062",
-        "date": "2025-05-27"
+        "shift_id": "S0052",
+        "date": "2025-05-23"
       },
       {
         "employee_id": "E045",
@@ -267,8 +262,13 @@
       },
       {
         "employee_id": "E046",
-        "shift_id": "S0022",
-        "date": "2025-05-23"
+        "shift_id": "S0012",
+        "date": "2025-05-22"
+      },
+      {
+        "employee_id": "E047",
+        "shift_id": "S0011",
+        "date": "2025-05-22"
       },
       {
         "employee_id": "E047",
@@ -282,8 +282,8 @@
       },
       {
         "employee_id": "E048",
-        "shift_id": "S0065",
-        "date": "2025-05-27"
+        "shift_id": "S0045",
+        "date": "2025-05-21"
       },
       {
         "employee_id": "E049",
@@ -292,8 +292,8 @@
       },
       {
         "employee_id": "E050",
-        "shift_id": "S0075",
-        "date": "2025-05-27"
+        "shift_id": "S0060",
+        "date": "2025-05-26"
       },
       {
         "employee_id": "E051",
@@ -327,23 +327,28 @@
       },
       {
         "employee_id": "E054",
-        "shift_id": "S0045",
+        "shift_id": "S0008",
         "date": "2025-05-21"
+      },
+      {
+        "employee_id": "E054",
+        "shift_id": "S0073",
+        "date": "2025-05-24"
       },
       {
         "employee_id": "E055",
-        "shift_id": "S0046",
-        "date": "2025-05-22"
+        "shift_id": "S0077",
+        "date": "2025-05-24"
       },
       {
         "employee_id": "E056",
-        "shift_id": "S0042",
-        "date": "2025-05-21"
+        "shift_id": "S0028",
+        "date": "2025-05-26"
       },
       {
         "employee_id": "E057",
-        "shift_id": "S0043",
-        "date": "2025-05-21"
+        "shift_id": "S0062",
+        "date": "2025-05-27"
       },
       {
         "employee_id": "E058",
@@ -362,18 +367,18 @@
       },
       {
         "employee_id": "E061",
-        "shift_id": "S0021",
-        "date": "2025-05-23"
+        "shift_id": "S0044",
+        "date": "2025-05-21"
       },
       {
         "employee_id": "E062",
-        "shift_id": "S0074",
-        "date": "2025-05-27"
+        "shift_id": "S0053",
+        "date": "2025-05-23"
       },
       {
         "employee_id": "E063",
-        "shift_id": "S0047",
-        "date": "2025-05-22"
+        "shift_id": "S0064",
+        "date": "2025-05-27"
       },
       {
         "employee_id": "E064",
@@ -382,23 +387,23 @@
       },
       {
         "employee_id": "E065",
-        "shift_id": "S0011",
-        "date": "2025-05-22"
+        "shift_id": "S0059",
+        "date": "2025-05-26"
       },
       {
         "employee_id": "E066",
-        "shift_id": "S0071",
+        "shift_id": "S0051",
         "date": "2025-05-23"
       },
       {
         "employee_id": "E067",
-        "shift_id": "S0066",
-        "date": "2025-05-21"
+        "shift_id": "S0085",
+        "date": "2025-05-26"
       },
       {
         "employee_id": "E068",
-        "shift_id": "S0084",
-        "date": "2025-05-26"
+        "shift_id": "S0007",
+        "date": "2025-05-21"
       },
       {
         "employee_id": "E069",
@@ -411,14 +416,9 @@
         "date": "2025-05-23"
       },
       {
-        "employee_id": "E069",
-        "shift_id": "S0073",
-        "date": "2025-05-24"
-      },
-      {
         "employee_id": "E070",
-        "shift_id": "S0060",
-        "date": "2025-05-26"
+        "shift_id": "S0039",
+        "date": "2025-05-27"
       },
       {
         "employee_id": "E071",
@@ -432,28 +432,28 @@
       },
       {
         "employee_id": "E072",
-        "shift_id": "S0051",
+        "shift_id": "S0055",
         "date": "2025-05-23"
       },
       {
         "employee_id": "E073",
-        "shift_id": "S0056",
-        "date": "2025-05-26"
+        "shift_id": "S0069",
+        "date": "2025-05-22"
       },
       {
         "employee_id": "E074",
-        "shift_id": "S0015",
-        "date": "2025-05-22"
+        "shift_id": "S0017",
+        "date": "2025-05-23"
+      },
+      {
+        "employee_id": "E074",
+        "shift_id": "S0025",
+        "date": "2025-05-26"
       },
       {
         "employee_id": "E074",
         "shift_id": "S0033",
         "date": "2025-05-27"
-      },
-      {
-        "employee_id": "E074",
-        "shift_id": "S0079",
-        "date": "2025-05-25"
       },
       {
         "employee_id": "E075",
@@ -472,7 +472,7 @@
       },
       {
         "employee_id": "E078",
-        "shift_id": "S0005",
+        "shift_id": "S0006",
         "date": "2025-05-21"
       },
       {
@@ -502,8 +502,8 @@
     "total_preference_score_achieved": 34,
     "total_positive_preferences_count": 37,
     "total_negative_preferences_count": 28,
-    "workload_distribution_std_dev": 0.5406882188470542,
-    "bad_shift_distribution_std_dev": 0.5099019513592784,
+    "workload_distribution_std_dev": 0.5170529469986609,
+    "bad_shift_distribution_std_dev": 0.4847679857416329,
     "system_adaptability_score": 5.0,
     "config_complexity_score": 10.0,
     "rule_count": 12
