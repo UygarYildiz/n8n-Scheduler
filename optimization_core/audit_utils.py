@@ -295,6 +295,56 @@ def log_user_status_changed(
         user_agent=user_agent
     )
 
+def log_password_change_success(
+    db: Session,
+    user_id: int,
+    ip_address: Optional[str] = None,
+    user_agent: Optional[str] = None
+):
+    """Başarılı şifre değiştirme kaydı"""
+    user = db.query(User).filter(User.id == user_id).first()
+    username = user.username if user else "Unknown"
+    
+    return create_audit_log(
+        db=db,
+        action=AuditAction.PASSWORD_CHANGED,
+        description=f"Kullanıcı {username} şifresini başarıyla değiştirdi",
+        user_id=user_id,
+        details={
+            "username": username,
+            "change_time": datetime.now(timezone.utc).isoformat()
+        },
+        ip_address=ip_address,
+        user_agent=user_agent,
+        success=True
+    )
+
+def log_password_change_failed(
+    db: Session,
+    user_id: int,
+    reason: str = "Invalid current password",
+    ip_address: Optional[str] = None,
+    user_agent: Optional[str] = None
+):
+    """Başarısız şifre değiştirme kaydı"""
+    user = db.query(User).filter(User.id == user_id).first()
+    username = user.username if user else "Unknown"
+    
+    return create_audit_log(
+        db=db,
+        action=AuditAction.PASSWORD_CHANGED,
+        description=f"Kullanıcı {username} için başarısız şifre değiştirme denemesi: {reason}",
+        user_id=user_id,
+        details={
+            "username": username,
+            "reason": reason,
+            "attempt_time": datetime.now(timezone.utc).isoformat()
+        },
+        ip_address=ip_address,
+        user_agent=user_agent,
+        success=False
+    )
+
 def get_audit_logs(
     db: Session,
     limit: int = 100,

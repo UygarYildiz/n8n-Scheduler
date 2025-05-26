@@ -15,8 +15,6 @@ import {
   Divider,
   IconButton,
   Avatar,
-  Tooltip,
-  Badge,
   useTheme,
   alpha
 } from '@mui/material';
@@ -28,10 +26,7 @@ import {
   Tune as TuneIcon,
   Assessment as AssessmentIcon,
   CalendarMonth as CalendarIcon,
-  Notifications as NotificationsIcon,
   Person as PersonIcon,
-  Brightness4 as DarkModeIcon,
-  Search as SearchIcon,
   Security as SecurityIcon,
   History as HistoryIcon
 } from '@mui/icons-material';
@@ -55,7 +50,7 @@ const MainLayout = () => {
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', requiredPage: 'DASHBOARD' as const },
     { text: 'Yönetici Paneli', icon: <PersonIcon />, path: '/admin', requiredPage: 'ADMIN_PANEL' as const },
     { text: 'Veri Seti ve Konfigürasyon', icon: <DatasetIcon />, path: '/dataset-config', requiredPage: 'DATASET_CONFIG' as const },
-    { text: 'Optimizasyon Parametreleri', icon: <TuneIcon />, path: '/optimization-params', requiredPage: 'OPTIMIZATION_PARAMS' as const },
+    { text: 'Vardiya Optimizasyonu', icon: <TuneIcon />, path: '/optimization-params', requiredPage: 'OPTIMIZATION_PARAMS' as const },
     { text: 'Sonuçlar ve Raporlar', icon: <AssessmentIcon />, path: '/results', requiredPage: 'RESULTS' as const },
     { text: 'Vardiya Çizelgesi', icon: <CalendarIcon />, path: '/schedule-view', requiredPage: 'SCHEDULE_VIEW' as const },
     { text: 'Oturum Yönetimi', icon: <SecurityIcon />, path: '/session-management', requiredPage: 'SESSION_MANAGEMENT' as const },
@@ -207,40 +202,7 @@ const MainLayout = () => {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Tooltip title="Arama">
-              <IconButton sx={{ mx: 1 }}>
-                <SearchIcon />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Bildirimler">
-              <IconButton sx={{ mx: 1 }}>
-                <Badge badgeContent={3} color="error">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Karanlık Mod">
-              <IconButton sx={{ mx: 1 }}>
-                <DarkModeIcon />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Profil">
-              <IconButton sx={{ ml: 1 }}>
-                <Avatar
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    bgcolor: alpha(theme.palette.primary.main, 0.1),
-                    color: theme.palette.primary.main
-                  }}
-                >
-                  <PersonIcon fontSize="small" />
-                </Avatar>
-              </IconButton>
-            </Tooltip>
+            {/* Navbar tamamen temizlendi - sadece başlık */}
           </Box>
         </Toolbar>
       </AppBar>

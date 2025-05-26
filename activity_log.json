@@ -1,6 +1,33 @@
 [
   {
     "id": "act21",
+    "date": "26.05.2025 14:59",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748260783
+  },
+  {
+    "id": "act21",
+    "date": "26.05.2025 01:45",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748213141
+  },
+  {
+    "id": "act21",
+    "date": "26.05.2025 01:25",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748211946
+  },
+  {
+    "id": "act21",
     "date": "26.05.2025 00:03",
     "action": "Çizelgeleme tamamlandı",
     "detail": "Başarılı optimizasyon",
@@ -151,32 +178,5 @@
     "color": "primary.main",
     "icon": "BoltIcon",
     "timestamp": 1748081596
-  },
-  {
-    "id": "act21",
-    "date": "24.05.2025 13:12",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1748081575
-  },
-  {
-    "id": "act21",
-    "date": "23.05.2025 16:55",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1748008505
-  },
-  {
-    "id": "act21",
-    "date": "22.05.2025 23:09",
-    "action": "Konfigürasyon güncellendi",
-    "detail": "cagri_merkezi_config.yaml konfigürasyonu güncellendi",
-    "color": "info.main",
-    "icon": "SettingsIcon",
-    "timestamp": 1747944569
   }
 ]

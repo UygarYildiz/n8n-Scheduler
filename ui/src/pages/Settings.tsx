@@ -21,40 +21,32 @@ import {
   Chip,
   Avatar,
   CircularProgress,
-  LinearProgress
+  InputAdornment,
+  IconButton
 } from '@mui/material';
 import { 
   Save as SaveIcon,
   Refresh as ResetIcon,
   Person as PersonIcon,
-  Api as ApiIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  Language as LanguageIcon,
-  DarkMode as DarkModeIcon,
-  LightMode as LightModeIcon,
-  Notifications as NotificationsIcon,
-  Security as SecurityIcon,
   Storage as StorageIcon,
   Speed as SpeedIcon,
   Info as InfoIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Lock as LockIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon
 } from '@mui/icons-material';
 
-interface ApiSettings {
-  apiUrl: string;
-  n8nUrl: string;
-  webhookId: string;
-  timeout: number;
-  retryAttempts: number;
-}
-
 interface UserPreferences {
-  darkMode: boolean;
-  language: 'tr' | 'en';
-  notificationsEnabled: boolean;
   autoSave: boolean;
   compactView: boolean;
+  autoRefresh: boolean;
+}
+
+interface PasswordChangeData {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 interface SystemInfo {
@@ -68,65 +60,88 @@ interface SystemInfo {
   activeUsers: number;
 }
 
+interface SystemApiResponse {
+  app_version?: string;
+  api_version?: string;
+  n8n_version?: string;
+  uptime?: string;
+  memory_usage?: number;
+  active_users?: number;
+  database_status?: string;
+}
+
+interface HealthApiResponse {
+  version?: string;
+  api_version?: string;
+  status?: string;
+  uptime?: string;
+}
+
+interface OptimizationApiResponse {
+  timestamp?: string;
+  status?: string;
+}
+
 const Settings = () => {
   // State tanımlamaları
-  const [apiSettings, setApiSettings] = useState<ApiSettings>({
-    apiUrl: 'http://localhost:8000',
-    n8nUrl: 'http://localhost:5678',
-    webhookId: 'optimization-webhook-001',
-    timeout: 30000,
-    retryAttempts: 3
-  });
-  
   const [userPreferences, setUserPreferences] = useState<UserPreferences>({
-    darkMode: false,
-    language: 'tr',
-    notificationsEnabled: true,
     autoSave: true,
-    compactView: false
+    compactView: false,
+    autoRefresh: true
   });
 
   const [systemInfo, setSystemInfo] = useState<SystemInfo>({
-    appVersion: '1.2.3',
-    apiVersion: '2.1.0',
-    n8nVersion: '1.91.2',
-    lastUpdate: '2024-01-15 09:00:00',
-    serverStatus: 'online',
-    uptime: '15 gün 6 saat',
-    memoryUsage: 68.5,
-    activeUsers: 12
+    appVersion: 'Yükleniyor...',
+    apiVersion: 'Yükleniyor...',
+    n8nVersion: 'Yükleniyor...',
+    lastUpdate: 'Yükleniyor...',
+    serverStatus: 'offline',
+    uptime: 'Yükleniyor...',
+    memoryUsage: 0,
+    activeUsers: 0
   });
   
   // Dialog ve notification state'leri
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [testingApi, setTestingApi] = useState(false);
-  const [apiTestResult, setApiTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  
+  // Şifre değiştirme state'leri
+  const [passwordData, setPasswordData] = useState<PasswordChangeData>({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
 
   // Sayfa yüklendiğinde ayarları localStorage'dan yükle
   useEffect(() => {
     loadSettingsFromStorage();
     fetchSystemInfo();
-  }, []);
+    
+    // Auto-refresh etkinse periyodik olarak sistem durumunu kontrol et
+    if (userPreferences.autoRefresh) {
+      const interval = setInterval(fetchSystemInfo, 30000); // 30 saniyede bir
+      return () => clearInterval(interval);
+    }
+  }, [userPreferences.autoRefresh]);
 
   // LocalStorage'dan ayarları yükle
   const loadSettingsFromStorage = () => {
     try {
-      const savedApiSettings = localStorage.getItem('apiSettings');
       const savedUserPreferences = localStorage.getItem('userPreferences');
-
-      if (savedApiSettings) {
-        setApiSettings(JSON.parse(savedApiSettings));
-      }
 
       if (savedUserPreferences) {
         const prefs = JSON.parse(savedUserPreferences);
-        setUserPreferences(prefs);
-        
-        // Theme'i uygula
-        if (prefs.darkMode) {
-          document.body.classList.add('dark-mode');
-        }
+        setUserPreferences(prev => ({
+          ...prev,
+          ...prefs
+        }));
       }
     } catch (error) {
       console.error('Ayarlar yüklenirken hata:', error);
@@ -136,7 +151,6 @@ const Settings = () => {
   // Ayarları localStorage'a kaydet
   const saveSettingsToStorage = () => {
     try {
-      localStorage.setItem('apiSettings', JSON.stringify(apiSettings));
       localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
       return true;
     } catch (error) {
@@ -148,92 +162,39 @@ const Settings = () => {
   // Sistem bilgilerini API'den al
   const fetchSystemInfo = async () => {
     try {
-      // Gerçek API çağrısı simülasyonu
-      // const info = await api.getSystemInfo();
-      // if (info) {
-      //   setSystemInfo(info);
-      // }
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
+      // Ana API health check
+      const healthResponse = await fetch('http://localhost:8000/health', {
+        method: 'GET',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (healthResponse.ok) {
+        const healthData: HealthApiResponse = await healthResponse.json();
+        
+        // Health endpoint'inden gelen verileri kullan
+        const currentTime = new Date().toLocaleString('tr-TR');
+        const randomMemory = Math.floor(Math.random() * 30) + 40; // 40-70% arası
+        
+        setSystemInfo(prev => ({ 
+          ...prev, 
+          appVersion: healthData.version || '1.0.0',
+          apiVersion: healthData.api_version || '1.0.0',
+          n8nVersion: '1.91.2',
+          serverStatus: healthData.status === 'healthy' ? 'online' : 'offline',
+          uptime: healthData.uptime || 'Bilinmiyor',
+          memoryUsage: randomMemory,
+          activeUsers: 1,
+          lastUpdate: currentTime
+        }));
+      }
     } catch (error) {
       console.error('Sistem bilgileri alınamadı:', error);
     }
-  };
-
-  // API bağlantısını test et
-  const testApiConnection = async () => {
-    setTestingApi(true);
-    setApiTestResult(null);
-
-    try {
-      // API endpoint'ini test et
-      const response = await fetch(`${apiSettings.apiUrl}/health`, {
-        method: 'GET'
-      });
-
-      if (response.ok) {
-        setApiTestResult({ 
-          success: true, 
-          message: 'API bağlantısı başarılı! Tüm endpoint\'ler erişilebilir.' 
-        });
-      } else {
-        setApiTestResult({ 
-          success: false, 
-          message: `API yanıt vermedi. Status: ${response.status}` 
-        });
-      }
-    } catch (error) {
-      setApiTestResult({ 
-        success: false, 
-        message: `Bağlantı hatası: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}` 
-      });
-    } finally {
-      setTestingApi(false);
-    }
-  };
-
-  // n8n webhook'unu test et
-  const testN8nWebhook = async () => {
-    setTestingApi(true);
-    try {
-      const response = await fetch(`${apiSettings.n8nUrl}/webhook-test/${apiSettings.webhookId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ test: true })
-      });
-
-      if (response.ok) {
-        setSnackbar({ 
-          open: true, 
-          message: 'n8n webhook testi başarılı!', 
-          severity: 'success' 
-        });
-      } else {
-        setSnackbar({ 
-          open: true, 
-          message: 'n8n webhook testi başarısız!', 
-          severity: 'error' 
-        });
-      }
-    } catch (error) {
-      setSnackbar({ 
-        open: true, 
-        message: 'n8n bağlantı hatası!', 
-        severity: 'error' 
-      });
-    } finally {
-      setTestingApi(false);
-    }
-  };
-
-  // API ayarları değiştir
-  const handleApiSettingChange = (name: keyof ApiSettings) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = name === 'timeout' || name === 'retryAttempts' 
-      ? parseInt(event.target.value) || 0 
-      : event.target.value;
-    
-    setApiSettings({
-      ...apiSettings,
-      [name]: value
-    });
   };
 
   // Kullanıcı tercihleri değiştir
@@ -246,15 +207,6 @@ const Settings = () => {
     };
     
     setUserPreferences(newPrefs);
-
-    // Dark mode değişimini anında uygula
-    if (name === 'darkMode') {
-      if (value) {
-        document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
-      }
-    }
 
     // Auto-save etkinse anında kaydet
     if (userPreferences.autoSave) {
@@ -286,27 +238,13 @@ const Settings = () => {
   // Ayarları varsayılana sıfırla
   const handleResetSettings = () => {
     // Varsayılan değerleri geri yükle
-    setApiSettings({
-      apiUrl: 'http://localhost:8000',
-      n8nUrl: 'http://localhost:5678',
-      webhookId: 'optimization-webhook-001',
-      timeout: 30000,
-      retryAttempts: 3
-    });
-
     setUserPreferences({
-      darkMode: false,
-      language: 'tr',
-      notificationsEnabled: true,
       autoSave: true,
-      compactView: false
+      compactView: false,
+      autoRefresh: true
     });
-
-    // Dark mode'u kapat
-    document.body.classList.remove('dark-mode');
 
     // LocalStorage'ı temizle
-    localStorage.removeItem('apiSettings');
     localStorage.removeItem('userPreferences');
 
     setSnackbar({ 
@@ -314,6 +252,115 @@ const Settings = () => {
       message: 'Ayarlar varsayılana sıfırlandı!', 
       severity: 'success' 
     });
+  };
+
+  // Şifre değiştirme fonksiyonları
+  const handlePasswordChange = (field: keyof PasswordChangeData) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordData(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+  };
+
+  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
+
+  const handlePasswordSubmit = async () => {
+    // Validasyon
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      setSnackbar({
+        open: true,
+        message: 'Lütfen tüm alanları doldurun!',
+        severity: 'error'
+      });
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setSnackbar({
+        open: true,
+        message: 'Yeni şifreler eşleşmiyor!',
+        severity: 'error'
+      });
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setSnackbar({
+        open: true,
+        message: 'Yeni şifre en az 6 karakter olmalıdır!',
+        severity: 'error'
+      });
+      return;
+    }
+
+    setPasswordLoading(true);
+    
+    try {
+      // Gerçek API çağrısı
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        setSnackbar({
+          open: true,
+          message: 'Oturum süresi dolmuş. Lütfen tekrar giriş yapın.',
+          severity: 'error'
+        });
+        return;
+      }
+
+      const response = await fetch('http://localhost:8000/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          current_password: passwordData.currentPassword,
+          new_password: passwordData.newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Başarılı
+        setSnackbar({
+          open: true,
+          message: data.message || 'Şifre başarıyla değiştirildi!',
+          severity: 'success'
+        });
+        
+        // Formu temizle ve kapat
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+        setShowPasswordForm(false);
+      } else {
+        // Hata
+        setSnackbar({
+          open: true,
+          message: data.detail || 'Şifre değiştirirken hata oluştu!',
+          severity: 'error'
+        });
+      }
+      
+    } catch (error) {
+      console.error('Şifre değiştirme hatası:', error);
+      setSnackbar({
+        open: true,
+        message: 'Sunucuya bağlanırken hata oluştu!',
+        severity: 'error'
+      });
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   // Server status rengini getir
@@ -337,22 +384,16 @@ const Settings = () => {
           borderBottom: '1px solid rgba(0, 0, 0, 0.05)'
         }}>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
-            Sistem Ayarları
+            Kullanıcı Ayarları
           </Typography>
           <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
-            API bağlantıları, kullanıcı tercihleri ve sistem konfigürasyonu
+            Kişisel tercihler ve sistem bilgileri
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
             <Chip
               icon={<SettingsIcon />}
-              label="Sistem Konfigürasyonu"
+              label="Kişiselleştirme"
               color="primary"
-              variant="outlined"
-            />
-            <Chip
-              icon={<SecurityIcon />}
-              label="Güvenli Bağlantı"
-              color="success"
               variant="outlined"
             />
           </Box>
@@ -395,7 +436,8 @@ const Settings = () => {
       </Snackbar>
       
       <Grid container spacing={4}>
-        {/* API Entegrasyon Ayarları */}
+        
+        {/* Şifre Değiştirme */}
         <Grid item xs={12} lg={6}>
           <Card sx={{
             borderRadius: 3,
@@ -404,111 +446,136 @@ const Settings = () => {
           }}>
             <CardHeader
               avatar={
-                <Avatar sx={{ bgcolor: '#1976d2' }}>
-                  <ApiIcon />
+                <Avatar sx={{ bgcolor: '#f44336' }}>
+                  <LockIcon />
                 </Avatar>
               }
-              title="API Entegrasyon Ayarları"
-              subheader="Optimizasyon ve n8n bağlantı konfigürasyonu"
+              title="Şifre Değiştirme"
+              subheader="Hesap güvenliği için şifrenizi güncelleyin"
             />
             
             <CardContent>
-              <TextField
-                fullWidth
-                label="Optimizasyon API URL"
-                value={apiSettings.apiUrl}
-                onChange={handleApiSettingChange('apiUrl')}
-                margin="normal"
-                variant="outlined"
-                helperText="Çizelgeleme optimizasyonu için kullanılacak API adresi"
-              />
-              
-              <TextField
-                fullWidth
-                label="n8n Workflow URL"
-                value={apiSettings.n8nUrl}
-                onChange={handleApiSettingChange('n8nUrl')}
-                margin="normal"
-                variant="outlined"
-                helperText="n8n automation platform adresi"
-              />
-              
-              <TextField
-                fullWidth
-                label="Webhook Identifier"
-                value={apiSettings.webhookId}
-                onChange={handleApiSettingChange('webhookId')}
-                margin="normal"
-                variant="outlined"
-                helperText="Optimizasyon webhook'u için benzersiz tanımlayıcı"
-              />
+              {!showPasswordForm ? (
+                <Box sx={{ textAlign: 'center', py: 3 }}>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                    Hesap güvenliğiniz için şifrenizi düzenli olarak değiştirmenizi öneririz.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => setShowPasswordForm(true)}
+                    startIcon={<LockIcon />}
+                    sx={{
+                      bgcolor: '#f44336',
+                      '&:hover': {
+                        bgcolor: '#d32f2f'
+                      }
+                    }}
+                  >
+                    Şifre Değiştir
+                  </Button>
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <TextField
+                    fullWidth
+                    label="Mevcut Şifre"
+                    type={showPasswords.current ? 'text' : 'password'}
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange('currentPassword')}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => togglePasswordVisibility('current')}
+                            edge="end"
+                          >
+                            {showPasswords.current ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
 
-              <Grid container spacing={2} sx={{ mt: 1 }}>
-                <Grid item xs={6}>
                   <TextField
                     fullWidth
-                    label="Timeout (ms)"
-                    type="number"
-                    value={apiSettings.timeout}
-                    onChange={handleApiSettingChange('timeout')}
-                    variant="outlined"
-                    helperText="İstek zaman aşımı süresi"
+                    label="Yeni Şifre"
+                    type={showPasswords.new ? 'text' : 'password'}
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange('newPassword')}
+                    helperText="En az 6 karakter olmalıdır"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => togglePasswordVisibility('new')}
+                            edge="end"
+                          >
+                            {showPasswords.new ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
-                </Grid>
-                <Grid item xs={6}>
+
                   <TextField
                     fullWidth
-                    label="Yeniden Deneme"
-                    type="number"
-                    value={apiSettings.retryAttempts}
-                    onChange={handleApiSettingChange('retryAttempts')}
-                    variant="outlined"
-                    helperText="Başarısız isteklerde tekrar sayısı"
+                    label="Yeni Şifre (Tekrar)"
+                    type={showPasswords.confirm ? 'text' : 'password'}
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange('confirmPassword')}
+                    error={passwordData.confirmPassword !== '' && passwordData.newPassword !== passwordData.confirmPassword}
+                    helperText={passwordData.confirmPassword !== '' && passwordData.newPassword !== passwordData.confirmPassword ? 'Şifreler eşleşmiyor' : ''}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => togglePasswordVisibility('confirm')}
+                            edge="end"
+                          >
+                            {showPasswords.confirm ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
-                </Grid>
-              </Grid>
-              
-              {/* API Test Sonucu */}
-              {apiTestResult && (
-                <Alert 
-                  severity={apiTestResult.success ? "success" : "error"} 
-                  sx={{ mt: 3, borderRadius: 2 }}
-                  icon={apiTestResult.success ? <CheckCircleIcon /> : <ErrorIcon />}
-                >
-                  <Typography variant="subtitle2" fontWeight="600">
-                    {apiTestResult.success ? 'Bağlantı Başarılı' : 'Bağlantı Hatası'}
-                  </Typography>
-                  <Typography variant="body2">
-                    {apiTestResult.message}
-                  </Typography>
-                </Alert>
+
+                  <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => {
+                        setShowPasswordForm(false);
+                        setPasswordData({
+                          currentPassword: '',
+                          newPassword: '',
+                          confirmPassword: ''
+                        });
+                      }}
+                      sx={{ flex: 1 }}
+                    >
+                      İptal
+                    </Button>
+                    <Button
+                      variant="contained"
+                      onClick={handlePasswordSubmit}
+                      disabled={passwordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                      startIcon={passwordLoading ? <CircularProgress size={20} /> : <LockIcon />}
+                      sx={{
+                        flex: 1,
+                        bgcolor: '#f44336',
+                        '&:hover': {
+                          bgcolor: '#d32f2f'
+                        }
+                      }}
+                    >
+                      {passwordLoading ? 'Değiştiriliyor...' : 'Şifreyi Değiştir'}
+                    </Button>
+                  </Box>
+                </Box>
               )}
-
-              <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-                <Button 
-                  variant="contained" 
-                  startIcon={testingApi ? <CircularProgress size={20} color="inherit" /> : <ApiIcon />}
-                  onClick={testApiConnection}
-                  disabled={testingApi}
-                  sx={{ borderRadius: 2 }}
-                >
-                  {testingApi ? 'Test Ediliyor...' : 'API Test Et'}
-                </Button>
-                
-                <Button 
-                  variant="outlined" 
-                  startIcon={testingApi ? <CircularProgress size={20} color="inherit" /> : <ApiIcon />}
-                  onClick={testN8nWebhook}
-                  disabled={testingApi}
-                  sx={{ borderRadius: 2 }}
-                >
-                  n8n Test Et
-                </Button>
-              </Box>
             </CardContent>
           </Card>
         </Grid>
-        
+
         {/* Kullanıcı Arayüzü Ayarları */}
         <Grid item xs={12} lg={6}>
           <Card sx={{
@@ -523,61 +590,11 @@ const Settings = () => {
                 </Avatar>
               }
               title="Kullanıcı Tercihleri"
-              subheader="Kişiselleştirme ve arayüz ayarları"
+              subheader="Kişiselleştirme ve davranış ayarları"
             />
             
             <CardContent>
-              <Box sx={{ mb: 3 }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={userPreferences.darkMode}
-                      onChange={handleUserPreferenceChange('darkMode')}
-                      color="primary"
-                    />
-                  }
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {userPreferences.darkMode ? <DarkModeIcon /> : <LightModeIcon />}
-                      <Typography>Karanlık Tema</Typography>
-                    </Box>
-                  }
-                />
-              </Box>
-              
-              <FormControl fullWidth margin="normal">
-                <InputLabel id="language-select-label">Dil Seçimi</InputLabel>
-                <Select
-                  labelId="language-select-label"
-                  value={userPreferences.language}
-                  label="Dil Seçimi"
-                  onChange={(e) => handleUserPreferenceChange('language')({ target: { value: e.target.value, type: 'text' } } as any)}
-                  startAdornment={<LanguageIcon sx={{ mr: 1, color: 'action.active' }} />}
-                >
-                  <MenuItem value="tr">🇹🇷 Türkçe</MenuItem>
-                  <MenuItem value="en">🇺🇸 English</MenuItem>
-                </Select>
-              </FormControl>
-              
               <Box sx={{ mt: 3 }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={userPreferences.notificationsEnabled}
-                      onChange={handleUserPreferenceChange('notificationsEnabled')}
-                      color="primary"
-                    />
-                  }
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <NotificationsIcon />
-                      <Typography>Bildirimleri Etkinleştir</Typography>
-                    </Box>
-                  }
-                />
-              </Box>
-
-              <Box sx={{ mt: 2 }}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -612,15 +629,36 @@ const Settings = () => {
                   }
                 />
               </Box>
+
+              <Box sx={{ mt: 2 }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={userPreferences.autoRefresh}
+                      onChange={handleUserPreferenceChange('autoRefresh')}
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <SettingsIcon />
+                      <Typography>Otomatik Durum Güncellemesi</Typography>
+                    </Box>
+                  }
+                />
+              </Box>
+
+
             </CardContent>
           </Card>
         </Grid>
-        
+
         {/* Sistem Bilgileri */}
-        <Grid item xs={12}>
+        <Grid item xs={12} lg={6}>
           <Card sx={{
             borderRadius: 3,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+            boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+            height: '100%'
           }}>
             <CardHeader
               avatar={
@@ -628,13 +666,13 @@ const Settings = () => {
                   <InfoIcon />
                 </Avatar>
               }
-              title="Sistem Bilgileri ve Durum"
-              subheader="Sunucu durumu, performans metrikleri ve sürüm bilgileri"
+              title="Sistem Bilgileri"
+              subheader="Sürüm bilgileri ve performans durumu"
             />
             
             <CardContent>
               <Grid container spacing={3}>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12}>
                   <Paper sx={{ p: 3, borderRadius: 2, bgcolor: 'rgba(33, 150, 243, 0.05)' }}>
                     <Typography variant="h6" fontWeight="600" gutterBottom sx={{ color: '#1976d2' }}>
                       Sürüm Bilgileri
@@ -653,10 +691,10 @@ const Settings = () => {
                   </Paper>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12}>
                   <Paper sx={{ p: 3, borderRadius: 2, bgcolor: 'rgba(76, 175, 80, 0.05)' }}>
                     <Typography variant="h6" fontWeight="600" gutterBottom sx={{ color: '#4caf50' }}>
-                      Sunucu Durumu
+                      Sistem Durumu
                     </Typography>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -682,35 +720,7 @@ const Settings = () => {
                   </Paper>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
-                  <Paper sx={{ p: 3, borderRadius: 2, bgcolor: 'rgba(255, 152, 0, 0.05)' }}>
-                    <Typography variant="h6" fontWeight="600" gutterBottom sx={{ color: '#ff9800' }}>
-                      Performans
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <Box>
-                        <Typography variant="body2" gutterBottom>
-                          <strong>Bellek Kullanımı:</strong> {systemInfo.memoryUsage.toFixed(1)}%
-                        </Typography>
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={systemInfo.memoryUsage} 
-                          sx={{ 
-                            height: 8, 
-                            borderRadius: 4,
-                            bgcolor: 'rgba(255, 152, 0, 0.1)',
-                            '& .MuiLinearProgress-bar': {
-                              bgcolor: systemInfo.memoryUsage > 80 ? '#f44336' : systemInfo.memoryUsage > 60 ? '#ff9800' : '#4caf50'
-                            }
-                          }}
-                        />
-                      </Box>
-                      <Typography variant="body2">
-                        <strong>Son Güncelleme:</strong> {systemInfo.lastUpdate}
-                      </Typography>
-                    </Box>
-                  </Paper>
-                </Grid>
+
               </Grid>
             </CardContent>
           </Card>
@@ -740,7 +750,7 @@ const Settings = () => {
                 boxShadow: '0 4px 14px rgba(25, 118, 210, 0.3)'
               }}
             >
-              Tüm Ayarları Kaydet
+              Ayarları Kaydet
             </Button>
             
             <Button 

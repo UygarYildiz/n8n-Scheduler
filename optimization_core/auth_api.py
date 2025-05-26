@@ -20,13 +20,13 @@ try:
     from auth_utils import (
         authenticate_user, create_access_token, get_user_by_token, 
         create_user_session, revoke_user_session, revoke_all_user_sessions,
-        check_permission, get_user_info, hash_password, verify_token
+        check_permission, get_user_info, hash_password, verify_token, verify_password
     )
     from auth_middleware import get_current_active_user, get_admin_user, get_super_admin_user
     from audit_utils import (
         log_login_success, log_login_failed, log_logout, log_session_revoked,
         log_user_created, log_user_updated, log_user_deleted, log_user_status_changed,
-        get_audit_logs
+        get_audit_logs, log_password_change_failed, log_password_change_success
     )
     print("✅ Auth modülü bağımlılıkları başarıyla yüklendi!")
 except ImportError as e:
@@ -131,6 +131,11 @@ class UserResponse(BaseModel):
 class MessageResponse(BaseModel):
     message: str
     success: bool = True
+
+# Şifre değiştirme modeli
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
 
 # Dependency: Current user
 async def get_current_user(
@@ -1041,5 +1046,75 @@ async def get_audit_stats(
         ],
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
+
+# Şifre değiştirme endpoint'i
+@router.post("/change-password", response_model=MessageResponse)
+async def change_password(
+    password_data: ChangePasswordRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Kullanıcının kendi şifresini değiştir"""
+    
+    # Mevcut şifreyi doğrula
+    if not verify_password(password_data.current_password, current_user.password_hash):
+        # Başarısız şifre değiştirme denemesini logla
+        ip_address, user_agent = get_client_info(request)
+        
+        try:
+            log_password_change_failed(
+                db=db,
+                user_id=current_user.id,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                reason="Invalid current password"
+            )
+        except Exception as e:
+            print(f"Audit log hatası: {e}")
+        
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mevcut şifre yanlış"
+        )
+    
+    # Yeni şifre validasyonu
+    if len(password_data.new_password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Yeni şifre en az 6 karakter olmalıdır"
+        )
+    
+    # Yeni şifreyi hash'le ve güncelle
+    try:
+        new_password_hash = hash_password(password_data.new_password)
+        current_user.password_hash = new_password_hash
+        current_user.updated_at = datetime.now(timezone.utc)
+        
+        db.commit()
+        
+        # Başarılı şifre değiştirme işlemini logla
+        ip_address, user_agent = get_client_info(request)
+        
+        try:
+            log_password_change_success(
+                db=db,
+                user_id=current_user.id,
+                ip_address=ip_address,
+                user_agent=user_agent
+            )
+        except Exception as e:
+            print(f"Audit log hatası: {e}")
+        
+        return MessageResponse(
+            message="Şifre başarıyla değiştirildi"
+        )
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Şifre değiştirirken bir hata oluştu"
+        )
 
 # verify_token function zaten yukarıda import edildi 

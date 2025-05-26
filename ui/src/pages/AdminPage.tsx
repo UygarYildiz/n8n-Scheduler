@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -31,7 +32,7 @@ import {
   Divider,
   CircularProgress,
   Switch,
-  FormControlLabel,
+  FormControlLabel
 } from '@mui/material';
 import {
   Person,
@@ -45,10 +46,11 @@ import {
   AdminPanelSettings as AdminIcon,
   Group as GroupIcon,
   Security as SecurityIcon,
-  Settings as SettingsIcon,
   Refresh as RefreshIcon,
   ToggleOff as ToggleOffIcon,
   ToggleOn as ToggleOnIcon,
+  Assessment as ReportIcon,
+  TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
@@ -63,6 +65,7 @@ import {
 const AdminPage: React.FC = () => {
   const { user, logout } = useAuth();
   const { canManageUsers, getUserRoleColor, isAdmin } = usePermissions();
+  const navigate = useNavigate();
 
   // State tanımlamaları
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -361,18 +364,18 @@ const AdminPage: React.FC = () => {
             </Button>
           </Box>
           <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
-            Kullanıcı yönetimi, sistem güvenliği ve yetkilendirme kontrolü
+            Kullanıcı yönetimi, kurum istatistikleri ve operasyonel kontroller
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
             <Chip
               icon={<AdminIcon />}
-              label="Sistem Yöneticisi"
+              label="Kurum Yöneticisi"
               color="primary"
               variant="outlined"
             />
             <Chip
               icon={<SecurityIcon />}
-              label="Güvenli Erişim"
+              label="Yetkilendirilmiş Erişim"
               color="success"
               variant="outlined"
             />
@@ -407,7 +410,7 @@ const AdminPage: React.FC = () => {
                   </Typography>
                 </Box>
               </Box>
-              
+
               <Divider sx={{ my: 2 }} />
               
               <Box sx={{ mb: 2 }}>
@@ -430,7 +433,7 @@ const AdminPage: React.FC = () => {
                   sx={{ fontWeight: 600 }}
                 />
               </Box>
-
+              
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Kurum
@@ -449,7 +452,7 @@ const AdminPage: React.FC = () => {
                 </Typography>
                 <Chip 
                   label={user?.organization?.type === 'hastane' ? 'Hastane' : 'Çağrı Merkezi'} 
-                  variant="outlined" 
+                  variant="outlined"
                   size="small"
                 />
               </Box>
@@ -574,6 +577,127 @@ const AdminPage: React.FC = () => {
               </Card>
             </Grid>
           </Grid>
+        </Grid>
+
+        {/* Hızlı Eylemler */}
+        <Grid item xs={12}>
+          <Card sx={{
+            borderRadius: 3,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+          }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
+                Hızlı Eylemler
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={4} lg={3}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      setEditingUser(null);
+                      setNewUser({
+                        username: '',
+                        email: '',
+                        password: '',
+                        first_name: '',
+                        last_name: '',
+                        organization_id: undefined,
+                        role_id: undefined
+                      });
+                      setUserDialogOpen(true);
+                    }}
+                    sx={{ 
+                      py: 2,
+                      borderRadius: 2,
+                      textTransform: 'none'
+                    }}
+                  >
+                    Yeni Kullanıcı Ekle
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4} lg={3}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<ReportIcon />}
+                    onClick={() => {
+                      setSnackbar({ 
+                        open: true, 
+                        message: 'Raporlar sayfasına yönlendiriliyor...', 
+                        severity: 'success' 
+                      });
+                      setTimeout(() => navigate('/results'), 500);
+                    }}
+                    sx={{ 
+                      py: 2,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      '&:hover': {
+                        bgcolor: 'rgba(33, 150, 243, 0.04)',
+                        borderColor: 'primary.main'
+                      }
+                    }}
+                  >
+                    Raporları Görüntüle
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4} lg={3}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<TrendingUpIcon />}
+                    onClick={() => {
+                      setSnackbar({ 
+                        open: true, 
+                        message: 'Dashboard sayfasına yönlendiriliyor...', 
+                        severity: 'success' 
+                      });
+                      setTimeout(() => navigate('/dashboard'), 500);
+                    }}
+                    sx={{ 
+                      py: 2,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      '&:hover': {
+                        bgcolor: 'rgba(76, 175, 80, 0.04)',
+                        borderColor: 'success.main'
+                      }
+                    }}
+                  >
+                    Performans Analizi
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4} lg={3}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<Schedule />}
+                    onClick={() => {
+                      setSnackbar({ 
+                        open: true, 
+                        message: 'Vardiya planları sayfasına yönlendiriliyor...', 
+                        severity: 'success' 
+                      });
+                      setTimeout(() => navigate('/schedule-view'), 500);
+                    }}
+                    sx={{ 
+                      py: 2,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 152, 0, 0.04)',
+                        borderColor: 'warning.main'
+                      }
+                    }}
+                  >
+                    Vardiya Planları
+                  </Button>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         </Grid>
 
         {/* Kullanıcı Yönetimi */}
