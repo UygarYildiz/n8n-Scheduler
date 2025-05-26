@@ -68,7 +68,7 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="session-management" element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredPage="ADMIN_PANEL" showAccessDenied={true}>
                 <SessionManagement />
               </ProtectedRoute>
             } />
