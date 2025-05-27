@@ -1,6 +1,24 @@
 [
   {
     "id": "act21",
+    "date": "27.05.2025 14:28",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748345321
+  },
+  {
+    "id": "act21",
+    "date": "27.05.2025 14:17",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1748344642
+  },
+  {
+    "id": "act21",
     "date": "26.05.2025 14:59",
     "action": "Çizelgeleme tamamlandı",
     "detail": "Başarılı optimizasyon",
@@ -160,23 +178,5 @@
     "color": "primary.main",
     "icon": "BoltIcon",
     "timestamp": 1748171571
-  },
-  {
-    "id": "act21",
-    "date": "25.05.2025 14:12",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1748171525
-  },
-  {
-    "id": "act21",
-    "date": "24.05.2025 13:13",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1748081596
   }
 ]

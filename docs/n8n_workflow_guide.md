@@ -1,22 +1,39 @@
 # n8n İş Akışı Kullanım Kılavuzu
 
-Bu belge, n8n platformunda oluşturulan "Vardiya" iş akışının nasıl kullanılacağını ve yapılandırılacağını açıklar. Bu iş akışı, farklı veri kaynaklarından (CSV dosyaları) veri okuyarak, bunları işleyip Optimizasyon API'sine göndermek için tasarlanmıştır.
+Bu belge, n8n platformunda oluşturulan "Vardiya" iş akışının nasıl kurulacağını, yapılandırılacağını ve kullanılacağını açıklar. Bu iş akışı, farklı veri kaynaklarından (CSV dosyaları) veri okuyarak, bunları işleyip FastAPI Optimizasyon backend'ine göndermek için tasarlanmıştır.
 
 ## İş Akışı Genel Bakış
+
+**Workflow ID:** `nEKfZ30L6vLyUMXe`
+**Webhook ID:** `98a3eec5-cce7-4a93-b2e5-2275b192b265`
+**Status:** Active
+**Execution Order:** v1
 
 "Vardiya" iş akışı, aşağıdaki temel adımlardan oluşur:
 
 1. **Webhook ile Tetikleme**: İş akışı bir webhook aracılığıyla tetiklenir ve dinamik parametreler alır.
 2. **Read/Write Files from Disk**: Sistemdeki aktif ayarlar dosyasından varsayılan değerler okunur.
 3. **Edit Fields**: Webhook parametrelerine göre temel ayarlar belirlenir.
-4. **Ayarların Belirlenmesi**: Webhook parametreleri ve aktif ayarlar kullanılarak hangi veri seti ve konfigürasyon dosyasının kullanılacağı belirlenir.
+4. **Ayar (Code Node)**: Webhook parametreleri ve aktif ayarlar kullanılarak dinamik dosya yolları belirlenir.
 5. **Temel Konfigürasyon Okuma**: Belirlenen veri setine ait YAML konfigürasyon dosyası okunur.
-6. **Dosya Okuma**: Belirlenen veri setine ait CSV dosyaları (çalışanlar, vardiyalar, yetenekler, uygunluklar, tercihler) okunur.
-7. **Veri Çıkarma**: CSV dosyalarından veriler çıkarılır ve işlenir.
-8. **Veri Birleştirme**: Tüm veriler birleştirilir ve API'ye gönderilecek formata dönüştürülür.
-9. **Veri İşleme ve Departman Kontrolü**: Veriler işlenir, departman istatistikleri oluşturulur ve vardiyası olan ancak çalışanı olmayan departmanlar tespit edilir.
-10. **API Çağrısı**: Hazırlanan veriler Optimizasyon API'sine gönderilir.
-11. **Sonuç İşleme**: API'den dönen sonuçlar işlenir ve gerekirse raporlanır.
+6. **Paralel CSV Dosya Okuma**: 5 farklı CSV dosyası (employees, shifts, availability, preferences, skills) paralel olarak okunur.
+7. **CSV Extract Operations**: Binary data'dan JSON formatına dönüştürme işlemleri paralel olarak gerçekleştirilir.
+8. **Merge**: Tüm CSV verileri ve YAML konfigürasyonu tek bir data stream'de birleştirilir.
+9. **Code (Ana İşleme)**: Veriler sınıflandırılır, YAML parse edilir ve API request formatına dönüştürülür.
+10. **HTTP Request**: Hazırlanan OptimizationRequest FastAPI backend'ine gönderilir.
+
+## Workflow Architecture
+
+```
+Webhook → Read Files → Edit Fields → Ayar (Code)
+                                      ↓
+                    Oku Temel Konfig ← ┴ → Employees → Extract → ┐
+                           ↓                Shifts → Extract → ┤
+                           ↓              Avaibility → Extract → ┤ → Merge → Code → HTTP Request
+                           ↓            Preferences → Extract → ┤
+                           ↓                Skills → Extract → ┘
+                           └─────────────────────────────────────┘
+```
 
 ## Webhook Kullanımı
 
@@ -29,18 +46,19 @@ Bu belge, n8n platformunda oluşturulan "Vardiya" iş akışının nasıl kullan
 
 ### Webhook URL ve Body Formatı
 
+**Gerçek Webhook URL:**
 ```
-POST http://localhost:5678/webhook/[webhook-id]/optimization
+POST http://localhost:5678/webhook/98a3eec5-cce7-4a93-b2e5-2275b192b265
 ```
 
-Body:
+**Request Body Format:**
 ```json
 {
   "veriSeti": "hastane",
   "objective_weights": {
-    "minimize_unfilled_shifts": 100,
-    "minimize_preference_violations": 10,
-    "minimize_consecutive_shifts": 5
+    "understaffing_penalty": 100,
+    "overstaffing_penalty": 50,
+    "preference_weight": 10
   },
   "solver_params": {
     "time_limit_seconds": 300,
@@ -52,347 +70,452 @@ Body:
 ### Örnek Kullanımlar
 
 1. **Hastane Veri Seti ile Temel Ayarlar**:
-   ```
-   POST http://localhost:5678/webhook/[webhook-id]/optimization
-
-   {
-     "veriSeti": "hastane"
-   }
+   ```bash
+   curl -X POST "http://localhost:5678/webhook/98a3eec5-cce7-4a93-b2e5-2275b192b265" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "veriSeti": "hastane"
+     }'
    ```
 
 2. **Çağrı Merkezi Veri Seti ile Özel Hedef Ağırlıkları**:
+   ```bash
+   curl -X POST "http://localhost:5678/webhook/98a3eec5-cce7-4a93-b2e5-2275b192b265" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "veriSeti": "cagri_merkezi",
+       "objective_weights": {
+         "understaffing_penalty": 200,
+         "preference_weight": 5
+       }
+     }'
    ```
-   POST http://localhost:5678/webhook/[webhook-id]/optimization
 
-   {
-     "veriSeti": "cagri_merkezi",
-     "objective_weights": {
-       "minimize_unfilled_shifts": 200,
-       "minimize_preference_violations": 5
-     }
-   }
+3. **Solver Parameters ile Kullanım**:
+   ```bash
+   curl -X POST "http://localhost:5678/webhook/98a3eec5-cce7-4a93-b2e5-2275b192b265" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "veriSeti": "hastane",
+       "solver_params": {
+         "time_limit_seconds": 600,
+         "use_mip_solver": true
+       }
+     }'
    ```
 
 ## İş Akışı Düğümleri ve Yapılandırma
 
 ### 1. Webhook Düğümü
 
+- **Node Type**: `n8n-nodes-base.webhook` (v2)
+- **Node ID**: `4ac2dc4e-0e60-438d-bab2-a569d8dad838`
+- **Position**: `[-700, 340]`
+- **Webhook ID**: `98a3eec5-cce7-4a93-b2e5-2275b192b265`
 - **Amaç**: İş akışını HTTP isteği ile tetiklemek.
 - **Yapılandırma**:
-  - HTTP Method: POST
-  - Path: optimization
-  - Authentication: None
-  - Response Mode: Last Node
+  ```json
+  {
+    "httpMethod": "POST",
+    "path": "optimization",
+    "responseMode": "lastNode",
+    "options": {}
+  }
+  ```
 
 ### 2. Read/Write Files from Disk Düğümü
 
+- **Node Type**: `n8n-nodes-base.readWriteFile` (v1)
+- **Node ID**: `20fc2f93-176d-41dd-9454-2e5eb414cf95`
+- **Position**: `[-480, 340]`
 - **Amaç**: Sistemdeki aktif ayarlar dosyasını okumak.
 - **Yapılandırma**:
-  - File Selector: /mnt/workflow_configs/aktif_ayarlar.json
-  - Options: fileName: aktifAyarlar
-  - Always Output Data: true
+  ```json
+  {
+    "fileSelector": "/mnt/workflow_configs/aktif_ayarlar.json",
+    "options": {
+      "fileName": "aktifAyarlar"
+    },
+    "alwaysOutputData": true
+  }
+  ```
 
 ### 3. Edit Fields Düğümü
 
+- **Node Type**: `n8n-nodes-base.set` (v3.4)
+- **Node ID**: `cf5bab33-73ae-45b4-96f2-8eedebbaad9e`
+- **Position**: `[-260, 340]`
 - **Amaç**: Webhook parametrelerine göre temel ayarları belirlemek.
 - **Yapılandırma**:
-  - Mode: Raw
-  - JSON Output:
-    ```json
+  ```json
+  {
+    "mode": "raw",
+    "jsonOutput": "{\n  \"kullanilacakVeriSeti\": \"{{ $node[\"Webhook\"].json.query.veriSeti || 'hastane' }}\",\n  \"basePath\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? '/veri_kaynaklari/cagri_merkezi/' : '/veri_kaynaklari/hastane/' }}\",\n  \"employeesFile\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'employees_cm.csv' : 'employees.csv' }}\",\n  \"shiftsFile\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'shifts_cm.csv' : 'shifts.csv' }}\",\n  \"skillsFile\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'skills_cm.csv' : 'skills.csv' }}\",\n  \"availabilityFile\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'availability_cm.csv' : 'availability.csv' }}\",\n  \"preferencesFile\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'preferences_cm.csv' : 'preferences.csv' }}\"\n}"
+  }
+  ```
+
+### 4. Ayar Düğümü (JavaScript Code)
+
+- **Node Type**: `n8n-nodes-base.code` (v2)
+- **Node ID**: `2b6092a1-e49d-4f2d-81b0-202ecbddea55`
+- **Position**: `[-40, 340]`
+- **Amaç**: Webhook parametreleri ve aktif ayarları kullanarak dinamik dosya yollarını belirlemek.
+- **Girdi**:
+  - `items[0].json` - Edit Fields düğümünden gelen webhook parametreleri
+  - `items[1].binary.data.data` - aktif_ayarlar.json dosyasının binary içeriği
+- **JavaScript Kodu** (Gerçek kod):
+  ```javascript
+  // Girişleri al:
+  // items[0].json -> Bir önceki "Set" (Edit Fields) düğümünün çıktısı
+  // items[1].binary.data.data -> aktif_ayarlar.json dosyasının içeriği
+
+  const upstreamNodeOutput = items[0].json; // Bir önceki düğümün çıktısı
+  console.log("Bir önceki 'Set' (Edit Fields) düğümünden gelen veri:", JSON.stringify(upstreamNodeOutput, null, 2));
+
+  let aktifAyarlar;
+  try {
+    // items[1] 'aktif_ayarlar.json' dosyasını içeriyor olmalı
+    const aktifAyarlarStr = Buffer.from(items[1].binary.data.data, 'base64').toString();
+    aktifAyarlar = JSON.parse(aktifAyarlarStr);
+    console.log("Okunan aktif ayarlar:", aktifAyarlar);
+  } catch (error) {
+    console.warn("Aktif ayarlar dosyası okunamadı veya ayrıştırılamadı:", error);
+    aktifAyarlar = {
+      varsayilan_veri_seti: "hastane",
+      varsayilan_kural_seti_adi: "temel_kurallar" // kurallar için varsayılan
+    };
+    console.log("Varsayılan aktif ayarlar kullanılıyor:", aktifAyarlar);
+  }
+
+  let nihaiVeriSeti;
+  let nihaiKurallar = aktifAyarlar.varsayilan_kural_seti_adi; // 'kurallar' için başlangıç değeri
+
+  // 1. 'nihaiVeriSeti'ni belirle:
+  // Öncelik, bir önceki "Set" (Edit Fields) düğümünden gelen 'kullanilacakVeriSeti' değerinde.
+  if (upstreamNodeOutput && upstreamNodeOutput.kullanilacakVeriSeti) {
+    nihaiVeriSeti = upstreamNodeOutput.kullanilacakVeriSeti;
+    console.log(`'kullanilacakVeriSeti' bir önceki düğümden alındı: ${nihaiVeriSeti}`);
+  } else {
+    // Eğer bir önceki düğümden gelmiyorsa, aktif ayarlardaki varsayılana dön.
+    console.warn("'kullanilacakVeriSeti' bir önceki düğümde bulunamadı. Aktif ayarlardaki varsayılan kullanılacak.");
+    nihaiVeriSeti = aktifAyarlar.varsayilan_veri_seti;
+  }
+
+  // 2. 'nihaiKurallar'ı belirle:
+  if (upstreamNodeOutput && upstreamNodeOutput.query && upstreamNodeOutput.query.kurallar) {
+    nihaiKurallar = upstreamNodeOutput.query.kurallar;
+    console.log(`'kurallar' upstreamNodeOutput.query içinden alındı: ${nihaiKurallar}`);
+  } else {
+    console.log(`'kurallar' için dinamik bir kaynak bulunamadı. Aktif ayarlardaki varsayılan ('${nihaiKurallar}') kullanılacak.`);
+  }
+
+  // Dosya yollarını nihaiVeriSeti'ne göre oluştur
+  const veriKlasoru = `/mnt/workflow_data/${nihaiVeriSeti}`;
+  const filePrefix = nihaiVeriSeti === "cagri_merkezi" ? "_cm" : "";
+
+  const employeesPath = `${veriKlasoru}/employees${filePrefix}.csv`;
+  const shiftsPath = `${veriKlasoru}/shifts${filePrefix}.csv`;
+  const skillsPath = `${veriKlasoru}/skills${filePrefix}.csv`;
+  const availabilityPath = `${veriKlasoru}/availability${filePrefix}.csv`;
+  const preferencesPath = `${veriKlasoru}/preferences${filePrefix}.csv`;
+
+  const configPath = nihaiVeriSeti === "cagri_merkezi" ?
+                    "/mnt/workflow_configs/cagri_merkezi_config.yaml" :
+                    "/mnt/workflow_configs/hospital_test_config.yaml";
+
+  // Sonuçları döndür
+  return [
     {
-      "kullanilacakVeriSeti": "{{ $node[\"Webhook\"].json.query.veriSeti || 'hastane' }}",
-      "basePath": "{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? '/veri_kaynaklari/cagri_merkezi/' : '/veri_kaynaklari/hastane/' }}",
-      "employeesFile": "{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'employees_cm.csv' : 'employees.csv' }}",
-      "shiftsFile": "{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'shifts_cm.csv' : 'shifts.csv' }}",
-      "skillsFile": "{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'skills_cm.csv' : 'skills.csv' }}",
-      "availabilityFile": "{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'availability_cm.csv' : 'availability.csv' }}",
-      "preferencesFile": "{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'preferences_cm.csv' : 'preferences.csv' }}"
+      veriSeti: nihaiVeriSeti,
+      kurallar: nihaiKurallar,
+      veriKlasoru,
+      employeesPath,
+      shiftsPath,
+      skillsPath,
+      availabilityPath,
+      preferencesPath,
+      configPath
     }
-    ```
-
-### 4. Ayar Düğümü
-
-- **Amaç**: Webhook parametreleri ve aktif ayarları kullanarak dosya yollarını belirlemek.
-- **Yapılandırma**:
-  - JavaScript Kodu:
-    ```javascript
-    // Girişleri al:
-    // items[0].json -> Bir önceki "Set" (Edit Fields) düğümünün çıktısı
-    // items[1].binary.data.data -> aktif_ayarlar.json dosyasının içeriği
-
-    const upstreamNodeOutput = items[0].json; // Bir önceki düğümün çıktısı
-
-    let aktifAyarlar;
-    try {
-      // items[1] 'aktif_ayarlar.json' dosyasını içeriyor olmalı
-      const aktifAyarlarStr = Buffer.from(items[1].binary.data.data, 'base64').toString();
-      aktifAyarlar = JSON.parse(aktifAyarlarStr);
-    } catch (error) {
-      aktifAyarlar = {
-        varsayilan_veri_seti: "hastane",
-        varsayilan_kural_seti_adi: "temel_kurallar" // kurallar için varsayılan
-      };
-    }
-
-    let nihaiVeriSeti;
-    let nihaiKurallar = aktifAyarlar.varsayilan_kural_seti_adi;
-
-    // 1. 'nihaiVeriSeti'ni belirle:
-    if (upstreamNodeOutput && upstreamNodeOutput.kullanilacakVeriSeti) {
-      nihaiVeriSeti = upstreamNodeOutput.kullanilacakVeriSeti;
-    } else {
-      nihaiVeriSeti = aktifAyarlar.varsayilan_veri_seti;
-    }
-
-    // 2. 'nihaiKurallar'ı belirle:
-    if (upstreamNodeOutput && upstreamNodeOutput.query && upstreamNodeOutput.query.kurallar) {
-      nihaiKurallar = upstreamNodeOutput.query.kurallar;
-    }
-
-    // Dosya yollarını nihaiVeriSeti'ne göre oluştur
-    const veriKlasoru = `/mnt/workflow_data/${nihaiVeriSeti}`;
-    const filePrefix = nihaiVeriSeti === "cagri_merkezi" ? "_cm" : "";
-
-    const employeesPath = `${veriKlasoru}/employees${filePrefix}.csv`;
-    const shiftsPath = `${veriKlasoru}/shifts${filePrefix}.csv`;
-    const skillsPath = `${veriKlasoru}/skills${filePrefix}.csv`;
-    const availabilityPath = `${veriKlasoru}/availability${filePrefix}.csv`;
-    const preferencesPath = `${veriKlasoru}/preferences${filePrefix}.csv`;
-
-    const configPath = nihaiVeriSeti === "cagri_merkezi" ?
-                      "/mnt/workflow_configs/cagri_merkezi_config.yaml" :
-                      "/mnt/workflow_configs/hospital_test_config.yaml";
-
-    // Sonuçları döndür
-    return [
-      {
-        veriSeti: nihaiVeriSeti,
-        kurallar: nihaiKurallar,
-        veriKlasoru,
-        employeesPath,
-        shiftsPath,
-        skillsPath,
-        availabilityPath,
-        preferencesPath,
-        configPath
-      }
-    ];
-    ```
-  - **Örnek Çıktı**:
-    ```json
-    {
-      "veriSeti": "hastane",
-      "kurallar": "temel_kurallar",
-      "veriKlasoru": "/mnt/workflow_data/hastane",
-      "employeesPath": "/mnt/workflow_data/hastane/employees.csv",
-      "shiftsPath": "/mnt/workflow_data/hastane/shifts.csv",
-      "skillsPath": "/mnt/workflow_data/hastane/skills.csv",
-      "availabilityPath": "/mnt/workflow_data/hastane/availability.csv",
-      "preferencesPath": "/mnt/workflow_data/hastane/preferences.csv",
-      "configPath": "/mnt/workflow_configs/hospital_test_config.yaml"
-    }
-    ```
+  ];
+  ```
+- **Örnek Çıktı**:
+  ```json
+  {
+    "veriSeti": "hastane",
+    "kurallar": "temel_kurallar",
+    "veriKlasoru": "/mnt/workflow_data/hastane",
+    "employeesPath": "/mnt/workflow_data/hastane/employees.csv",
+    "shiftsPath": "/mnt/workflow_data/hastane/shifts.csv",
+    "skillsPath": "/mnt/workflow_data/hastane/skills.csv",
+    "availabilityPath": "/mnt/workflow_data/hastane/availability.csv",
+    "preferencesPath": "/mnt/workflow_data/hastane/preferences.csv",
+    "configPath": "/mnt/workflow_configs/hospital_test_config.yaml"
+  }
+  ```
 
 ### 5. Oku Temel Konfig Düğümü
 
+- **Node Type**: `n8n-nodes-base.readWriteFile` (v1)
+- **Node ID**: `205714c3-3e34-4dec-9c92-09d5e7785e3f`
+- **Position**: `[400, 440]`
 - **Amaç**: Belirlenen veri setine ait YAML konfigürasyon dosyasını okumak.
 - **Yapılandırma**:
-  - File Selector: `={{ $node["Ayar"].json.configPath }}`
-  - Options: fileName: baseConfigYamlContent
+  ```json
+  {
+    "fileSelector": "={{ $node[\"Ayar\"].json.configPath }}",
+    "options": {
+      "fileName": "baseConfigYamlContent"
+    }
+  }
+  ```
 
-### 6. Dosya Okuma Düğümleri
+### 6. CSV Dosya Okuma Düğümleri
 
-- **Employees**: `{{ $node["Ayar"].json.employeesPath }}` yolundaki CSV dosyasını okur.
-- **Shifts**: `{{ $node["Ayar"].json.shiftsPath }}` yolundaki CSV dosyasını okur.
-- **Availability**: `{{ $node["Ayar"].json.availabilityPath }}` yolundaki CSV dosyasını okur.
-- **Preferences**: `{{ $node["Ayar"].json.preferencesPath }}` yolundaki CSV dosyasını okur.
-- **Skills**: `{{ $node["Ayar"].json.skillsPath }}` yolundaki CSV dosyasını okur.
+Her CSV dosyası için ayrı bir Read/Write Files node'u:
 
-### 7. CSV Çıkarma Düğümleri
+#### 6.1 Employees Node
+- **Node Type**: `n8n-nodes-base.readWriteFile` (v1)
+- **Node ID**: `370cc3fd-506a-4a55-8c1d-b936cf05ac3c`
+- **Position**: `[180, -160]`
+- **File Selector**: `={{ $node["Ayar"].json.employeesPath }}`
+- **Binary Property**: `employeesData`
 
-- Her bir dosya okuma düğümünden sonra, okunan CSV verilerini JSON formatına dönüştürür.
-- **Extract Employees CSV**, **Extract Shifts CSV**, **Extract Availability CSV**, **Extract Preferences CSV**, **Extract Skills CSV**
+#### 6.2 Shifts Node
+- **Node Type**: `n8n-nodes-base.readWriteFile` (v1)
+- **Position**: `[180, 40]`
+- **File Selector**: `={{ $node["Ayar"].json.shiftsPath }}`
+- **Binary Property**: `shiftData`
+
+#### 6.3 Avaibility Node (Yazım hatası mevcut)
+- **Node Type**: `n8n-nodes-base.readWriteFile` (v1)
+- **Position**: `[180, 240]`
+- **File Selector**: `={{ $node["Ayar"].json.availabilityPath }}`
+- **Binary Property**: `availabilityData`
+
+#### 6.4 Preferences Node
+- **Node Type**: `n8n-nodes-base.readWriteFile` (v1)
+- **Position**: `[180, 640]`
+- **File Selector**: `={{ $node["Ayar"].json.preferencesPath }}`
+- **Binary Property**: `preferenceData`
+
+#### 6.5 Skills Node
+- **Node Type**: `n8n-nodes-base.readWriteFile` (v1)
+- **Node ID**: `a2c70ed9-bd77-4e1c-8b75-2be8a88e53d5`
+- **Position**: `[180, 840]`
+- **File Selector**: `={{ $node["Ayar"].json.skillsPath }}`
+- **Binary Property**: `skillData`
+
+### 7. CSV Extract Düğümleri
+
+Her CSV dosyası için binary data'yı JSON'a dönüştüren extract node'ları:
+
+#### 7.1 Extract Employees CSV
+- **Node Type**: `n8n-nodes-base.extractFromFile` (v1)
+- **Node ID**: `4f6ab5db-df0f-464c-98f0-2db83e05d146`
+- **Position**: `[400, -160]`
+- **Binary Property**: `employeesData`
+- **Header Row**: true
+
+#### 7.2 Extract Shifts CSV
+- **Node Type**: `n8n-nodes-base.extractFromFile` (v1)
+- **Node ID**: `bd4a1703-a404-4f63-a585-a0acc4076742`
+- **Position**: `[400, 40]`
+- **Binary Property**: `shiftData`
+- **Header Row**: true
+
+#### 7.3 Extract Availability CSV
+- **Node Type**: `n8n-nodes-base.extractFromFile` (v1)
+- **Node ID**: `86e262c6-b1c3-4895-8aae-bd3d66da9de3`
+- **Position**: `[400, 240]`
+- **Binary Property**: `availabilityData`
+- **Header Row**: true
+
+#### 7.4 Extract Preferences CSV
+- **Node Type**: `n8n-nodes-base.extractFromFile` (v1)
+- **Node ID**: `8b2f572a-5fb8-40f8-8c69-220161154ba4`
+- **Position**: `[400, 640]`
+- **Binary Property**: `preferenceData`
+- **Header Row**: true
+
+#### 7.5 Extract Skills CSV
+- **Node Type**: `n8n-nodes-base.extractFromFile` (v1)
+- **Node ID**: `9fb16afb-c533-4297-bec5-400848a0e8c4`
+- **Position**: `[400, 840]`
+- **Binary Property**: `skillData`
+- **Header Row**: true
 
 ### 8. Merge Düğümü
 
-- **Amaç**: Tüm CSV verilerini tek bir veri akışında birleştirmek.
+- **Node Type**: `n8n-nodes-base.merge` (v3.1)
+- **Node ID**: `902db380-4074-4072-8bee-93db4ba910d5`
+- **Position**: `[620, 277]`
+- **Amaç**: Tüm CSV verilerini ve YAML konfigürasyonunu tek bir veri akışında birleştirmek.
 - **Yapılandırma**:
-  - Number Inputs: 5
-  - Mode: Merge By Position (3.1 sürümü)
+  ```json
+  {
+    "numberInputs": 6,
+    "mode": "mergeByPosition"
+  }
+  ```
+- **Input Connections**:
+  1. Extract Employees CSV (index 0)
+  2. Extract Shifts CSV (index 1)
+  3. Extract Availability CSV (index 2)
+  4. Extract Preferences CSV (index 3)
+  5. Extract Skills CSV (index 4)
+  6. Oku Temel Konfig (index 5) - YAML konfigürasyonu
 
-### 9. Code Düğümü
+### 9. Code Düğümü (Ana Veri İşleme)
 
-- **Amaç**: Verileri işleyip API'ye gönderilecek formata dönüştürmek.
-- **Yapılandırma**:
-  - JavaScript Kodu:
-    ```javascript
-    // Girdileri alalım:
-    // items[0] -> Merge edilmiş CSV verileri (Merge düğümünden)
-    // items[1] -> Temel konfigürasyon YAML içeriği (Oku Temel Konfig düğümünden)
-    // Webhook verisine erişim: $node["Webhook"].json kullanacağız.
+- **Node Type**: `n8n-nodes-base.code` (v2)
+- **Node ID**: `d0ecc543-c0f3-4e46-993f-5e0728ebe767`
+- **Position**: `[840, 340]`
+- **Amaç**: Tüm verileri işleyip FastAPI'ye gönderilecek OptimizationRequest formatına dönüştürmek.
+- **Girdi**: Merge node'undan gelen 6 input (5 CSV + 1 YAML)
+- **JavaScript Kodu** (Gerçek kod):
+  ```javascript
+  // Girdileri alalım:
+  // allMergedItems -> Merge edilmiş CSV verileri VE YAML içeriğini içerir
+  // Webhook verisine erişim.
+  const allMergedItems = $items("Merge"); // Tüm birleşmiş öğeleri al (CSV'ler + YAML)
+  const webhookData = $items("Webhook")[0].json; // Webhook verisini al
 
-    const allMergedItems = $items("Merge"); // Tüm birleşmiş öğeleri al
-    const baseConfigItem = $items("Oku Temel Konfig")[0]; // YAML içeriğini al
-    const webhookData = $node["Webhook"].json; // Webhook verisini al (query ve body içerir)
+  // 1. Webhook'tan UI parametrelerini al
+  const uiObjectiveWeights = webhookData.body.objective_weights;
+  const uiSolverParams = webhookData.body.solver_params;
 
-    // 1. Webhook'tan UI parametrelerini al
-    const uiObjectiveWeights = webhookData.body.objective_weights;
-    const uiSolverParams = webhookData.body.solver_params; // { time_limit_seconds: X, use_mip_solver: Y }
+  // 2. Temel konfigürasyon YAML'ını parse et
+  // YAML verisi 'allMergedItems' dizisinin son elemanı olmalı.
+  // DİKKAT: Eğer Merge düğümüne 6 giriş varsa, YAML verisi allMergedItems[5] olmalı.
+  const baseConfigItem = allMergedItems[allMergedItems.length - 1]; // Son öğeyi YAML olarak varsay
+  let baseConfigJson = {};
+  const yaml = require('js-yaml');
 
-    // 2. Temel konfigürasyon YAML'ını parse et (js-yaml gerektirir)
-    const yaml = require('js-yaml');
-    let baseConfigJson = {};
-    try {
-      // Read File düğümü çıktıyı 'data' property'si altında binary olarak verir
+  try {
+    if (baseConfigItem && baseConfigItem.binary && baseConfigItem.binary.data) {
       const baseConfigYAML = Buffer.from(baseConfigItem.binary.data.data, 'base64').toString();
       baseConfigJson = yaml.load(baseConfigYAML);
       console.log("Temel Konfigürasyon başarıyla yüklendi.");
-    } catch (e) {
-      console.error("Temel YAML konfigürasyonu parse edilemedi:", e);
-      // Hata durumunda varsayılan bir yapı oluşturabiliriz veya hata fırlatabiliriz
-      // Şimdilik boş bir obje ile devam edelim, Python tarafı bunu yönetebilir
-      baseConfigJson = { optimization_core: {} }; // Güvenlik için temel yapıyı oluşturalım
-    }
-
-    // 3. Temel konfigürasyonu UI parametreleriyle güncelle
-    if (!baseConfigJson.optimization_core) {
-      baseConfigJson.optimization_core = {};
-    }
-    // Eğer UI'dan gelen parametreler varsa, konfigürasyondakileri üzerine yaz
-    if (uiObjectiveWeights) {
-        baseConfigJson.optimization_core.objective_weights = uiObjectiveWeights;
-        console.log("Hedef ağırlıkları UI'dan gelenle güncellendi.");
     } else {
-        console.log("UI'dan hedef ağırlığı gelmedi, temel konfigürasyondaki kullanılacak.");
+      console.error("Merge'den gelen YAML konfigürasyon öğesi beklenen formatta değil:", baseConfigItem);
+      baseConfigJson = { error: "YAML item missing or malformed", optimization_core: {} };
     }
-    if (uiSolverParams && uiSolverParams.time_limit_seconds !== undefined) {
-        baseConfigJson.optimization_core.solver_time_limit_seconds = uiSolverParams.time_limit_seconds;
-        console.log("Çözücü zaman limiti UI'dan gelenle güncellendi.");
-    } else {
-         console.log("UI'dan çözücü zaman limiti gelmedi, temel konfigürasyondaki kullanılacak.");
-    }
-    if (uiSolverParams && uiSolverParams.use_mip_solver !== undefined) {
-        // Python API'nizin beklediği alan adını kontrol edin (örn: use_mip_solver)
-        baseConfigJson.optimization_core.use_mip_solver = uiSolverParams.use_mip_solver;
-         console.log("Gelişmiş çözücü ayarı UI'dan gelenle güncellendi.");
-    } else {
-         console.log("UI'dan gelişmiş çözücü ayarı gelmedi, temel konfigürasyondaki kullanılacak.");
+  } catch (e) {
+    console.error("Temel YAML konfigürasyonu parse edilemedi:", e);
+    baseConfigJson = { error: "YAML parse error", optimization_core: {} };
+  }
+
+  // 3. Temel konfigürasyonu UI parametreleriyle güncelle
+  if (!baseConfigJson.optimization_core) {
+    baseConfigJson.optimization_core = {}; // Hata durumunda bile bu alanın var olmasını sağla
+  }
+  if (uiObjectiveWeights) {
+      baseConfigJson.optimization_core.objective_weights = uiObjectiveWeights;
+      console.log("Hedef ağırlıkları UI'dan gelenle güncellendi.");
+  }
+  if (uiSolverParams && uiSolverParams.time_limit_seconds !== undefined) {
+      baseConfigJson.optimization_core.solver_time_limit_seconds = uiSolverParams.time_limit_seconds;
+      console.log("Çözücü zaman limiti UI'dan gelenle güncellendi.");
+  }
+  if (uiSolverParams && uiSolverParams.use_mip_solver !== undefined) {
+      baseConfigJson.optimization_core.use_mip_solver = uiSolverParams.use_mip_solver;
+       console.log("Gelişmiş çözücü ayarı UI'dan gelenle güncellendi.");
+  }
+
+  // 4. input_data'yı oluştur
+  const employees = [];
+  const skills = [];
+  const shifts = [];
+  const availability = [];
+  const preferences = [];
+  let unclassifiedCount = 0;
+
+  // Birleştirilmiş öğeleri döngüye al, AMA SONUNCUYU (YAML) ATLA
+  // Bu yüzden döngü allMergedItems.length - 1'e kadar gitmeli.
+  for (let i = 0; i < allMergedItems.length - 1; i++) { // SON ÖĞEYİ HARİÇ TUT
+    const item = allMergedItems[i];
+
+    if (!item || !item.json) {
+        console.warn(`UYARI: Geçersiz CSV öğe yapısı atlanıyor (index ${i}):`, item);
+        continue;
     }
 
-    // 4. input_data'yı oluştur (Mevcut kodunuzdaki sınıflandırma mantığı)
-    const employees = [];
-    const skills = [];
-    const shifts = [];
-    const availability = [];
-    const preferences = [];
-    let unclassifiedCount = 0;
+    const data = item.json;
+    let categorized = false;
 
-    // Birleştirilmiş tüm öğeleri döngüye al ve doğru dizilere ayır
-    for (let i = 0; i < (allMergedItems ? allMergedItems.length : 0); i++) {
-      const item = allMergedItems[i];
+    if (data.hasOwnProperty('preference_score')) {
+      preferences.push(data);
+      categorized = true;
+    } else if (data.hasOwnProperty('shift_id') && data.hasOwnProperty('start_time') && !data.hasOwnProperty('employee_id') && !data.hasOwnProperty('role')) {
+      shifts.push(data);
+      categorized = true;
+    } else if (data.hasOwnProperty('is_available') && data.hasOwnProperty('date') && data.hasOwnProperty('employee_id')) {
+      availability.push(data);
+      categorized = true;
+    } else if (data.hasOwnProperty('skill') && data.hasOwnProperty('employee_id') && !data.hasOwnProperty('role')) {
+      skills.push(data);
+      categorized = true;
+    } else if (data.hasOwnProperty('role') && data.hasOwnProperty('employee_id')) {
+      employees.push(data);
+      categorized = true;
+    }
 
-      if (!item || !item.json) {
-          console.log(`UYARI: Geçersiz öğe yapısı atlanıyor (index ${i}):`, item);
-          continue;
+    if (!categorized) {
+      unclassifiedCount++;
+      if (unclassifiedCount <= 5) {
+          console.warn(`UYARI: CSV Öğesi sınıflandırılamadı (index ${i}). Veri:`, JSON.stringify(data));
+      } else if (unclassifiedCount === 6) {
+          console.warn("UYARI: Daha fazla sınıflandırılamayan CSV öğesi loglanmayacak...");
       }
-
-      const data = item.json;
-      let categorized = false;
-
-      // Veri türünü ayırt etmek için anahtarları kontrol et (en spesifik önce)
-      if (data.hasOwnProperty('preference_score')) {
-        preferences.push(data);
-        categorized = true;
-      } else if (data.hasOwnProperty('shift_id') && data.hasOwnProperty('start_time') && !data.hasOwnProperty('employee_id') && !data.hasOwnProperty('role')) { // Employee'den ayırt etmek için ek kontrol
-        shifts.push(data);
-        categorized = true;
-      } else if (data.hasOwnProperty('is_available') && data.hasOwnProperty('date') && data.hasOwnProperty('employee_id')) {
-        availability.push(data);
-        categorized = true;
-      // Skill kontrolü - 'role' içermediğinden emin olalım
-      } else if (data.hasOwnProperty('skill') && data.hasOwnProperty('employee_id') && !data.hasOwnProperty('role')) {
-        skills.push(data);
-        categorized = true;
-      // Employee kontrolü - 'role' içermeli
-      } else if (data.hasOwnProperty('role') && data.hasOwnProperty('employee_id')) {
-        employees.push(data);
-        categorized = true;
-      }
-
-      if (!categorized) {
-        unclassifiedCount++;
-        if (unclassifiedCount <= 5) {
-            console.log(`UYARI: Öğe sınıflandırılamadı (index ${i}). Veri:`, JSON.stringify(data));
-        } else if (unclassifiedCount === 6) {
-            console.log("UYARI: Daha fazla sınıflandırılamayan öğe loglanmayacak...");
-        }
-      }
     }
+  }
 
-    console.log(`DEBUG: Sınıflandırma tamamlandı. Sayılar - Employees: ${employees.length}, Skills: ${skills.length}, Shifts: ${shifts.length}, Availability: ${availability.length}, Preferences: ${preferences.length}, Unclassified: ${unclassifiedCount}`);
+  console.log(`DEBUG: CSV Sınıflandırma tamamlandı. Sayılar - Employees: ${employees.length}, Skills: ${skills.length}, Shifts: ${shifts.length}, Availability: ${availability.length}, Preferences: ${preferences.length}, Unclassified: ${unclassifiedCount}`);
 
-    // 5. Departman istatistiklerini oluştur
-    const departmentStats = {};
+  const input_data = { employees, skills, shifts, availability, preferences };
 
-    // Çalışan departmanlarını topla
-    employees.forEach(emp => {
-      if (emp.department) {
-        if (!departmentStats[emp.department]) {
-          departmentStats[emp.department] = { employeeCount: 0, shiftCount: 0 };
-        }
-        departmentStats[emp.department].employeeCount++;
-      }
-    });
+  if (employees.length === 0 || shifts.length === 0 || availability.length === 0) {
+      console.error(`HATA: Employees(${employees.length}), Shifts(${shifts.length}) veya Availability(${availability.length}) CSV dizilerinden en az biri boş! Sınıflandırma mantığı veya girdi verisi kontrol edilmeli.`);
+  }
 
-    // Vardiya departmanlarını topla
-    shifts.forEach(shift => {
-      if (shift.department) {
-        if (!departmentStats[shift.department]) {
-          departmentStats[shift.department] = { employeeCount: 0, shiftCount: 0 };
-        }
-        departmentStats[shift.department].shiftCount++;
-      }
-    });
+  // 5. Python API'sine gönderilecek nihai istek gövdesini oluştur
+  const requestBodyForPython = {
+    configuration: baseConfigJson,
+    input_data: input_data
+  };
 
-    // Vardiyası olan ancak çalışanı olmayan departmanları kontrol et
-    const departmentsWithShiftsButNoEmployees = Object.keys(departmentStats)
-      .filter(dept => departmentStats[dept].shiftCount > 0 && departmentStats[dept].employeeCount === 0);
+  console.log("Python API'sine gönderilecek son istek gövdesi:", JSON.stringify(requestBodyForPython, null, 2));
 
-    if (departmentsWithShiftsButNoEmployees.length > 0) {
-      console.warn(`UYARI: Aşağıdaki departmanlarda vardiya var ancak çalışan yok: ${departmentsWithShiftsButNoEmployees.join(', ')}`);
-    }
-
-    const input_data = { employees, skills, shifts, availability, preferences };
-
-    // Kontrol: Herhangi bir dizi hala boş mu? (Özellikle skills, shifts, availability önemlidir)
-    if (employees.length === 0 || shifts.length === 0 || availability.length === 0) {
-        console.error(`HATA: Employees(${employees.length}), Shifts(${shifts.length}) veya Availability(${availability.length}) dizilerinden en az biri boş! Sınıflandırma mantığı veya girdi verisi kontrol edilmeli.`);
-    }
-
-    // 6. Python API'sine gönderilecek nihai istek gövdesini oluştur
-    const requestBodyForPython = {
-      configuration: baseConfigJson, // Güncellenmiş tam konfigürasyon nesnesi
-      input_data: input_data,
-      department_stats: departmentStats // Departman istatistiklerini ekle
-    };
-
-    console.log("Python API'sine gönderilecek son istek gövdesi:", JSON.stringify(requestBodyForPython, null, 2));
-
-    // Sonucu döndür
-    return [ { json: requestBodyForPython } ];
-    ```
+  return [ { json: requestBodyForPython } ];
+  ```
 
 ### 10. HTTP Request Düğümü
 
-- **Amaç**: Hazırlanan verileri Optimizasyon API'sine göndermek.
+- **Node Type**: `n8n-nodes-base.httpRequest` (v4.2)
+- **Node ID**: `f483ae1d-4053-4f1e-8877-374900e3a770`
+- **Position**: `[1060, 340]`
+- **Amaç**: Hazırlanan OptimizationRequest'i FastAPI backend'ine göndermek.
 - **Yapılandırma**:
-  - Method: POST
-  - URL: http://host.docker.internal:8000/optimize veya üretim ortamında belirtilen URL
-  - Send Headers: true
-  - Header Parameters: Content-Type: application/json
-  - Send Body: true
-  - Specify Body: json
-  - JSON Body: `={{ $json }}`
+  ```json
+  {
+    "method": "POST",
+    "url": "http://host.docker.internal:8000/optimize",
+    "sendHeaders": true,
+    "headerParameters": {
+      "parameters": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    "sendBody": true,
+    "specifyBody": "json",
+    "jsonBody": "={{ $json }}",
+    "options": {}
+  }
+  ```
+- **Response Mode**: Workflow'un son node'u olarak response döndürür
 
 ## Hata Ayıklama ve Sorun Giderme
 
@@ -616,3 +739,161 @@ Bu iş akışı, farklı veri setleri ve konfigürasyonlar için dinamik olarak 
    - Sonuçları `optimization_result.json` dosyasında görüntüleyin
 
 Bu dinamik yapı sayesinde, farklı kurumlar için aynı optimizasyon altyapısını kullanabilir, sadece veri setlerini ve konfigürasyon dosyalarını değiştirerek farklı senaryolara uyarlayabilirsiniz. Ayrıca, webhook parametreleri ile optimizasyon davranışını anında özelleştirebilirsiniz.
+
+## Environment Variables ve Docker Konfigürasyonu
+
+### n8n Environment Variables
+```yaml
+# docker-compose.yml
+n8n:
+  environment:
+    - GENERIC_TIMEZONE=Europe/Istanbul
+    - N8N_EDITOR_BASE_URL=http://localhost:5678
+    - NODE_FUNCTION_ALLOW_EXTERNAL=js-yaml,yaml,fs-extra
+```
+
+### Docker Volume Mappings
+```yaml
+# docker-compose.yml
+n8n:
+  volumes:
+    - ./n8n_data:/home/node/.n8n                    # n8n workflow ve ayar dosyaları
+    - ./configs:/mnt/workflow_configs                # YAML konfigürasyon dosyaları
+    - ./veri_kaynaklari:/mnt/workflow_data          # CSV veri dosyaları
+```
+
+## Step-by-Step Kurulum Rehberi
+
+### 1. Ön Gereksinimler
+- Docker ve Docker Compose kurulu olmalı
+- n8n container'ı çalışır durumda olmalı
+- FastAPI backend servisi aktif olmalı
+
+### 2. Workflow Import Etme
+1. n8n arayüzünde (http://localhost:5678) "Import from file" seçeneğini kullanın
+2. `Vardiya.json` dosyasını seçin ve import edin
+3. Workflow otomatik olarak aktif hale gelecektir
+
+### 3. Dosya Yapısını Hazırlama
+```
+project_root/
+├── configs/
+│   ├── aktif_ayarlar.json
+│   ├── hospital_test_config.yaml
+│   └── cagri_merkezi_config.yaml
+└── veri_kaynaklari/
+    ├── hastane/
+    │   ├── employees.csv
+    │   ├── shifts.csv
+    │   ├── availability.csv
+    │   ├── preferences.csv
+    │   └── skills.csv
+    └── cagri_merkezi/
+        ├── employees_cm.csv
+        ├── shifts_cm.csv
+        ├── availability_cm.csv
+        ├── preferences_cm.csv
+        └── skills_cm.csv
+```
+
+### 4. aktif_ayarlar.json Konfigürasyonu
+```json
+{
+  "varsayilan_veri_seti": "hastane",
+  "varsayilan_kural_seti_adi": "temel_kurallar"
+}
+```
+
+### 5. Webhook Test Etme
+```bash
+curl -X POST "http://localhost:5678/webhook/98a3eec5-cce7-4a93-b2e5-2275b192b265" \
+  -H "Content-Type: application/json" \
+  -d '{"veriSeti": "hastane"}'
+```
+
+## Gelişmiş Hata Ayıklama Teknikleri
+
+### Debug Teknikleri
+
+#### 1. **Console Log İnceleme**
+```javascript
+// Code node'larında debug için
+console.log("Debug: Webhook data:", JSON.stringify(webhookData, null, 2));
+console.log("Debug: Merged items count:", allMergedItems.length);
+```
+
+#### 2. **Node Output İnceleme**
+- n8n arayüzünde her node'a tıklayın
+- "Executions" sekmesinden son çalıştırmaları görüntüleyin
+- Input/Output data'yı JSON formatında inceleyin
+
+#### 3. **Webhook Test Etme**
+```bash
+# Minimal test
+curl -X POST "http://localhost:5678/webhook/98a3eec5-cce7-4a93-b2e5-2275b192b265" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+# Detaylı test
+curl -X POST "http://localhost:5678/webhook/98a3eec5-cce7-4a93-b2e5-2275b192b265" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "veriSeti": "hastane",
+    "objective_weights": {"understaffing_penalty": 100}
+  }' -v
+```
+
+### Spesifik Hata Senaryoları
+
+#### 1. **JavaScript Runtime Hatası**
+**Semptom**: "ReferenceError" veya "TypeError" hataları
+**Çözüm**:
+- `NODE_FUNCTION_ALLOW_EXTERNAL=js-yaml` environment variable'ının set olduğunu kontrol edin
+- n8n container'ını restart edin
+- JavaScript kodundaki syntax hatalarını kontrol edin
+
+#### 2. **Binary Data Processing Hatası**
+**Semptom**: "Cannot read property 'data' of undefined"
+**Çözüm**:
+- Binary property names'lerin doğru olduğunu kontrol edin
+- Extract CSV node'larının "Header Row: true" ayarını kontrol edin
+- File read node'larının output'unu inceleyin
+
+#### 3. **Merge Node Input Hatası**
+**Semptom**: "Expected 6 inputs but got X"
+**Çözüm**:
+- Merge node'unun `numberInputs: 6` ayarını kontrol edin
+- Tüm CSV extract node'larının Merge'e bağlı olduğunu kontrol edin
+- YAML config node'unun da Merge'e bağlı olduğunu kontrol edin
+
+### Performance Monitoring
+
+#### 1. **Execution Time Tracking**
+- n8n arayüzünde execution time'ları izleyin
+- Yavaş node'ları tespit edin
+- Büyük CSV dosyaları için timeout ayarlarını artırın
+
+#### 2. **Memory Usage**
+- Docker container memory usage'ını izleyin
+- Büyük dosyalar için memory limit'lerini artırın
+
+#### 3. **Error Rate Monitoring**
+- Failed execution'ları düzenli olarak kontrol edin
+- Retry mekanizmalarının çalıştığından emin olun
+
+## Güvenlik Best Practices
+
+### 1. **Webhook Security**
+- Webhook URL'lerini güvenli tutun
+- Production'da authentication ekleyin
+- Rate limiting uygulayın
+
+### 2. **File System Security**
+- Dosya yollarında directory traversal saldırılarına karşı dikkatli olun
+- Dosya izinlerini minimum gerekli seviyede tutun
+- Input validation uygulayın
+
+### 3. **API Security**
+- FastAPI endpoint'lerini uygun authentication ile koruyun
+- HTTPS kullanın (production'da)
+- Request size limit'leri uygulayın
