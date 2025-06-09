@@ -11,6 +11,25 @@ const apiClient = axios.create({
   },
 });
 
+// Request interceptor - Authorization header'ı otomatik ekler
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    
+    // UTF-8 desteği için header ekle
+    config.headers['Accept'] = 'application/json; charset=utf-8';
+    config.headers['Content-Type'] = 'application/json; charset=utf-8';
+    
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // API fonksiyonları
 export const api = {
   // Dashboard verilerini alma

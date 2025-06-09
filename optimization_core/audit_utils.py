@@ -400,11 +400,11 @@ def get_audit_logs(
                 "created_at": log.created_at.replace(tzinfo=timezone.utc).isoformat(),
                 "user": {
                     "username": log.user.username,
-                    "full_name": f"{log.user.first_name} {log.user.last_name}"
+                    "full_name": "Sistem Yoneticisi" if log.user.username == "admin" else f"{log.user.first_name} {log.user.last_name}"
                 } if log.user else None,
                 "target_user": {
                     "username": log.target_user.username,
-                    "full_name": f"{log.target_user.first_name} {log.target_user.last_name}"
+                    "full_name": "Sistem Yoneticisi" if log.target_user.username == "admin" else f"{log.target_user.first_name} {log.target_user.last_name}"
                 } if log.target_user else None
             }
             log_list.append(log_data)

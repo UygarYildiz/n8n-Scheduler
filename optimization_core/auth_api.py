@@ -411,11 +411,20 @@ async def get_roles(
     """Rolleri listele"""
     roles = db.query(Role).filter(Role.is_active == True).all()
     
+    # Role display name'lerini temiz Türkçe metinlerle değiştir
+    role_display_map = {
+        'super_admin': 'Super Yonetici',
+        'org_admin': 'Kurum Yoneticisi', 
+        'manager': 'Vardiya Yoneticisi',
+        'planner': 'Planlamaci',
+        'staff': 'Personel'
+    }
+    
     return [
         {
             "id": role.id,
             "name": role.name,
-            "display_name": role.display_name,
+            "display_name": role_display_map.get(role.name, role.display_name),
             "description": role.description,
             "permissions": role.permissions
         }
@@ -494,14 +503,31 @@ async def get_all_sessions(
     session_list = []
     for session in sessions:
         user = session.user
+        # Admin kullanıcısı için özel gösterim
+        if user.username == "admin":
+            full_name = "Sistem Yoneticisi"
+        else:
+            full_name = f"{user.first_name} {user.last_name}"
+        
+        # Role display name'ini temiz metinle değiştir
+        role_display_map = {
+            'super_admin': 'Super Yonetici',
+            'org_admin': 'Kurum Yoneticisi', 
+            'manager': 'Vardiya Yoneticisi',
+            'planner': 'Planlamaci',
+            'staff': 'Personel'
+        }
+        
+        role_display = role_display_map.get(user.role.name, user.role.display_name) if user.role else None
+            
         session_info = {
             "id": session.id,
             "token_jti": session.token_jti,
             "user_id": session.user_id,
             "username": user.username,
-            "full_name": f"{user.first_name} {user.last_name}",
+            "full_name": full_name,
             "organization": user.organization.name if user.organization else None,
-            "role": user.role.display_name if user.role else None,
+            "role": role_display,
             "created_at": session.created_at.replace(tzinfo=timezone.utc).isoformat(),
             "expires_at": session.expires_at.replace(tzinfo=timezone.utc).isoformat(),
             "duration": str(datetime.now(timezone.utc) - session.created_at.replace(tzinfo=timezone.utc)),

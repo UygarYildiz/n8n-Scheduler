@@ -168,13 +168,28 @@ def check_permission(user: User, required_permission: str) -> bool:
 
 def get_user_info(user: User) -> Dict[str, Any]:
     """Kullanıcı bilgilerini döner (şifre hariç)"""
+    # Admin kullanıcısı için özel gösterim
+    if user.username == "admin":
+        full_name = "Sistem Yoneticisi"
+    else:
+        full_name = f"{user.first_name} {user.last_name}"
+    
+    # Role display name mapping
+    role_display_map = {
+        'super_admin': 'Super Yonetici',
+        'org_admin': 'Kurum Yoneticisi', 
+        'manager': 'Vardiya Yoneticisi',
+        'planner': 'Planlamaci',
+        'staff': 'Personel'
+    }
+        
     return {
         "id": user.id,
         "username": user.username,
         "email": user.email,
         "first_name": user.first_name,
         "last_name": user.last_name,
-        "full_name": f"{user.first_name} {user.last_name}",
+        "full_name": full_name,
         "organization": {
             "id": user.organization.id,
             "name": user.organization.name,
@@ -184,7 +199,7 @@ def get_user_info(user: User) -> Dict[str, Any]:
         "role": {
             "id": user.role.id,
             "name": user.role.name,
-            "display_name": user.role.display_name,
+            "display_name": role_display_map.get(user.role.name, user.role.display_name),
             "permissions": user.role.permissions
         } if user.role else None,
         "is_active": user.is_active,

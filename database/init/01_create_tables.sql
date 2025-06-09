@@ -59,13 +59,45 @@ CREATE TABLE IF NOT EXISTS user_sessions (
     INDEX idx_expires_at (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Audit log tablosu (güvenlik izleme için)
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    action ENUM(
+        'LOGIN_SUCCESS',
+        'LOGIN_FAILED', 
+        'LOGOUT',
+        'LOGOUT_ALL',
+        'SESSION_REVOKED',
+        'USER_CREATED',
+        'USER_UPDATED',
+        'USER_DELETED',
+        'USER_STATUS_CHANGED',
+        'PASSWORD_CHANGED',
+        'PROFILE_UPDATED',
+        'ADMIN_ACCESS'
+    ) NOT NULL,
+    user_id INT,
+    target_user_id INT,
+    description TEXT NOT NULL,
+    details JSON,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    success BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (target_user_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_action (action),
+    INDEX idx_user_id (user_id),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Varsayılan rolleri ekle
 INSERT INTO roles (name, display_name, description, permissions) VALUES
-('super_admin', 'Süper Yönetici', 'Tüm sistem yetkilerine sahip', JSON_ARRAY('*')),
-('org_admin', 'Kurum Yöneticisi', 'Kurum içi tüm yetkiler', JSON_ARRAY('org.*', 'users.read', 'users.create', 'users.update', 'optimization.*')),
-('manager', 'Vardiya Yöneticisi', 'Vardiya planlama ve yönetim', JSON_ARRAY('optimization.*', 'schedules.*', 'reports.read')),
-('planner', 'Planlamacı', 'Vardiya planlama', JSON_ARRAY('optimization.read', 'optimization.create', 'schedules.read', 'schedules.create')),
-('staff', 'Personel', 'Sadece kendi bilgilerini görüntüleme', JSON_ARRAY('profile.read', 'schedules.read.own'));
+('super_admin', 'Super Yonetici', 'Tum sistem yetkilerine sahip', JSON_ARRAY('*')),
+('org_admin', 'Kurum Yoneticisi', 'Kurum ici tum yetkiler', JSON_ARRAY('org.*', 'users.read', 'users.create', 'users.update', 'optimization.*')),
+('manager', 'Vardiya Yoneticisi', 'Vardiya planlama ve yonetim', JSON_ARRAY('optimization.*', 'schedules.*', 'reports.read')),
+('planner', 'Planlamaci', 'Vardiya planlama', JSON_ARRAY('optimization.read', 'optimization.create', 'schedules.read', 'schedules.create')),
+('staff', 'Personel', 'Sadece kendi bilgilerini goruntuleme', JSON_ARRAY('profile.read', 'schedules.read.own'));
 
 -- Varsayılan kurumları ekle
 INSERT INTO organizations (name, type, description, config_file) VALUES
@@ -75,4 +107,4 @@ INSERT INTO organizations (name, type, description, config_file) VALUES
 -- Varsayılan süper admin kullanıcısı (şifre: admin123)
 -- Şifre hash'i bcrypt ile oluşturulmuş
 INSERT INTO users (username, email, password_hash, first_name, last_name, organization_id, role_id) VALUES
-('admin', 'admin@optimization.local', '$2b$12$LQv3c1yqBw2LeOiMSk.VKuAiYlRD4uuoMUvnUuOp9YQjP5wqP.flO', 'Sistem', 'Yöneticisi', 1, 1); 
+('admin', 'admin@optimization.local', '$2b$12$z2JYJMYiU9J.iQRsgTE4s.vJd8fVhzA3ciXNx8u7lEJrEx/UN2KXC', 'Sistem', 'Yoneticisi', 1, 1); 

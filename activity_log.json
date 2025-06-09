@@ -1,6 +1,15 @@
 [
   {
     "id": "act21",
+    "date": "09.06.2025 23:38",
+    "action": "Çizelgeleme tamamlandı",
+    "detail": "Başarılı optimizasyon",
+    "color": "primary.main",
+    "icon": "BoltIcon",
+    "timestamp": 1749501532
+  },
+  {
+    "id": "act21",
     "date": "09.06.2025 23:13",
     "action": "Çizelgeleme tamamlandı",
     "detail": "Başarılı optimizasyon",
@@ -169,14 +178,5 @@
     "color": "primary.main",
     "icon": "BoltIcon",
     "timestamp": 1748171773
-  },
-  {
-    "id": "act21",
-    "date": "25.05.2025 14:15",
-    "action": "Çizelgeleme tamamlandı",
-    "detail": "Başarılı optimizasyon",
-    "color": "primary.main",
-    "icon": "BoltIcon",
-    "timestamp": 1748171737
   }
 ]
