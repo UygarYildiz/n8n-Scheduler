@@ -197,9 +197,18 @@ async def add_utf8_header(request: Request, call_next):
     return response
 
 # CORS middleware ekle
+# CORS origins - environment'a göre ayarla
+cors_origins = ["http://localhost:3001", "http://localhost:3000"]  # Development default
+if os.getenv("ENVIRONMENT") == "production":
+    production_origins = os.getenv("CORS_ORIGINS", "").split(",")
+    if production_origins and production_origins[0]:  # Boş string kontrolü
+        cors_origins = [origin.strip() for origin in production_origins]
+    else:
+        cors_origins = ["*"]  # Fallback, güvenlik için production'da belirli URL'ler kullanın
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*", "http://localhost:3000"],  # Tüm originlere ve frontend'e özel olarak izin ver
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],  # Tüm HTTP metodlarına izin ver
     allow_headers=["*"],  # Tüm headerlara izin ver

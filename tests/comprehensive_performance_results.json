@@ -3,9 +3,9 @@
     "hastane": [
       {
         "status": "OPTIMAL",
-        "build_time": 0.03518319129943848,
-        "solve_time": 0.16335368156433105,
-        "total_time": 0.19853782653808594,
+        "build_time": 0.04415011405944824,
+        "solve_time": 0.16723036766052246,
+        "total_time": 0.21138238906860352,
         "assignment_count": 25,
         "objective_value": 1.0,
         "metrics": {
@@ -31,9 +31,9 @@
       },
       {
         "status": "OPTIMAL",
-        "build_time": 0.13470101356506348,
-        "solve_time": 0.39025092124938965,
-        "total_time": 0.5249538421630859,
+        "build_time": 0.13367438316345215,
+        "solve_time": 0.4492471218109131,
+        "total_time": 0.5829226970672607,
         "assignment_count": 43,
         "objective_value": -7.5,
         "metrics": {
@@ -46,7 +46,7 @@
           "total_preference_score_achieved": 5,
           "total_positive_preferences_count": 5,
           "total_negative_preferences_count": 6,
-          "workload_distribution_std_dev": 1.1913752557443855,
+          "workload_distribution_std_dev": 1.1486405007660143,
           "bad_shift_distribution_std_dev": 0.0,
           "system_adaptability_score": 5.0,
           "config_complexity_score": 10,
@@ -59,9 +59,9 @@
       },
       {
         "status": "OPTIMAL",
-        "build_time": 0.600440263748169,
-        "solve_time": 1.1802735328674316,
-        "total_time": 1.780714750289917,
+        "build_time": 0.6669278144836426,
+        "solve_time": 1.0974228382110596,
+        "total_time": 1.7643516063690186,
         "assignment_count": 63,
         "objective_value": -24.5,
         "metrics": {
@@ -74,7 +74,7 @@
           "total_preference_score_achieved": 15,
           "total_positive_preferences_count": 16,
           "total_negative_preferences_count": 11,
-          "workload_distribution_std_dev": 1.1029586833344471,
+          "workload_distribution_std_dev": 1.0866478599015283,
           "bad_shift_distribution_std_dev": 0.0,
           "system_adaptability_score": 5.0,
           "config_complexity_score": 10,
@@ -87,9 +87,9 @@
       },
       {
         "status": "OPTIMAL",
-        "build_time": 1.6902506351470947,
-        "solve_time": 4.404314041137695,
-        "total_time": 6.0945656299591064,
+        "build_time": 2.3107173442840576,
+        "solve_time": 4.642580986022949,
+        "total_time": 6.95330023765564,
         "assignment_count": 97,
         "objective_value": -55.0,
         "metrics": {
@@ -102,8 +102,8 @@
           "total_preference_score_achieved": 34,
           "total_positive_preferences_count": 37,
           "total_negative_preferences_count": 28,
-          "workload_distribution_std_dev": 0.5170529469986609,
-          "bad_shift_distribution_std_dev": 0.4847679857416329,
+          "workload_distribution_std_dev": 0.4922842166878804,
+          "bad_shift_distribution_std_dev": 0.5099019513592784,
           "system_adaptability_score": 5.0,
           "config_complexity_score": 10,
           "rule_count": 12
@@ -117,9 +117,9 @@
     "cagri_merkezi": [
       {
         "status": "OPTIMAL",
-        "build_time": 0.14990973472595215,
-        "solve_time": 0.5017797946929932,
-        "total_time": 0.6516907215118408,
+        "build_time": 0.12257790565490723,
+        "solve_time": 0.5141017436981201,
+        "total_time": 0.636681079864502,
         "assignment_count": 37,
         "objective_value": -1.5,
         "metrics": {
@@ -145,9 +145,9 @@
       },
       {
         "status": "OPTIMAL",
-        "build_time": 0.47039175033569336,
-        "solve_time": 1.861678123474121,
-        "total_time": 2.332070827484131,
+        "build_time": 0.6706390380859375,
+        "solve_time": 2.437692403793335,
+        "total_time": 3.108332395553589,
         "assignment_count": 63,
         "objective_value": -9.5,
         "metrics": {
@@ -173,9 +173,9 @@
       },
       {
         "status": "OPTIMAL",
-        "build_time": 1.3070592880249023,
-        "solve_time": 2.259428024291992,
-        "total_time": 3.566488742828369,
+        "build_time": 1.6713926792144775,
+        "solve_time": 3.1000566482543945,
+        "total_time": 4.7714502811431885,
         "assignment_count": 88,
         "objective_value": -21.5,
         "metrics": {
@@ -201,9 +201,9 @@
       },
       {
         "status": "OPTIMAL",
-        "build_time": 3.4229934215545654,
-        "solve_time": 6.02987813949585,
-        "total_time": 9.452872514724731,
+        "build_time": 4.094324588775635,
+        "solve_time": 6.712569952011108,
+        "total_time": 10.806896448135376,
         "assignment_count": 127,
         "objective_value": -44.5,
         "metrics": {
@@ -232,18 +232,45 @@
   "repeatability": {
     "hastane": {
       "success_rate": 1.0,
-      "time_mean": 5.115932416915894,
-      "time_std": 0.31796039295689843,
-      "time_min": 4.754580736160278,
-      "time_max": 5.5207202434539795,
+      "time_mean": 5.9387571811676025,
+      "time_std": 0.5056884909566257,
+      "time_min": 5.369455575942993,
+      "time_max": 6.648711681365967,
       "objective_mean": -55.0,
       "objective_std": 0.0,
       "runs": [
         {
           "status": "OPTIMAL",
-          "build_time": 1.6601536273956299,
-          "solve_time": 3.094425916671753,
-          "total_time": 4.754580736160278,
+          "build_time": 1.7653121948242188,
+          "solve_time": 4.044711112976074,
+          "total_time": 5.8100244998931885,
+          "assignment_count": 97,
+          "objective_value": -55.0,
+          "metrics": {
+            "total_understaffing": 0,
+            "total_overstaffing": 12,
+            "min_staffing_coverage_ratio": 1.0,
+            "skill_coverage_ratio": 1.0,
+            "positive_preferences_met_count": 34,
+            "negative_preferences_assigned_count": 0,
+            "total_preference_score_achieved": 34,
+            "total_positive_preferences_count": 37,
+            "total_negative_preferences_count": 28,
+            "workload_distribution_std_dev": 0.5170529469986609,
+            "bad_shift_distribution_std_dev": 0.5099019513592784,
+            "system_adaptability_score": 5.0,
+            "config_complexity_score": 10,
+            "rule_count": 12
+          },
+          "num_employees": 80,
+          "num_shifts": 85,
+          "success": true
+        },
+        {
+          "status": "OPTIMAL",
+          "build_time": 1.7290196418762207,
+          "solve_time": 3.640435218811035,
+          "total_time": 5.369455575942993,
           "assignment_count": 97,
           "objective_value": -55.0,
           "metrics": {
@@ -268,9 +295,9 @@
         },
         {
           "status": "OPTIMAL",
-          "build_time": 1.9818408489227295,
-          "solve_time": 3.5388779640197754,
-          "total_time": 5.5207202434539795,
+          "build_time": 2.0633597373962402,
+          "solve_time": 4.58535099029541,
+          "total_time": 6.648711681365967,
           "assignment_count": 97,
           "objective_value": -55.0,
           "metrics": {
@@ -283,7 +310,7 @@
             "total_preference_score_achieved": 34,
             "total_positive_preferences_count": 37,
             "total_negative_preferences_count": 28,
-            "workload_distribution_std_dev": 0.5406882188470542,
+            "workload_distribution_std_dev": 0.5170529469986609,
             "bad_shift_distribution_std_dev": 0.5099019513592784,
             "system_adaptability_score": 5.0,
             "config_complexity_score": 10,
@@ -295,9 +322,9 @@
         },
         {
           "status": "OPTIMAL",
-          "build_time": 1.7056515216827393,
-          "solve_time": 3.3469345569610596,
-          "total_time": 5.052588224411011,
+          "build_time": 1.9855425357818604,
+          "solve_time": 4.24566650390625,
+          "total_time": 6.231209993362427,
           "assignment_count": 97,
           "objective_value": -55.0,
           "metrics": {
@@ -322,36 +349,9 @@
         },
         {
           "status": "OPTIMAL",
-          "build_time": 1.732243537902832,
-          "solve_time": 3.1636877059936523,
-          "total_time": 4.8959338665008545,
-          "assignment_count": 97,
-          "objective_value": -55.0,
-          "metrics": {
-            "total_understaffing": 0,
-            "total_overstaffing": 12,
-            "min_staffing_coverage_ratio": 1.0,
-            "skill_coverage_ratio": 1.0,
-            "positive_preferences_met_count": 34,
-            "negative_preferences_assigned_count": 0,
-            "total_preference_score_achieved": 34,
-            "total_positive_preferences_count": 37,
-            "total_negative_preferences_count": 28,
-            "workload_distribution_std_dev": 0.5406882188470542,
-            "bad_shift_distribution_std_dev": 0.5099019513592784,
-            "system_adaptability_score": 5.0,
-            "config_complexity_score": 10,
-            "rule_count": 12
-          },
-          "num_employees": 80,
-          "num_shifts": 85,
-          "success": true
-        },
-        {
-          "status": "OPTIMAL",
-          "build_time": 1.8600099086761475,
-          "solve_time": 3.4958274364471436,
-          "total_time": 5.355839014053345,
+          "build_time": 2.106095552444458,
+          "solve_time": 3.528287649154663,
+          "total_time": 5.6343841552734375,
           "assignment_count": 97,
           "objective_value": -55.0,
           "metrics": {
@@ -378,72 +378,18 @@
     },
     "cagri_merkezi": {
       "success_rate": 1.0,
-      "time_mean": 10.282177686691284,
-      "time_std": 0.5580710221476932,
-      "time_min": 9.510572671890259,
-      "time_max": 11.036956548690796,
+      "time_mean": 11.788397884368896,
+      "time_std": 0.6432731329387746,
+      "time_min": 10.875276565551758,
+      "time_max": 12.538332462310791,
       "objective_mean": -44.5,
       "objective_std": 0.0,
       "runs": [
         {
           "status": "OPTIMAL",
-          "build_time": 3.678351879119873,
-          "solve_time": 6.627729177474976,
-          "total_time": 10.306081771850586,
-          "assignment_count": 127,
-          "objective_value": -44.5,
-          "metrics": {
-            "total_understaffing": 0,
-            "total_overstaffing": 1,
-            "min_staffing_coverage_ratio": 1.0,
-            "skill_coverage_ratio": 1.0,
-            "positive_preferences_met_count": 23,
-            "negative_preferences_assigned_count": 0,
-            "total_preference_score_achieved": 23,
-            "total_positive_preferences_count": 28,
-            "total_negative_preferences_count": 24,
-            "workload_distribution_std_dev": 0.4922842166878804,
-            "bad_shift_distribution_std_dev": 0.6666145812986692,
-            "system_adaptability_score": 5.0,
-            "config_complexity_score": 10,
-            "rule_count": 12
-          },
-          "num_employees": 80,
-          "num_shifts": 126,
-          "success": true
-        },
-        {
-          "status": "OPTIMAL",
-          "build_time": 3.329188108444214,
-          "solve_time": 6.181382894515991,
-          "total_time": 9.510572671890259,
-          "assignment_count": 127,
-          "objective_value": -44.5,
-          "metrics": {
-            "total_understaffing": 0,
-            "total_overstaffing": 1,
-            "min_staffing_coverage_ratio": 1.0,
-            "skill_coverage_ratio": 1.0,
-            "positive_preferences_met_count": 23,
-            "negative_preferences_assigned_count": 0,
-            "total_preference_score_achieved": 23,
-            "total_positive_preferences_count": 28,
-            "total_negative_preferences_count": 24,
-            "workload_distribution_std_dev": 0.4922842166878804,
-            "bad_shift_distribution_std_dev": 0.6666145812986692,
-            "system_adaptability_score": 5.0,
-            "config_complexity_score": 10,
-            "rule_count": 12
-          },
-          "num_employees": 80,
-          "num_shifts": 126,
-          "success": true
-        },
-        {
-          "status": "OPTIMAL",
-          "build_time": 3.7077083587646484,
-          "solve_time": 6.370790243148804,
-          "total_time": 10.078499794006348,
+          "build_time": 3.7040979862213135,
+          "solve_time": 7.171177625656128,
+          "total_time": 10.875276565551758,
           "assignment_count": 127,
           "objective_value": -44.5,
           "metrics": {
@@ -468,9 +414,36 @@
         },
         {
           "status": "OPTIMAL",
-          "build_time": 3.9864890575408936,
-          "solve_time": 6.492287635803223,
-          "total_time": 10.478777647018433,
+          "build_time": 4.010866641998291,
+          "solve_time": 8.115306377410889,
+          "total_time": 12.126174211502075,
+          "assignment_count": 127,
+          "objective_value": -44.5,
+          "metrics": {
+            "total_understaffing": 0,
+            "total_overstaffing": 1,
+            "min_staffing_coverage_ratio": 1.0,
+            "skill_coverage_ratio": 1.0,
+            "positive_preferences_met_count": 23,
+            "negative_preferences_assigned_count": 0,
+            "total_preference_score_achieved": 23,
+            "total_positive_preferences_count": 28,
+            "total_negative_preferences_count": 24,
+            "workload_distribution_std_dev": 0.4922842166878804,
+            "bad_shift_distribution_std_dev": 0.7031180555212617,
+            "system_adaptability_score": 5.0,
+            "config_complexity_score": 10,
+            "rule_count": 12
+          },
+          "num_employees": 80,
+          "num_shifts": 126,
+          "success": true
+        },
+        {
+          "status": "OPTIMAL",
+          "build_time": 4.161700963973999,
+          "solve_time": 7.284768104553223,
+          "total_time": 11.446470737457275,
           "assignment_count": 127,
           "objective_value": -44.5,
           "metrics": {
@@ -495,9 +468,36 @@
         },
         {
           "status": "OPTIMAL",
-          "build_time": 4.22534441947937,
-          "solve_time": 6.811611175537109,
-          "total_time": 11.036956548690796,
+          "build_time": 4.706811428070068,
+          "solve_time": 7.831519365310669,
+          "total_time": 12.538332462310791,
+          "assignment_count": 127,
+          "objective_value": -44.5,
+          "metrics": {
+            "total_understaffing": 0,
+            "total_overstaffing": 1,
+            "min_staffing_coverage_ratio": 1.0,
+            "skill_coverage_ratio": 1.0,
+            "positive_preferences_met_count": 23,
+            "negative_preferences_assigned_count": 0,
+            "total_preference_score_achieved": 23,
+            "total_positive_preferences_count": 28,
+            "total_negative_preferences_count": 24,
+            "workload_distribution_std_dev": 0.4922842166878804,
+            "bad_shift_distribution_std_dev": 0.6851094803022361,
+            "system_adaptability_score": 5.0,
+            "config_complexity_score": 10,
+            "rule_count": 12
+          },
+          "num_employees": 80,
+          "num_shifts": 126,
+          "success": true
+        },
+        {
+          "status": "OPTIMAL",
+          "build_time": 4.462709903717041,
+          "solve_time": 7.493024587631226,
+          "total_time": 11.955735445022583,
           "assignment_count": 127,
           "objective_value": -44.5,
           "metrics": {
@@ -527,9 +527,9 @@
     "hastane": {
       "cp_sat": {
         "status": "OPTIMAL",
-        "build_time": 1.801382303237915,
-        "solve_time": 3.6407272815704346,
-        "total_time": 5.442111015319824,
+        "build_time": 2.09719181060791,
+        "solve_time": 5.600337505340576,
+        "total_time": 7.697530031204224,
         "assignment_count": 97,
         "objective_value": -55.0,
         "metrics": {
@@ -542,7 +542,7 @@
           "total_preference_score_achieved": 34,
           "total_positive_preferences_count": 37,
           "total_negative_preferences_count": 28,
-          "workload_distribution_std_dev": 0.4922842166878804,
+          "workload_distribution_std_dev": 0.5170529469986609,
           "bad_shift_distribution_std_dev": 0.5099019513592784,
           "system_adaptability_score": 5.0,
           "config_complexity_score": 10,
@@ -554,14 +554,14 @@
       },
       "random": {
         "status": "RANDOM",
-        "total_time": 0.0002865791320800781,
+        "total_time": 0.0003218650817871094,
         "assignment_count": 170,
         "objective_value": -340,
         "success": true
       },
       "greedy": {
         "status": "GREEDY",
-        "total_time": 0.0026738643646240234,
+        "total_time": 0.003840923309326172,
         "assignment_count": 80,
         "objective_value": -23,
         "success": true
@@ -570,9 +570,9 @@
     "cagri_merkezi": {
       "cp_sat": {
         "status": "OPTIMAL",
-        "build_time": 4.199089527130127,
-        "solve_time": 6.668919563293457,
-        "total_time": 10.868010997772217,
+        "build_time": 4.938467264175415,
+        "solve_time": 8.01016879081726,
+        "total_time": 12.948637962341309,
         "assignment_count": 127,
         "objective_value": -44.5,
         "metrics": {
@@ -597,14 +597,14 @@
       },
       "random": {
         "status": "RANDOM",
-        "total_time": 0.0003323554992675781,
+        "total_time": 0.0006723403930664062,
         "assignment_count": 252,
         "objective_value": -504,
         "success": true
       },
       "greedy": {
         "status": "GREEDY",
-        "total_time": 0.003582477569580078,
+        "total_time": 0.008467912673950195,
         "assignment_count": 80,
         "objective_value": -18,
         "success": true

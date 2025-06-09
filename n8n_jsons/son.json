@@ -1,0 +1,521 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "fileSelector": "={{ $node[\"Ayar\"].json.employeesPath }}",
+        "options": {
+          "dataPropertyName": "employeesData"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        80,
+        60
+      ],
+      "id": "0a363029-d7b5-4cf1-bb94-812fc8b17189",
+      "name": "Employees",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $node[\"Ayar\"].json.skillsPath }}",
+        "options": {
+          "dataPropertyName": "skillData"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        80,
+        1060
+      ],
+      "id": "19699648-09e4-4eaa-9295-ee02d42efb5c",
+      "name": "Skills"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $node[\"Ayar\"].json.shiftsPath }}",
+        "options": {
+          "dataPropertyName": "shiftData"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        80,
+        260
+      ],
+      "id": "beb8bd8d-0730-4214-ba5a-06d3078a90d2",
+      "name": "Shifts"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $node[\"Ayar\"].json.availabilityPath }}",
+        "options": {
+          "dataPropertyName": "availabilityData"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        80,
+        460
+      ],
+      "id": "5d711826-3240-478b-8e42-5f2341741269",
+      "name": "Avaibility"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $node[\"Ayar\"].json.preferencesPath }}",
+        "options": {
+          "dataPropertyName": "preferenceData"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        80,
+        860
+      ],
+      "id": "66619efb-a633-4653-b080-54e3e8ec6965",
+      "name": "Preferences"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Girdileri alalım:\n// allMergedItems -> Merge edilmiş CSV verileri VE YAML içeriğini içerir\n// Webhook verisine erişim.\nconst allMergedItems = $items(\"Merge\"); // Tüm birleşmiş öğeleri al (CSV'ler + YAML)\nconst webhookData = $items(\"Webhook\")[0].json; // Webhook verisini al\n\n// 1. Webhook'tan UI parametrelerini al\nconst uiObjectiveWeights = webhookData.body.objective_weights;\nconst uiSolverParams = webhookData.body.solver_params;\n\n// 2. Temel konfigürasyon YAML'ını parse et\n// YAML verisi 'allMergedItems' dizisinin son elemanı olmalı.\n// DİKKAT: Eğer Merge düğümüne 6 giriş varsa, YAML verisi allMergedItems[5] olmalı.\n// Eğer Merge düğümüne daha az/fazla giriş varsa bu indeksi DÜĞÜM ÇIKTISINA GÖRE ayarlayın.\nconst baseConfigItem = allMergedItems[allMergedItems.length - 1]; // Son öğeyi YAML olarak varsay\nlet baseConfigJson = {};\nconst yaml = require('js-yaml');\n\ntry {\n  if (baseConfigItem && baseConfigItem.binary && baseConfigItem.binary.data) {\n    const baseConfigYAML = Buffer.from(baseConfigItem.binary.data.data, 'base64').toString();\n    baseConfigJson = yaml.load(baseConfigYAML);\n    console.log(\"Temel Konfigürasyon başarıyla yüklendi.\");\n  } else {\n    console.error(\"Merge'den gelen YAML konfigürasyon öğesi beklenen formatta değil:\", baseConfigItem);\n    baseConfigJson = { error: \"YAML item missing or malformed\", optimization_core: {} };\n  }\n} catch (e) {\n  console.error(\"Temel YAML konfigürasyonu parse edilemedi:\", e);\n  baseConfigJson = { error: \"YAML parse error\", optimization_core: {} };\n}\n\n// 3. Temel konfigürasyonu UI parametreleriyle güncelle\nif (!baseConfigJson.optimization_core) {\n  baseConfigJson.optimization_core = {}; // Hata durumunda bile bu alanın var olmasını sağla\n}\nif (uiObjectiveWeights) {\n    baseConfigJson.optimization_core.objective_weights = uiObjectiveWeights;\n    console.log(\"Hedef ağırlıkları UI'dan gelenle güncellendi.\");\n}\nif (uiSolverParams && uiSolverParams.time_limit_seconds !== undefined) {\n    baseConfigJson.optimization_core.solver_time_limit_seconds = uiSolverParams.time_limit_seconds;\n    console.log(\"Çözücü zaman limiti UI'dan gelenle güncellendi.\");\n}\nif (uiSolverParams && uiSolverParams.use_mip_solver !== undefined) {\n    baseConfigJson.optimization_core.use_mip_solver = uiSolverParams.use_mip_solver;\n     console.log(\"Gelişmiş çözücü ayarı UI'dan gelenle güncellendi.\");\n}\n\n// 4. input_data'yı oluştur\nconst employees = [];\nconst skills = [];\nconst shifts = [];\nconst availability = [];\nconst preferences = [];\nlet unclassifiedCount = 0;\n\n// Birleştirilmiş öğeleri döngüye al, AMA SONUNCUYU (YAML) ATLA\n// Bu yüzden döngü allMergedItems.length - 1'e kadar gitmeli.\nfor (let i = 0; i < allMergedItems.length - 1; i++) { // SON ÖĞEYİ HARİÇ TUT\n  const item = allMergedItems[i];\n\n  if (!item || !item.json) {\n      console.warn(`UYARI: Geçersiz CSV öğe yapısı atlanıyor (index ${i}):`, item);\n      continue;\n  }\n\n  const data = item.json;\n  let categorized = false;\n\n  if (data.hasOwnProperty('preference_score')) {\n    preferences.push(data);\n    categorized = true;\n  } else if (data.hasOwnProperty('shift_id') && data.hasOwnProperty('start_time') && !data.hasOwnProperty('employee_id') && !data.hasOwnProperty('role')) {\n    shifts.push(data);\n    categorized = true;\n  } else if (data.hasOwnProperty('is_available') && data.hasOwnProperty('date') && data.hasOwnProperty('employee_id')) {\n    availability.push(data);\n    categorized = true;\n  } else if (data.hasOwnProperty('skill') && data.hasOwnProperty('employee_id') && !data.hasOwnProperty('role')) {\n    skills.push(data);\n    categorized = true;\n  } else if (data.hasOwnProperty('role') && data.hasOwnProperty('employee_id')) {\n    employees.push(data);\n    categorized = true;\n  }\n\n  if (!categorized) {\n    unclassifiedCount++;\n    if (unclassifiedCount <= 5) {\n        console.warn(`UYARI: CSV Öğesi sınıflandırılamadı (index ${i}). Veri:`, JSON.stringify(data));\n    } else if (unclassifiedCount === 6) {\n        console.warn(\"UYARI: Daha fazla sınıflandırılamayan CSV öğesi loglanmayacak...\");\n    }\n  }\n}\n\nconsole.log(`DEBUG: CSV Sınıflandırma tamamlandı. Sayılar - Employees: ${employees.length}, Skills: ${skills.length}, Shifts: ${shifts.length}, Availability: ${availability.length}, Preferences: ${preferences.length}, Unclassified: ${unclassifiedCount}`);\n\nconst input_data = { employees, skills, shifts, availability, preferences };\n\nif (employees.length === 0 || shifts.length === 0 || availability.length === 0) {\n    console.error(`HATA: Employees(${employees.length}), Shifts(${shifts.length}) veya Availability(${availability.length}) CSV dizilerinden en az biri boş! Sınıflandırma mantığı veya girdi verisi kontrol edilmeli.`);\n}\n\n// 5. Python API'sine gönderilecek nihai istek gövdesini oluştur\nconst requestBodyForPython = {\n  configuration: baseConfigJson,\n  input_data: input_data\n};\n\nconsole.log(\"Python API'sine gönderilecek son istek gövdesi:\", JSON.stringify(requestBodyForPython, null, 2));\n\nreturn [ { json: requestBodyForPython } ];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        740,
+        560
+      ],
+      "id": "ae682744-23b4-4849-8de3-93a800bc2fa1",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "employeesData",
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        300,
+        60
+      ],
+      "id": "81d4b1b2-881f-4cdd-b5ce-1dcb703d81e3",
+      "name": "Extract Employees CSV"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "availabilityData",
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        300,
+        460
+      ],
+      "id": "7e3efb94-4ba5-4657-97aa-921ff99f2615",
+      "name": "Extract Availability CSV"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "shiftData",
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        300,
+        260
+      ],
+      "id": "aa3feb89-de8d-4c05-85dd-b32d7caeeee5",
+      "name": "Extract Shifts CSV"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "preferenceData",
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        300,
+        860
+      ],
+      "id": "607a2efc-6210-46c8-a4d8-7f3a37230dd1",
+      "name": "Extract Preferences CSV"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "skillData",
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        300,
+        1060
+      ],
+      "id": "297b1ef3-42a9-485c-95a1-77107c95d9ec",
+      "name": "Extract Skills CSV"
+    },
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        520,
+        500
+      ],
+      "id": "1516f188-8b80-4206-a575-c9f00cdd0baa",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/optimize",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        960,
+        560
+      ],
+      "id": "ae4ccc3d-c597-455e-b2e7-78e5b7bba008",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "optimization",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        560
+      ],
+      "id": "86be078b-6942-4b26-956c-10fb0c540ec4",
+      "name": "Webhook",
+      "webhookId": "98a3eec5-cce7-4a93-b2e5-2275b192b265"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/mnt/workflow_configs/aktif_ayarlar.json",
+        "options": {
+          "fileName": "aktifAyarlar"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        560
+      ],
+      "id": "0ddb08d3-9bfb-498e-84e7-e7cb3c8ce496",
+      "name": "Read/Write Files from Disk",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Girişleri al:\n// items[0].json -> Bir önceki \"Set\" (Edit Fields) düğümünün çıktısı\n// items[1].binary.data.data -> aktif_ayarlar.json dosyasının içeriği\n\nconst upstreamNodeOutput = items[0].json; // Bir önceki düğümün çıktısı\nconsole.log(\"Bir önceki 'Set' (Edit Fields) düğümünden gelen veri:\", JSON.stringify(upstreamNodeOutput, null, 2));\n\nlet aktifAyarlar;\ntry {\n  // items[1] 'aktif_ayarlar.json' dosyasını içeriyor olmalı\n  const aktifAyarlarStr = Buffer.from(items[1].binary.data.data, 'base64').toString();\n  aktifAyarlar = JSON.parse(aktifAyarlarStr);\n  console.log(\"Okunan aktif ayarlar:\", aktifAyarlar);\n} catch (error) {\n  console.warn(\"Aktif ayarlar dosyası okunamadı veya ayrıştırılamadı:\", error);\n  aktifAyarlar = {\n    varsayilan_veri_seti: \"hastane\",\n    varsayilan_kural_seti_adi: \"temel_kurallar\" // kurallar için varsayılan\n  };\n  console.log(\"Varsayılan aktif ayarlar kullanılıyor:\", aktifAyarlar);\n}\n\nlet nihaiVeriSeti;\nlet nihaiKurallar = aktifAyarlar.varsayilan_kural_seti_adi; // 'kurallar' için başlangıç değeri\n\n// 1. 'nihaiVeriSeti'ni belirle:\n// Öncelik, bir önceki \"Set\" (Edit Fields) düğümünden gelen 'kullanilacakVeriSeti' değerinde.\nif (upstreamNodeOutput && upstreamNodeOutput.kullanilacakVeriSeti) {\n  nihaiVeriSeti = upstreamNodeOutput.kullanilacakVeriSeti;\n  console.log(`'kullanilacakVeriSeti' bir önceki düğümden alındı: ${nihaiVeriSeti}`);\n} else {\n  // Eğer bir önceki düğümden gelmiyorsa, Webhook query'sine bak (bu senaryoda buraya düşmemeli)\n  // veya aktif ayarlardaki varsayılana dön.\n  // Bu örnekte, eğer upstream'den gelmezse doğrudan aktif ayarlara düşürelim.\n  console.warn(\"'kullanilacakVeriSeti' bir önceki düğümde bulunamadı. Aktif ayarlardaki varsayılan kullanılacak.\");\n  nihaiVeriSeti = aktifAyarlar.varsayilan_veri_seti;\n}\n\n// 2. 'nihaiKurallar'ı belirle:\n// Eğer bir önceki \"Set\" (Edit Fields) düğümü 'kurallar' diye bir alan üretiyorsa onu al.\n// Üretmiyorsa, Webhook query'sinden (eğer Webhook direkt bu Code node'una bağlıysa) veya aktif ayarlardan al.\n// Mevcut durumda, upstreamNodeOutput'ta 'kurallar' alanı yok gibi görünüyor.\n// Bu yüzden 'kurallar' için hala Webhook query'sine veya aktif ayarlara bakmamız gerekebilir.\n// Şimdilik, 'kurallar'ın dinamik olarak Webhook'tan gelmesi gerekiyorsa,\n// bir önceki \"Set\" (Edit Fields) düğümünün de Webhook'tan 'query.kurallar' alıp\n// 'kurallar' adıyla bir alan üretmesi en temiz çözüm olurdu.\n// Ya da bu Code node'unun Webhook'tan ayrıca bir input alması gerekir.\n// Şimdilik sadece aktif ayarlardan gelen varsayılanı kullanıyoruz.\n// Gerekirse burası daha sonra düzenlenebilir.\nif (upstreamNodeOutput && upstreamNodeOutput.query && upstreamNodeOutput.query.kurallar) {\n    // Bu senaryoda (items[0] Set node çıktısı ise) buraya pek girmez.\n    nihaiKurallar = upstreamNodeOutput.query.kurallar;\n    console.log(`'kurallar' upstreamNodeOutput.query içinden alındı: ${nihaiKurallar}`);\n} else {\n    console.log(`'kurallar' için dinamik bir kaynak bulunamadı (örn: upstreamNodeOutput.query.kurallar). Aktif ayarlardaki varsayılan ('${nihaiKurallar}') kullanılacak.`);\n}\n\n\n// Dosya yollarını nihaiVeriSeti'ne göre oluştur\nconst veriKlasoru = `/mnt/workflow_data/${nihaiVeriSeti}`;\nconst filePrefix = nihaiVeriSeti === \"cagri_merkezi\" ? \"_cm\" : \"\";\n\nconst employeesPath = `${veriKlasoru}/employees${filePrefix}.csv`;\nconst shiftsPath = `${veriKlasoru}/shifts${filePrefix}.csv`;\nconst skillsPath = `${veriKlasoru}/skills${filePrefix}.csv`;\nconst availabilityPath = `${veriKlasoru}/availability${filePrefix}.csv`;\nconst preferencesPath = `${veriKlasoru}/preferences${filePrefix}.csv`;\n\nconst configPath = nihaiVeriSeti === \"cagri_merkezi\" ?\n                  \"/mnt/workflow_configs/cagri_merkezi_config.yaml\" :\n                  \"/mnt/workflow_configs/hospital_test_config.yaml\";\n\n// Sonuçları döndür\nreturn [\n  {\n    veriSeti: nihaiVeriSeti,\n    kurallar: nihaiKurallar,\n    veriKlasoru,\n    employeesPath,\n    shiftsPath,\n    skillsPath,\n    availabilityPath,\n    preferencesPath,\n    configPath\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -140,
+        560
+      ],
+      "id": "699c21fd-4444-4e77-a9d3-9ead3e891269",
+      "name": "Ayar"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "=    {\n      \"kullanilacakVeriSeti\": \"{{ $node[\"Webhook\"].json.query.veriSeti || 'hastane' }}\",\n      \"basePath\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? '/veri_kaynaklari/cagri_merkezi/' : '/veri_kaynaklari/hastane/' }}\",\n      \"employeesFile\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'employees_cm.csv' : 'employees.csv' }}\",\n      \"shiftsFile\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'shifts_cm.csv' : 'shifts.csv' }}\",\n      \"skillsFile\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'skills_cm.csv' : 'skills.csv' }}\",\n      \"availabilityFile\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'availability_cm.csv' : 'availability.csv' }}\",\n      \"preferencesFile\": \"{{ ($node[\"Webhook\"].json.query.veriSeti || 'hastane') === 'cagri_merkezi' ? 'preferences_cm.csv' : 'preferences.csv' }}\"\n    }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        -360,
+        560
+      ],
+      "id": "ae141a4e-d973-45ac-b0d6-8655a6dd1aa0",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $node[\"Ayar\"].json.configPath }}",
+        "options": {
+          "fileName": "baseConfigYamlContent"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        300,
+        660
+      ],
+      "id": "c7bdb939-7225-4462-af21-5b7280e41ccd",
+      "name": "Oku Temel Konfig"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Employees": {
+      "main": [
+        [
+          {
+            "node": "Extract Employees CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skills": {
+      "main": [
+        [
+          {
+            "node": "Extract Skills CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shifts": {
+      "main": [
+        [
+          {
+            "node": "Extract Shifts CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avaibility": {
+      "main": [
+        [
+          {
+            "node": "Extract Availability CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preferences": {
+      "main": [
+        [
+          {
+            "node": "Extract Preferences CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Employees CSV": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Availability CSV": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Extract Shifts CSV": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Extract Preferences CSV": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Extract Skills CSV": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ayar": {
+      "main": [
+        [
+          {
+            "node": "Oku Temel Konfig",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Employees",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Shifts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Avaibility",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Preferences",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Skills",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Ayar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Oku Temel Konfig": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "instanceId": "180228f460f97432e4d043418de9d490f45696eef572c1dab275c52c7658487e"
+  },
+  "tags": []
+}

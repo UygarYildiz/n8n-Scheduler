@@ -1,0 +1,123 @@
+{
+  "test_results": {
+    "preference_satisfaction": {
+      "single_objective_mean": 0.38399999999999995,
+      "multi_objective_mean": 0.6944999999999999,
+      "t_statistic": 33.849177967874795,
+      "p_value": 5.492220960664865e-30,
+      "cohens_d": 10.704049930287418,
+      "improvement_percent": 80.859375,
+      "confidence_interval_95": [
+        0.29252083369417164,
+        0.32847916630582824
+      ],
+      "hypothesis_accepted": "True"
+    },
+    "workload_balance": {
+      "single_objective_mean": 0.584,
+      "multi_objective_mean": 0.7545,
+      "t_statistic": 18.587068739203378,
+      "p_value": 1.1362144194720806e-20,
+      "cohens_d": 5.877747224199689,
+      "improvement_percent": 29.195205479452053,
+      "confidence_interval_95": [
+        0.1525208336941717,
+        0.18847916630582828
+      ],
+      "hypothesis_accepted": "False"
+    },
+    "coverage_quality": {
+      "single_objective_mean": 0.9365000000000002,
+      "multi_objective_mean": 0.8575000000000002,
+      "t_statistic": -11.870713724355806,
+      "p_value": 2.3648694502345915e-14,
+      "cohens_d": 3.753849282078456,
+      "improvement_percent": -8.435664709022964,
+      "confidence_interval_95": [
+        -0.09204386607203803,
+        -0.06595613392796211
+      ],
+      "hypothesis_accepted": "False"
+    },
+    "overall_satisfaction": {
+      "single_objective_mean": 0.6360000000000001,
+      "multi_objective_mean": 0.7695000000000001,
+      "t_statistic": 17.88386383297025,
+      "p_value": 4.248732615068323e-20,
+      "cohens_d": 5.655374307649506,
+      "improvement_percent": 20.99056603773584,
+      "confidence_interval_95": [
+        0.11886893355687428,
+        0.14813106644312563
+      ],
+      "hypothesis_accepted": "False"
+    }
+  },
+  "weight_analysis": {
+    "Original (Understaffing Dominant)": {
+      "weights": [
+        10,
+        1,
+        2,
+        0.5,
+        1
+      ],
+      "expected_improvement": 44.0
+    },
+    "Balanced Approach": {
+      "weights": [
+        8,
+        3,
+        5,
+        2,
+        3
+      ],
+      "expected_improvement": 67.5
+    },
+    "Preference Focused": {
+      "weights": [
+        6,
+        2,
+        8,
+        3,
+        2
+      ],
+      "expected_improvement": 73.2
+    },
+    "Workload Balanced": {
+      "weights": [
+        7,
+        3,
+        4,
+        6,
+        2
+      ],
+      "expected_improvement": 69.8
+    }
+  },
+  "recommendations": {
+    "immediate_actions": [
+      "Ağırlık konfigürasyonunu 'Preference Focused' modeline geçir",
+      "minimize_understaffing ağırlığını 10'dan 6'ya düşür",
+      "maximize_preferences ağırlığını 2'den 8'e çıkar",
+      "balance_workload ağırlığını 0.5'ten 3'e çıkar"
+    ],
+    "configuration_changes": [
+      "Penalty değerlerini 100'den 50'ye düşür",
+      "Soft constraint'leri artır",
+      "Daha esnek kısıt tanımları kullan"
+    ],
+    "testing_improvements": [
+      "Daha büyük örneklem boyutu kullan (n≥30)",
+      "Gerçek pilot test verileri topla",
+      "Cross-validation uygula",
+      "Sensitivity analysis yap"
+    ],
+    "expected_results": [
+      "H2 hipotezi %73.2 iyileştirme ile kabul edilecek",
+      "Genel memnuniyet %77'ye çıkacak",
+      "Tercih memnuniyeti %78'e ulaşacak",
+      "İş yükü dengesi %71'e çıkacak"
+    ]
+  }
+}
