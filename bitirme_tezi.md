@@ -43,128 +43,48 @@ The system's academic contributions include integration of constraint programmin
    1.2. Araştırma Soruları
    1.3. Çalışmanın Amacı ve Kapsamı
    1.4. Çalışmanın Akademik ve Pratik Katkıları
-       1.4.1. Teorik ve Metodolojik Katkılar
-       1.4.2. Disiplinler Arası Akademik Katkılar
-       1.4.3. Endüstriyel ve Pratik Uygulamalar
    1.5. Araştırma Hipotezleri
-       1.5.1. H1: Performans Üstünlüğü Hipotezi
-       1.5.2. H2: Personel Memnuniyeti Hipotezi
-       1.5.3. H3: Sistem Güvenilirliği Hipotezi
-       1.5.4. H4: Uyarlanabilirlik Hipotezi
    1.6. Tez Yapısı
 
 **2. LİTERATÜR TARAMASI**
    2.1. Vardiya Çizelgeleme Problemlerinin Teorik Temelleri ve Gelişimi
-       2.1.1. Matematiksel Karmaşıklık ve Çözülebilirlik Teorisi
-       2.1.2. Belirsizlik Altında Optimizasyon Yaklaşımları
    2.2. Kısıt Programlama ve CP-SAT Çözücü Literatürü
-       2.2.1. Kısıt Programlama Paradigmasının Teorik Temelleri
-       2.2.2. Alternatif Optimizasyon Yaklaşımları ve CP-SAT Seçimi
-       2.2.3. Hibrit Yaklaşımlar ve Makine Öğrenmesi Entegrasyonu
    2.3. Sektörel Uygulamalar ve Özel Durumlar
-       2.3.1. Otomotiv Endüstrisinde Çok Yetenekli İş Gücü Çizelgeleme
-       2.3.2. Sağlık Sektöründe Vardiya Çizelgeleme
-       2.3.3. Ulaştırma Sektöründe Personel Çizelgeleme
-       2.3.4. Örtük Modelleme Yaklaşımları
    2.4. Araştırma Boşlukları ve Teorik Katkı Alanları
-       2.4.1. Tespit Edilen Kritik Boşluklar
-       2.4.2. Bu Çalışmanın Teorik ve Metodolojik Katkıları
 
 **3. PROBLEM TANIMI VE METODOLOJİ**
    3.1. Problem Formülasyonu
-       3.1.1. Matematiksel Model
-       3.1.2. Hedef Fonksiyonu (Çok Amaçlı Çerçeve)
-       3.1.3. Kısıt Sistemi Mimarisi
    3.2. Çözüm Metodolojisi
-       3.2.1. Kısıt Programlama Teorik Temelleri
-       3.2.2. Hesaplama Karmaşıklığı Analizi
-       3.2.3. Algoritma Yakınsaması ve Çözüm Kalitesi Değerlendirmesi
-       3.2.4. Algoritma Seçimi Mantığı
-       3.2.5. Çok Amaçlı Optimizasyon Stratejisi
    3.3. Değerlendirme Çerçevesi
-       3.3.1. Performans Metrikleri Sistemi
-       3.3.2. Deneysel Tasarım ve Test Senaryoları
-       3.3.3. Performans Metrik Tanımları ve Hesaplama Yöntemleri
-       3.3.4. İstatistiksel Analiz Metodolojisi
-       3.3.5. Karşılaştırmalı Analiz ve Baseline Değerlendirme
 
 **4. SİSTEM TASARIMI VE İMPLEMENTASYONU**
    4.1. Sistem Mimarisi
-       4.1.1. Çok Katmanlı Mimari Genel Bakışı
-       4.1.2. Bileşen Tasarımı ve Etkileşimler
    4.2. Optimizasyon Çekirdeği
-       4.2.1. CP-SAT Model Oluşturucu Uygulaması
-       4.2.2. Kısıt Tanımı ve Yönetimi
-       4.2.3. Hedef Fonksiyonu Uygulaması
    4.3. API ve Arka Uç Servisleri
-       4.3.1. FastAPI Mimarisi ve RESTful Tasarım
-       4.3.2. Kimlik Doğrulama ve Güvenlik Mimarisi
    4.4. Frontend ve Kullanıcı Arayüzü
-       4.4.1. React Uygulama Mimarisi ve Component Design
-       4.4.2. Kullanıcı Deneyimi Tasarımı ve Usability Engineering
    4.5. İş Akışı Düzenlemesi ve Entegrasyon
-       4.5.1. Süreç Otomasyonu Mimarisi ve Teorik Temeller
-       4.5.2. Dinamik Konfigürasyon Sistemi ve Adaptability Framework
    4.6. Sistem Entegrasyonu ve Geliştirme Ortamı
-       4.6.1. Docker Konteyner Tabanlı Geliştirme Ortamı
-       4.6.2. Konfigürasyon Yönetimi ve Araştırma Metodolojisi Desteği
 
 **5. DENEYSEL SONUÇLAR VE PERFORMANS ANALİZİ**
    5.1. Deneysel Düzen ve Test Ortamı
-       5.1.1. Altyapı Konfigürasyonu
-       5.1.2. Veri Seti Özellikleri ve Sentetik Veri Temsili
    5.2. Ölçeklenebilirlik Analizi ve Hesaplama Performansı
-       5.2.1. Çoklu Ölçeklerde Algoritma Performansı
-       5.2.2. Karmaşıklık Analizi ve Hesaplama Davranışı
    5.3. Çözüm Kalitesi Değerlendirmesi ve Optimizasyon Etkinliği
-       5.3.1. Çok Amaçlı Performans Değerlendirmesi
-       5.3.2. Kısıt Tatmin Analizi
    5.4. Tekrarlanabilirlik ve İstatistiksel Güvenilirlik
-       5.4.1. Çoklu Çalıştırma Analizi
-       5.4.2. Güvenilirlik Değerlendirmesi
    5.5. Karşılaştırmalı Performans Analizi
-       5.5.1. Temel Algoritma Karşılaştırmaları
-       5.5.2. Manuel Süreç Karşılaştırması
 
 **6. DEĞERLENDİRME VE KARŞILAŞTIRMA**
    6.1. Hipotez Testleri ve Doğrulama
-       6.1.1. H1: Performans Üstünlüğü Hipotezi Doğrulaması
-       6.1.2. H2: Personel Memnuniyeti Analizi
-       6.1.3. H3: Sistem Güvenilirliği Analizi
-       6.1.4. H4: Uyarlanabilirlik Analizi
    6.2. Araştırma Sorularına Yanıtlar
-       6.2.1. AS1: CP-SAT Etkinlik Analizi
-       6.2.2. AS2: Çok Amaçlı Optimizasyon Etkisi
-       6.2.3. AS3: Hibrit Mimari Avantajları
-       6.2.4. AS4: Dinamik Konfigürasyon Esnekliği
    6.3. Literatür ile Karşılaştırma
-       6.3.1. Akademik Kıyaslamalar
-       6.3.2. Performans Kıyaslamaları
-       6.3.3. Endüstri Çözümleri
    6.4. Güçlü Yönler ve Sınırlılıklar
-       6.4.1. Güçlü Yönler
-       6.4.2. Sınırlılıklar
    6.5. Sistem Değerlendirme Skorları
 
 **7. SONUÇ VE GELECEK ÇALIŞMALAR**
    7.1. Araştırma Sonuçlarının Kapsamlı Değerlendirmesi
-       7.1.1. Temel Araştırma Başarımları
-       7.1.2. Hipotez Doğrulaması ve Bilimsel Titizlik
    7.2. Bilimsel ve Pratik Katkıların Sentezi
-       7.2.1. Akademik Literatüre Özgün Katkılar
-       7.2.2. Endüstriyel Etki ve Pratik Değer Yaratımı
-       7.2.3. Teknoloji Transferi ve Bilgi Yayılımı
    7.3. Mevcut Sınırlılıklar ve Araştırma Sınırları
-       7.3.1. Teknik Sınırlılıklar ve Ölçeklenebilirlik Sınırları
-       7.3.2. Alan Kapsamı ve Uygulama Alanı
    7.4. Gelecek Araştırma Yönleri ve Stratejik Yol Haritası
-       7.4.1. Acil Araştırma Öncelikleri (0-12 Ay)
-       7.4.2. Orta Vadeli Araştırma Ufukları (1-3 Yıl)
-       7.4.3. Uzun Vadeli Vizyon ve Devrimci Fırsatlar (3+ Yıl)
    7.5. Toplumsal Etki ve Geniş Kapsamlı Sonuçlar
-       7.5.1. Sağlık Sistemi Dönüşümü
-       7.5.2. Acil Müdahale Yeteneği Geliştirmesi
-       7.5.3. Ekonomik Kalkınma ve Yenilik Ekosistemi
    7.6. Son Değerlendirmeler ve Araştırma Mirası
 
 **8. KAYNAKLAR**
@@ -544,7 +464,20 @@ Bu yardımcı değişkenler, çözümün farklı boyutlarını ölçmeye yarar. 
 
 **Parametre Kümeleri ve Matematiksel Yapılar:**
 
+Vardiya çizelgeleme probleminin matematiksel modellemesi, gerçek dünya organizasyonlarının karmaşık yapısını sistematik bir şekilde temsil edebilmek için kapsamlı parametre kümeleri gerektirmektedir. Bu parametre kümeleri, problemin boyutsal karakteristiklerini ve organizasyonel hiyerarşiyi matematiksel formda ifade ederken, CP-SAT çözücünün etkin çalışması için gerekli veri yapılarını sağlamaktadır.
+
+**Çalışan Evreni (E)** organizasyondaki tüm aktif personeli kapsayan temel varlık kümesidir. Her çalışan benzersiz bir kimlik tanımlayıcısı ile karakterize edilmekte ve departman, rol, deneyim seviyesi gibi özelliklerle ilişkilendirilmektedir. Çalışan evreninin büyüklüğü (|E| = n), problemin karmaşıklığını doğrudan etkilemektedir. Örneğin hastane ortamında E = {Doktor_Ahmet, Hemşire_Ayşe, Teknisyen_Mehmet, ...} şeklinde ifade edilirken, çağrı merkezi ortamında E = {Operatör_001, Supervisor_002, ...} formatında tanımlanmaktadır.
+
+**Vardiya Evreni (S)** organizasyonun operasyonel süreklilik gereksinimlerini karşılamak üzere tasarlanmış zaman dilimlerini temsil etmektedir. Her vardiya sabit bir başlangıç ve bitiş saati, belirli bir tarih, gerekli personel sayısı ve yetenek gereksinimleri ile karakterize edilmektedir. Sağlık sektöründe S = {Sabah_08:00-16:00, Akşam_16:00-00:00, Gece_00:00-08:00} şeklinde 8 saatlik bloklar halinde tanımlanırken, çağrı merkezi operasyonlarında S = {Sabah_06:00-14:00, Öğle_14:00-22:00, Gece_22:00-06:00} formatında düzenlenebilmektedir.
+
+**Tarih Evreni (D)** çizelgeleme döneminin zaman çerçevesini belirlemekte ve genellikle 1-4 haftalık periyotları kapsamaktadır. Bu yapı D = {2024-01-01, 2024-01-02, ..., 2024-01-28} şeklinde günlük granularitede tanımlanmakta ve her tarihin hafta içi/hafta sonu, resmi tatil/normal gün gibi özelliklerle etiketlenmesini mümkün kılmaktadır.
+
+**Yetenek Evreni (K)** organizasyonda gerekli olan uzmanlık alanlarını ve sertifikasyonları sistematik olarak kategorize etmektedir. Hastane ortamında K = {Kardiyoloji, Yoğun_Bakım, Acil_Tıp, Ameliyathane} gibi tıbbi uzmanlıkları içerirken, çağrı merkezi bağlamında K = {İngilizce, Teknik_Destek, Satış, Yönetim} şeklinde iletişim ve işletme becerilerini kapsamaktadır.
+
+**Rol Evreni (R)** organizasyonel hiyerarşi ve sorumluluk seviyelerini tanımlamakta olup, R = {Başhekim, Uzman_Doktor, Pratisyen, Başhemşire, Hemşire, Stajyer} gibi kademe yapısını matematiksel modele entegre etmektedir.
+
 Problem örneğinin tam karakterizasyonu şu parametre kümelerini gerektirmektedir:
+
 ```
 E = {e₁, e₂, ..., eₙ} : Çalışan evreni (|E| = n)
 S = {s₁, s₂, ..., sₘ} : Vardiya evreni (|S| = m)
@@ -553,9 +486,24 @@ K = {k₁, k₂, ..., kₗ} : Yetenek evreni (|K| = l)
 R = {r₁, r₂, ..., rₚ} : Rol evreni (|R| = p)
 ```
 
+Bu parametre kümeleri arasındaki çarpımsal ilişki, toplam karar değişkeni sayısını n × m × k olarak belirlemekte ve problemin NP-zor karakteristiğinin temel nedenini oluşturmaktadır.
+
 **Kısıt Tanım Matrisleri:**
 
+Vardiya çizelgeleme probleminin kısıt yapısı, çok boyutlu matrisler aracılığıyla sistematik olarak tanımlanmaktadır. Bu matrissel yaklaşım, gerçek dünya kurallarının matematiksel optimizasyon modeline tutarlı bir şekilde çevrilmesini sağlamakta ve CP-SAT çözücünün etkin çalışması için gerekli veri yapısını oluşturmaktadır.
+
+**Müsaitlik Matrisi (A)** çalışanların zaman bazlı kısıtlarını temsil eden temel veri yapısıdır. A_{i,d} elemanları ikili (binary) değerler almakta ve çalışan i'nin d tarihinde çalışmaya müsait olup olmadığını belirtmektedir. Bu matris, izin talepleri, hastalık raporları, eğitim programları ve kişisel kısıtların sistematik olarak modele dahil edilmesini mümkün kılmaktadır. Örneğin, bir hemşirenin Pazartesi günü çocuk bakım sorumluluğu nedeniyle çalışamaması A_{Hemşire_Ayşe,2024-01-01} = 0 şeklinde modellenirken, normal çalışma günleri A_{Hemşire_Ayşe,2024-01-02} = 1 değeri almaktadır.
+
+**Tercih Matrisi (P)** çalışan memnuniyetinin nicel olarak optimize edilmesini sağlayan kritik veri yapısıdır. P_{i,j} elemanları -3 ile +3 arasında değerler alarak çalışan i'nin vardiya j için subjektif tercih derecesini ifade etmektedir. Bu 7 noktalı Likert ölçeği, çalışanların kesinlikle kaçınmak istedikleri vardiyalardan (-3) en çok tercih ettikleri zaman dilimlerine (+3) kadar geniş bir tercih spektrumunu kapsayacak şekilde tasarlanmıştır. Sistem, pozitif tercih skorlarına sahip atamaları ödüllendirirken, negatif skorları cezalandırmakta ve bu sayede personel memnuniyetini doğrudan optimizasyon hedefine dönüştürmektedir.
+
+**Personel Gereksinim Vektörleri (R, M)** operasyonel süreklilik ve maliyet kontrolü arasındaki dengeyi sağlamak üzere tasarlanmıştır. R_j değerleri her vardiya için mutlaka bulundurulması gereken minimum personel sayısını belirtirken, M_j değerleri maliyet kontrolü amacıyla izin verilen maksimum personel limitlerini tanımlamaktadır. Bu ikili yaklaşım, hem hizmet kalitesinin korunması hem de işgücü maliyetlerinin kontrolü için esneklik sağlamaktadır.
+
+**Yetenek Uyumluluk Matrisleri (SK, SR)** personel niteliklerinin vardiya gereksinimleri ile eşleştirilmesini sağlayan kritik veri yapılarıdır. SK_{i,k} matrisi çalışan i'nin k yeteneğine sahip olup olmadığını belirtirken, SR_{j,k} matrisi vardiya j'nin k yeteneğini gerektirip gerektirmediğini tanımlamaktadır. Bu ikili matris yapısı, hasta güvenliği ve hizmet kalitesi açısından kritik olan yetenek eşleştirmelerinin matematiksel olarak garanti altına alınmasını mümkün kılmaktadır.
+
+**İş Yükü Kapasite Vektörü (WL)** çalışan refahı ve sürdürülebilir performans hedefleri doğrultusunda her personelin maksimum çalışma kapasitesini tanımlamaktadır. WL_i değerleri, yasal düzenlemeler, bireysel sözleşme koşulları ve sağlık durumu gibi faktörleri dikkate alarak belirlenmekte ve aşırı yüklenmenin sistematik olarak engellenmesini sağlamaktadır.
+
 Matematiksel modelin kısıt yapısı şu matrisler ile tanımlanmaktadır:
+
 ```
 A_{i,d} ∈ {0,1} : Çalışan i'nin tarih d'deki müsaitlik durumu
 P_{i,j} ∈ [-3,+3] : Çalışan i'nin vardiya j için tercih puanı
@@ -565,6 +513,8 @@ SK_{i,k} ∈ {0,1} : Çalışan i'nin yetenek k sahiplik göstergesi
 SR_{j,k} ∈ {0,1} : Vardiya j'nin yetenek k gereksinim göstergesi
 WL_{i} ∈ ℝ⁺ : Çalışan i için iş yükü kapasite sınırı
 ```
+
+Bu matematiksel yapı, vardiya çizelgeleme probleminin tüm boyutlarını sistematik olarak kapsayacak şekilde tasarlanmıştır. Her matris ve vektör, gerçek dünya gereksinimlerinin matematiksel optimizasyon modeline dönüştürülmesinde kritik rol oynamakta ve sistemin farklı organizasyon türlerine uyarlanabilirliğinin temelini oluşturmaktadır.
 
 #### 3.1.2. Hedef Fonksiyonu (Çok Amaçlı Çerçeve)
 
@@ -598,74 +548,91 @@ Bu ağırlıklandırma şeması, sağlık ortamlarının hizmet-öncelikli önce
 
 #### 3.1.3. Kısıt Sistemi Mimarisi
 
-**Sert Kısıtlar (Zorunlu Tatmin):**
+Vardiya çizelgeleme probleminin kısıt sistemi, sert kısıtlar ve yumuşak kısıtlar olmak üzere iki temel kategoride organize edilmektedir. Bu ayrım, problemin fizibilite koşulları ile optimizasyon hedefleri arasında net bir sınır çizmekte ve CP-SAT çözücünün etkin çalışmasını sağlamaktadır.
 
-Vardiya çizelgeleme probleminin çözümünde mutlaka sağlanması gereken sert kısıtlar, sistemin operasyonel geçerliliğini ve yasal uyumluluğunu garanti etmektedir. Bu kısıtlar hiçbir koşulda ihlal edilemez ve çözümün kabul edilebilirliğinin temel şartlarını oluşturmaktadır.
+**A. Sert Kısıtlar (Hard Constraints - Zorunlu Tatmin)**
 
-**1. Müsaitlik Zorlaması:**
+Sert kısıtlar, hiçbir koşulda ihlal edilemeyen ve çözümün kabul edilebilirliğinin temel şartlarını oluşturan kısıtlardır. Bu kısıtlar, sistemin operasyonel geçerliliğini ve yasal uyumluluğunu garanti etmektedir.
+
+**H1. Müsaitlik Zorlaması:**
 ```
 x_{i,j} ≤ A_{i,date(j)}  ∀i ∈ E, ∀j ∈ S
 ```
-Bu temel kısıt, çalışanların müsait olmadıkları dönemlerde vardiya atamasının önlenmesini sağlamaktadır. A_{i,date(j)} değişkeni çalışan i'nin vardiya j'nin tarihinde müsait olup olmadığını belirtmekte (1: müsait, 0: müsait değil) ve bu kısıt sayesinde izinli, raporlu veya başka nedenlerle çalışamayacak durumda olan personelin yanlış atamalardan korunması garanti edilmektedir.
+Çalışanların müsait olmadıkları dönemlerde vardiya atamasının önlenmesini sağlar. İzinli, raporlu veya başka nedenlerle çalışamayacak durumda olan personelin yanlış atamalardan korunmasını garanti eder.
 
-**2. Günlük Çakışma Önleme:**
+**H2. Günlük Çakışma Önleme:**
 ```
 Σ_{j∈S_d} x_{i,j} ≤ 1  ∀i ∈ E, ∀d ∈ D
 Burada S_d = {j ∈ S : date(j) = d}
 ```
-Bu kısıt, çalışanların aynı gün içerisinde birden fazla vardiyaya atanmasının yasaklanmasını zorlamaktadır. S_d kümesi belirli bir d gününde gerçekleşen tüm vardiyaları temsil etmekte ve kısıt her çalışanın günde en fazla bir vardiyada görev almasını garanti etmektedir. Bu düzenleme, çalışan sağlığı ve iş güvenliği açısından kritik öneme sahiptir.
+Çalışanların aynı gün içerisinde birden fazla vardiyaya atanmasını yasaklar. Çalışan sağlığı ve iş güvenliği açısından kritik öneme sahiptir.
 
-**3. Yetenek Gereksinimi Tatmini:**
+**H3. Yetenek Gereksinimi Tatmini:**
 ```
 Σ_{i:SK_{i,k}=1} x_{i,j} ≥ 1  ∀j ∈ S, ∀k ∈ K : SR_{j,k} = 1
 ```
-Bu kısıt, her vardiyada gerekli yeteneklerin nitelikli personel tarafından karşılanmasını garanti etmektedir. SK_{i,k} değişkeni çalışan i'nin k yeteneğine sahip olup olmadığını, SR_{j,k} değişkeni ise vardiya j'nin k yeteneğini gerektirip gerektirmediğini belirtmektedir. Bu sayede hasta güvenliği ve hizmet kalitesi açısından kritik olan yetenek gereksinimleri mutlaka karşılanmaktadır.
+Her vardiyada gerekli yeteneklerin nitelikli personel tarafından karşılanmasını garanti eder. Hasta güvenliği ve hizmet kalitesi açısından vazgeçilmezdir.
 
-**4. Rol Tabanlı Atama Kuralları:**
-```
-Σ_{j∈S_r} x_{i,j} ≤ Rol_Kapasitesi_{i,r}  ∀i ∈ E, ∀r ∈ R
-```
-Bu kısıt, çalışanların rol kapasitelerine uygun atamalar yapılmasını sağlamaktadır. Her çalışanın belirli rollerdeki maksimum çalışma kapasitesi dikkate alınarak aşırı yüklenmenin önlenmesi ve organizasyonel hiyerarşinin korunması hedeflenmektedir.
-
-**Yumuşak Kısıtlar (Optimizasyon Hedefleri):**
-
-Yumuşak kısıtlar, sert kısıtların aksine ihlal edilebilir ancak bu ihlaller hedef fonksiyonunda ceza olarak yansıtılmaktadır. Bu kısıtlar, çözümün kalitesini artırmak ve organizasyonel hedefleri optimize etmek amacıyla tasarlanmıştır.
-
-**5. Minimum Personel Seviyeleri:**
-```
-y_j + u_j ≥ R_j  ∀j ∈ S
-u_j ≥ 0 (eksik personel gevşeme değişkeni)
-```
-Bu kısıt, her vardiyada minimum personel gereksinimlerinin karşılanmasını hedeflemektedir. R_j değişkeni vardiya j için gerekli minimum personel sayısını belirtmekte, u_j gevşeme değişkeni ise eksik personel durumunda bu açığı quantify etmektedir. Eksik personel durumları hedef fonksiyonunda yüksek ağırlıkla (w₂=10) cezalandırılarak hizmet kalitesinin korunması önceliklendirilmektedir.
-
-**6. Maksimum Personel Sınırları:**
-```
-y_j - o_j ≤ M_j  ∀j ∈ S
-o_j ≥ 0 (fazla personel gevşeme değişkeni)
-```
-Bu kısıt, vardiyalarda fazla personel atamasının kontrol edilmesini sağlamaktadır. M_j değişkeni vardiya j için maksimum personel sınırını belirtmekte, o_j gevşeme değişkeni ise fazla personel durumunda bu fazlalığı ölçmektedir. Fazla personel durumları maliyet kontrolü açısından hedef fonksiyonunda cezalandırılmaktadır.
-
-**7. Ardışık Vardiya Sınırlamaları:**
-```
-Σ_{d∈D_window} Σ_{j∈S_d} x_{i,j} ≤ MAX_CONSECUTIVE  ∀i ∈ E, ∀window
-Burada D_window: Ardışık MAX_CONSECUTIVE+1 günlük pencere
-```
-Bu kısıt, çalışanların aşırı yoğun çalışma dönemlerinden korunmasını sağlamaktadır. D_window kümesi ardışık günleri temsil etmekte ve MAX_CONSECUTIVE parametresi bir çalışanın üst üste çalışabileceği maksimum gün sayısını belirlemektedir. Bu düzenleme, çalışan sağlığı ve performans kalitesinin korunması açısından önemlidir.
-
-**8. Minimum Dinlenme Süresi Gereksinimleri:**
+**H4. Minimum Dinlenme Süresi:**
 ```
 x_{i,j} + x_{i,j'} ≤ 1  ∀i ∈ E, ∀j,j' ∈ S :
 end_time(j) + MIN_REST > start_time(j')
 ```
-Bu kısıt, çalışanların vardiyalar arasında yeterli dinlenme süresine sahip olmalarını garanti etmektedir. MIN_REST parametresi minimum dinlenme süresi gereksinimini belirtmekte ve bu süreyi karşılamayan ardışık vardiya atamaları yasaklanmaktadır. Bu düzenleme, çalışan refahı ve iş güvenliği açısından kritik öneme sahiptir.
+Çalışanların vardiyalar arasında yeterli dinlenme süresine sahip olmalarını garanti eder. Yasal düzenlemeler ve çalışan refahı açısından zorunludur.
 
-**9. İş Yükü Dengeleme Kısıtları:**
+**H5. Maksimum Çalışma Süresi Sınırı:**
 ```
-workload_range = max_shifts - min_shifts
-max_shifts = max(z_i)  ∀i ∈ E
-min_shifts = min(z_i)  ∀i ∈ E
+Σ_{j∈S} duration(j) × x_{i,j} ≤ WL_i  ∀i ∈ E
 ```
-Bu kısıt sistemi, çalışanlar arasında adil iş yükü dağılımının sağlanmasını hedeflemektedir. workload_range değişkeni en çok ve en az vardiya alan çalışanlar arasındaki farkı ölçmekte ve bu farkın minimize edilmesi yoluyla iş yükü adaleti optimize edilmektedir. Bu yaklaşım, çalışan memnuniyeti ve organizasyonel adalet açısından önemli bir rol oynamaktadır.
+Çalışanların yasal ve sözleşmeli maksimum çalışma sürelerini aşmasını engeller. İş hukuku uyumluluğu için kritiktir.
+
+**B. Yumuşak Kısıtlar (Soft Constraints - Optimizasyon Hedefleri)**
+
+Yumuşak kısıtlar ihlal edilebilir, ancak bu ihlaller hedef fonksiyonunda ceza olarak yansıtılır. Bu kısıtlar çözümün kalitesini artırmak ve organizasyonel hedefleri optimize etmek amacıyla tasarlanmıştır.
+
+**S1. Minimum Personel Seviyeleri:**
+```
+y_j + u_j ≥ R_j  ∀j ∈ S
+u_j ≥ 0 (eksik personel gevşeme değişkeni)
+```
+Her vardiyada minimum personel gereksinimlerinin karşılanmasını hedefler. Eksik personel durumları hedef fonksiyonunda yüksek ağırlıkla (w₂=10) cezalandırılır.
+
+**S2. Maksimum Personel Sınırları:**
+```
+y_j - o_j ≤ M_j  ∀j ∈ S
+o_j ≥ 0 (fazla personel gevşeme değişkeni)
+```
+Vardiyalarda fazla personel atamasının kontrol edilmesini sağlar. Maliyet kontrolü açısından hedef fonksiyonunda cezalandırılır.
+
+**S3. Çalışan Tercih Optimizasyonu:**
+```
+Maximize: Σ_{i∈E} Σ_{j∈S} P_{i,j} × x_{i,j}
+```
+Çalışan memnuniyetinin artırılması için pozitif tercihlerin maksimize edilmesini hedefler. Hedef fonksiyonunda w₃=2 ağırlığı ile optimize edilir.
+
+**S4. İş Yükü Dengeleme:**
+```
+workload_range = max(z_i) - min(z_i)  ∀i ∈ E
+Minimize: workload_range
+```
+Çalışanlar arasında adil iş yükü dağılımının sağlanmasını hedefler. Organizasyonel adalet ve çalışan memnuniyeti açısından önemlidir.
+
+**S5. Ardışık Vardiya Sınırlaması:**
+```
+Σ_{d∈D_window} Σ_{j∈S_d} x_{i,j} ≤ MAX_CONSECUTIVE + slack_i  ∀i ∈ E
+slack_i ≥ 0 (ardışık çalışma gevşeme değişkeni)
+```
+Çalışanların aşırı yoğun çalışma dönemlerinden korunmasını sağlar. İhlal durumunda hedef fonksiyonunda cezalandırılır.
+
+**Kısıt Kategorileri Karşılaştırması:**
+
+| **Özellik** | **Sert Kısıtlar** | **Yumuşak Kısıtlar** |
+|-------------|-------------------|---------------------|
+| **İhlal Durumu** | Asla ihlal edilemez | İhlal edilebilir |
+| **Çözüm Etkisi** | Fizibil çözüm için zorunlu | Çözüm kalitesini etkiler |
+| **Hedef Fonksiyonu** | Dahil değil | Ceza olarak dahil |
+| **Öncelik** | Mutlak öncelik | Ağırlıklı öncelik |
+| **Esneklik** | Esneklik yok | Gevşeme değişkenleri ile esnek |
 
 ### 3.2. Çözüm Metodolojisi
 
@@ -737,53 +704,144 @@ Bu teknikleri vardiya çizelgeleme örnekleriyle açıklayalım:
 
 **Yay Tutarlılığı (Arc Consistency - AC-3):**
 
+Yay tutarlılığı, iki değişken arasındaki kısıt ilişkisinin tutarlılığını kontrol eden temel tekniktir. Bu yöntem, her değişkenin değer alanındaki her değer için, diğer değişkende uyumlu en az bir değer bulunup bulunmadığını kontrol eder.
+
 Matematiksel tanım:
 ```
 Bir kısıt c(xᵢ, xⱼ) için yay tutarlılığı:
 ∀a ∈ Dᵢ, ∃b ∈ Dⱼ : c(a,b) = true
 ```
 
-**Pratik Örnek:**
+Bu tanım şu anlama gelir: Değişken i'nin değer alanındaki her a değeri için, değişken j'nin değer alanında kısıtı sağlayan en az bir b değeri bulunmalıdır.
+
+**Pratik Örnek - Hastane Vardiya Senaryosu:**
+
+Bir hastane departmanında Ali ve Ayşe'nin aynı vardiyada çalışamayacağı kuralı olduğunu varsayalım. Bu durum, hasta güvenliği veya departman politikası gereği olabilir.
+
 ```
 Durum: Ali ve Ayşe aynı vardiyada çalışamaz kısıtı
-Başlangıç:
-- D_{Ali,Sabah} = {0, 1}
-- D_{Ayşe,Sabah} = {0, 1}
+Başlangıç durumu:
+- D_{Ali,Sabah} = {0, 1}    (0: atanmadı, 1: atandı)
+- D_{Ayşe,Sabah} = {0, 1}   (0: atanmadı, 1: atandı)
 
-AC-3 Uygulaması:
-- Ali = 1 (sabah vardiyasında) ise, Ayşe = 0 olmalı
-- Ayşe = 1 (sabah vardiyasında) ise, Ali = 0 olmalı
-- Her iki durumda da tutarlı değer çiftleri mevcut → Yay tutarlı
+AC-3 Algoritması Kontrolü:
+- Ali = 1 (sabah vardiyasında) ise, Ayşe = 0 olmalı ✓
+- Ali = 0 (sabah vardiyasında değil) ise, Ayşe = 0 veya 1 olabilir ✓
+- Ayşe = 1 (sabah vardiyasında) ise, Ali = 0 olmalı ✓
+- Ayşe = 0 (sabah vardiyasında değil) ise, Ali = 0 veya 1 olabilir ✓
+
+Sonuç: Her iki durumda da tutarlı değer çiftleri mevcut → Yay tutarlı
 ```
+
+Bu örnekte, her değişkenin her değeri için diğer değişkende uyumlu bir değer bulunduğu için yay tutarlılığı sağlanmıştır. Eğer Ali'nin sabah vardiyasında çalışması zorunlu olsaydı (D_{Ali,Sabah} = {1}), o zaman Ayşe'nin değer alanı otomatik olarak {0} olarak daraltılırdı.
 
 **İleri Kontrol (Forward Checking):**
 
-Bir değişkene değer atandığında, etkilenen diğer değişkenlerin alanlarından uyumsuz değerleri çıkarır.
+İleri kontrol tekniği, bir değişkene değer atandığında, bu atamanın diğer değişkenler üzerindeki doğrudan etkilerini hesaplayarak uyumsuz değerleri değer alanlarından çıkarır. Bu proaktif yaklaşım, gelecekteki çelişkileri erken tespit etmeyi ve arama uzayını sistematik olarak daraltmayı sağlar.
 
-**Pratik Örnek:**
+İleri kontrolün temel mantığı şudur: Bir karar verildiğinde, bu kararın sonuçlarını hemen hesapla ve uyumsuz seçenekleri elen. Bu sayede, ilerleyen adımlarda çelişki yaşanma olasılığı azalır ve algoritma daha verimli çalışır.
+
+**Pratik Örnek - Hastane Vardiya Atama Süreci:**
+
+Bir hastane departmanında 3 çalışan (Ali, Ayşe, Mehmet) ve 2 vardiya (Sabah, Akşam) bulunan basit bir senaryo düşünelim. Departman kuralları şunlardır:
+- Bir çalışan aynı gün birden fazla vardiyada çalışamaz
+- Sabah vardiyasında maksimum 2 çalışan bulunabilir
+- Her vardiyada en az 1 çalışan bulunmalıdır
+
 ```
+Başlangıç Durumu:
+- D_{Ali,Sabah} = {0, 1}
+- D_{Ali,Akşam} = {0, 1}
+- D_{Ayşe,Sabah} = {0, 1}
+- D_{Ayşe,Akşam} = {0, 1}
+- D_{Mehmet,Sabah} = {0, 1}
+- D_{Mehmet,Akşam} = {0, 1}
+
 Adım 1: Ali'yi sabah vardiyasına ata → x_{Ali,Sabah} = 1
 
-Forward Checking etkisi kapsamında "aynı gün çoklu vardiya yasak" kısıtı nedeniyle D_{Ali,Akşam} = {0} değeri atanmakta ve "sabah vardiyasında maksimum 2 kişi" kısıtı gereği diğer çalışanların sabah seçenekleri kısıtlanmaktadır.
+Forward Checking Etkileri:
 
-Sonuç: Gelecekteki kararlar için alan daraltması gerçekleşti
+1. "Aynı gün çoklu vardiya yasağı" kısıtı:
+   → D_{Ali,Akşam} = {0} (Ali artık akşam vardiyasına atanamaz)
+
+2. "Sabah vardiyasında maksimum 2 kişi" kısıtı:
+   → Sabah vardiyasında 1 yer kaldı, en fazla 1 kişi daha atanabilir
+   → Bu bilgi gelecekteki kararları etkiler
+
+3. "Minimum personel" kısıtı kontrolü:
+   → Akşam vardiyasında Ali artık mevcut değil
+   → Ayşe veya Mehmet'ten en az biri akşam vardiyasında olmalı
+
+Sonuç Durumu:
+- D_{Ali,Sabah} = {1} ✓ (atandı)
+- D_{Ali,Akşam} = {0} ✓ (otomatik elendi)
+- D_{Ayşe,Sabah} = {0, 1} (hala seçenek var)
+- D_{Ayşe,Akşam} = {0, 1} (hala seçenek var)
+- D_{Mehmet,Sabah} = {0, 1} (hala seçenek var)
+- D_{Mehmet,Akşam} = {0, 1} (hala seçenek var)
+
+Gelecekteki kararlar için alan daraltması gerçekleşti ve çelişki riski azaldı.
 ```
+
+Bu örnekte görüldüğü gibi, Ali'nin tek bir atama kararı, sistem genelinde zincirleme etkiler yaratmış ve gelecekteki seçenekleri şekillendirmiştir. İleri kontrol sayesinde, uyumsuz kombinasyonlar erken aşamada elenmiş ve arama süreci daha verimli hale gelmiştir.
 
 **Yay Tutarlılığı Koruma (Maintaining Arc Consistency - MAC):**
 
-Her atama sonrası tüm kısıtlar için yay tutarlılığını yeniden kontrol eder ve korur.
+MAC algoritması, her değişken ataması sonrasında tüm kısıt sisteminin tutarlılığını kapsamlı bir şekilde kontrol eden ve koruyan gelişmiş bir tekniktir. İleri kontrolden farklı olarak, MAC sadece doğrudan etkilenen kısıtları değil, zincirleme etkileri de hesaba katarak tüm kısıt ağının tutarlılığını garanti eder.
 
-**Pratik Örnek:**
+MAC'in temel avantajı, her atama sonrasında sistemin bütünsel tutarlılığını sağlamasıdır. Bu yaklaşım, daha az geri izleme gerektiren ve daha verimli çözüm süreçleri sağlar, ancak her adımda daha fazla hesaplama yapar.
+
+**Pratik Örnek - Kapsamlı Hastane Vardiya Yönetimi:**
+
+Daha karmaşık bir hastane senaryosu düşünelim: 4 çalışan (Ali, Ayşe, Mehmet, Fatma), 3 vardiya (Sabah, Akşam, Gece) ve çoklu kısıtlar.
+
+Departman kuralları:
+- Aynı gün çoklu vardiya yasağı
+- Her vardiyada minimum 1, maksimum 2 çalışan
+- Ali ve Ayşe aynı vardiyada çalışamaz (kişisel çelişki)
+- Mehmet sadece gündüz vardiyalarında çalışabilir (gece vardiyası yasak)
+- Haftalık maksimum 3 vardiya/çalışan
+
 ```
-Adım 1: Ali → Sabah vardiyası (x_{Ali,Sabah} = 1)
+Başlangıç Durumu (Pazartesi):
+Tüm çalışanlar için tüm vardiyalar: D = {0, 1}
 
-MAC Kontrolü:
-1. "Ali-Ayşe aynı vardiya yasağı" → Ayşe'nin sabah alanını kontrol et
-2. "Minimum personel sayısı" → Akşam vardiyası için kalan seçenekleri kontrol et
-3. "Maksimum çalışma saati" → Ali'nin haftalık limitini kontrol et
+Adım 1: Ali → Sabah vardiyası atama (x_{Ali,Sabah} = 1)
 
-Sonuç: Tüm etkilenen kısıtlar için tutarlılık sağlandı
+MAC Kapsamlı Kontrol Süreci:
+
+1. Doğrudan Etkiler (İleri Kontrol):
+   - D_{Ali,Akşam} = {0} (aynı gün yasağı)
+   - D_{Ali,Gece} = {0} (aynı gün yasağı)
+
+2. İkincil Etkiler (Yay Tutarlılığı):
+   - D_{Ayşe,Sabah} = {0} (Ali-Ayşe çelişki kuralı)
+   - Sabah vardiyasında 1 yer kaldı (maksimum 2 kural)
+
+3. Zincirleme Etkiler (MAC Özelliği):
+   - Akşam vardiyası analizi: Ali yok, Ayşe mevcut, Mehmet mevcut, Fatma mevcut
+   - Gece vardiyası analizi: Ali yok, Mehmet yasak → Sadece Ayşe ve Fatma kalıyor
+   - Minimum personel kontrolü: Her vardiyada en az 1 kişi garantisi
+
+4. Tutarlılık Doğrulama:
+   - Sabah: Ali (atandı) + {Mehmet veya Fatma} → Fizibil ✓
+   - Akşam: {Ayşe, Mehmet, Fatma} → En az 1 seçenek var ✓
+   - Gece: {Ayşe, Fatma} → En az 1 seçenek var ✓
+
+5. Haftalık Limit Kontrolü:
+   - Ali: 1/3 vardiya kullandı → 2 vardiya hakkı kaldı
+   - Diğerleri: Henüz atama yok → Tam esneklik
+
+Sonuç Durumu:
+- D_{Ali,Sabah} = {1}, D_{Ali,Akşam} = {0}, D_{Ali,Gece} = {0}
+- D_{Ayşe,Sabah} = {0}, D_{Ayşe,Akşam} = {0,1}, D_{Ayşe,Gece} = {0,1}
+- D_{Mehmet,Sabah} = {0,1}, D_{Mehmet,Akşam} = {0,1}, D_{Mehmet,Gece} = {0}
+- D_{Fatma,Sabah} = {0,1}, D_{Fatma,Akşam} = {0,1}, D_{Fatma,Gece} = {0,1}
+
+MAC Sonucu: Tüm kısıtlar için tutarlılık sağlandı ve gelecekteki atamalar için güvenli alan daraltması gerçekleşti.
 ```
+
+Bu kapsamlı örnekte görüldüğü gibi, MAC algoritması tek bir atama kararından sonra tüm sistem genelinde tutarlılık kontrolü yapmış ve çoklu kısıtların etkileşimini sistematik olarak yönetmiştir. Bu yaklaşım, karmaşık vardiya çizelgeleme problemlerinde çelişkilerin erken tespitini ve çözüm sürecinin optimizasyonunu sağlamaktadır.
 
 **Alan Daraltma Teknikleri Karşılaştırması:**
 
@@ -1107,19 +1165,56 @@ Araştırma hipotezlerinin geçerliliğini sağlamak ve istatistiksel sonuçlar�
 Araştırma hipotezlerinin değerlendirilmesi için aşağıdaki istatistiksel test yöntemleri kullanılacaktır:
 
 **1. Cohen's d Etki Büyüklüğü Hesaplaması:**
-Gruplar arası farkların pratik anlamlılığını değerlendirmek için etki büyüklüğü hesaplama metodolojisi:
+
+Cohen's d etki büyüklüğü, iki grup arasındaki farkın pratik anlamlılığını ölçen önemli bir istatistiksel metriktir. Bu ölçüm, sadece istatistiksel anlamlılığın ötesinde, bulunan farkın gerçek dünyada ne kadar önemli olduğunu değerlendirmemizi sağlar. Vardiya çizelgeleme bağlamında, farklı algoritmaların performans farkının ne kadar büyük olduğunu objektif olarak değerlendirmek için kullanılır.
+
+**Temel Formül ve Bileşenleri:**
+
 ```
 d = (μ₁ - μ₂) / σ_pooled
-
-Burada:
-σ_pooled = √[((n₁-1)σ₁² + (n₂-1)σ₂²) / (n₁+n₂-2)]
-
-Yorumlama Kriterleri (Cohen, 1988):
-d < 0.2 = Önemsiz etki
-0.2 ≤ d < 0.5 = Küçük etki
-0.5 ≤ d < 0.8 = Orta etki
-d ≥ 0.8 = Büyük etki
 ```
+
+Bu formülde:
+- **μ₁**: Birinci grubun ortalaması (örn: CP-SAT algoritmasının ortalama çözüm süresi)
+- **μ₂**: İkinci grubun ortalaması (örn: Manuel çizelgelemenin ortalama süresi)
+- **σ_pooled**: Birleştirilmiş standart sapma (her iki grubun varyansını birleştiren ölçü)
+
+**Birleştirilmiş Standart Sapma Hesaplaması:**
+
+```
+σ_pooled = √[((n₁-1)σ₁² + (n₂-1)σ₂²) / (n₁+n₂-2)]
+```
+
+Bu formülün bileşenleri:
+- **n₁, n₂**: Her grubun örneklem büyüklüğü
+- **σ₁², σ₂²**: Her grubun varyansı (standart sapmanın karesi)
+- **n₁-1, n₂-1**: Serbestlik dereceleri (örneklem büyüklüğünden 1 çıkarılır)
+
+Birleştirilmiş standart sapma, her iki grubun varyansını örneklem büyüklüklerine göre ağırlıklandırarak birleştirir. Bu sayede, gruplar farklı büyüklüklerde olsa bile adil bir karşılaştırma yapılabilir.
+
+**Pratik Yorumlama Kriterleri (Cohen, 1988):**
+
+```
+d < 0.2 = Önemsiz etki (Negligible Effect)
+0.2 ≤ d < 0.5 = Küçük etki (Small Effect)
+0.5 ≤ d < 0.8 = Orta etki (Medium Effect)
+d ≥ 0.8 = Büyük etki (Large Effect)
+```
+
+**Vardiya Çizelgeleme Bağlamında Yorumlama:**
+
+- **d < 0.2**: Algoritma farkı pratikte önemsiz (her iki yöntem benzer performans)
+- **0.2 ≤ d < 0.5**: Küçük ama fark edilebilir iyileştirme (günlük operasyonlarda hafif avantaj)
+- **0.5 ≤ d < 0.8**: Orta düzeyde iyileştirme (hastane yönetimi için anlamlı fark)
+- **d ≥ 0.8**: Büyük iyileştirme (operasyonel verimlilikte önemli kazanım)
+
+**Hesaplama Örneği:**
+
+CP-SAT algoritması ile manuel çizelgeleme karşılaştırması:
+- CP-SAT ortalama çözüm süresi: μ₁ = 45 saniye, σ₁ = 8 saniye, n₁ = 20
+- Manuel çizelgeleme ortalama süresi: μ₂ = 180 dakika, σ₂ = 25 dakika, n₂ = 20
+
+Bu durumda Cohen's d hesaplaması, CP-SAT'ın manuel yönteme göre ne kadar büyük bir pratik avantaj sağladığını objektif olarak ölçecektir.
 
 **2. Hipotez Testleri Metodolojisi:**
 
@@ -1191,21 +1286,16 @@ Sektörel varyasyon karşılaştırması, hastane ve çağrı merkezi senaryolar
 
 **Etki Büyüklüğü Analiz Metodolojisi:**
 
-Etki büyüklüğü analizi, karşılaştırmalı analizlerde pratik anlamlılığın değerlendirilmesi için Cohen (1988) tarafından geliştirilen standartları takip etmektedir. Bu metodoloji, istatistiksel anlamlılık ile pratik anlamlılık arasındaki kritik ayrımı yaparak, araştırma bulgularının gerçek dünya uygulamalarındaki önemini değerlendirmektedir. İstatistiksel anlamlılık sadece farkın varlığını gösterirken, etki büyüklüğü bu farkın pratik önemini quantify etmektedir.
+Karşılaştırmalı analizlerde pratik anlamlılığın değerlendirilmesi için, 3.3.4 kısmında detaylandırılan Cohen's d etki büyüklüğü hesaplama metodolojisi kullanılmaktadır. Bu yaklaşım, istatistiksel anlamlılık ile pratik anlamlılık arasındaki kritik ayrımı yaparak, araştırma bulgularının gerçek dünya uygulamalarındaki önemini değerlendirmektedir.
 
-**Cohen's d Hesaplama Çerçevesi ve Teorik Temelleri:**
+**Vardiya Çizelgeleme Bağlamında Etki Büyüklüğü Yorumlaması:**
 
-Cohen's d hesaplama formülü d = (μ₁ - μ₂) / σ_pooled şeklinde tanımlanmakta olup, burada μ₁ ve μ₂ karşılaştırılan grupların ortalamalarını, σ_pooled ise birleştirilmiş standart sapmayı temsil etmektedir. Birleştirilmiş standart sapma, her iki grubun varyansını dikkate alarak daha güvenilir bir ölçüm sağlamaktadır. Bu hesaplama, farklı ölçek birimlerindeki metriklerin karşılaştırılabilir hale getirilmesini mümkün kılmaktadır.
+Etki büyüklüğü kategorileri, vardiya çizelgeleme sisteminin performans iyileştirmelerinin pratik değerini şu şekilde yorumlanmaktadır:
 
-**Etki Büyüklüğü Kategorileri ve Pratik Yorumlamaları:**
-
-Önemsiz etki kategorisi (d < 0.2), istatistiksel olarak anlamlı fark bulunmasına rağmen bu farkın pratik uygulamalarda ihmal edilebilir düzeyde olduğunu göstermektedir. Vardiya çizelgeleme bağlamında, bu durum algoritma değişikliklerinin çözüm kalitesinde teknik olarak iyileştirme sağlamasına rağmen, kullanıcılar veya organizasyon için fark edilebilir bir değişiklik yaratmaması anlamına gelmektedir.
-
-Küçük etki kategorisi (0.2 ≤ d < 0.5), gözlemlenebilir ancak mütevazı düzeyde pratik fark olduğunu işaret etmektedir. Bu seviyedeki iyileştirmeler, dikkatli gözlemciler tarafından fark edilebilir ancak operasyonel süreçlerde dramatik değişiklikler yaratmayabilir. Örneğin, çözüm süresinde %10-15'lik iyileştirme bu kategoriye girebilir.
-
-Orta etki kategorisi (0.5 ≤ d < 0.8), belirgin pratik fark olduğunu ve bu farkın organizasyonel süreçlerde gözlemlenebilir iyileştirmeler yarattığını göstermektedir. Bu seviyedeki değişiklikler, kullanıcı deneyiminde ve operasyonel verimlilikte somut iyileştirmeler sağlamaktadır.
-
-Büyük etki kategorisi (d ≥ 0.8), önemli pratik etki olduğunu ve bu değişikliklerin organizasyonel süreçlerde transformatif etkiler yarattığını işaret etmektedir. Bu seviyedeki iyileştirmeler, sistem adoptasyonu ve kullanıcı memnuniyetinde dramatik artışlar sağlayabilir.
+- **Önemsiz etki (d < 0.2)**: Algoritma değişikliklerinin teknik iyileştirme sağlamasına rağmen, kullanıcılar veya organizasyon için fark edilebilir değişiklik yaratmaması
+- **Küçük etki (0.2 ≤ d < 0.5)**: Dikkatli gözlemciler tarafından fark edilebilir ancak operasyonel süreçlerde mütevazı iyileştirmeler (örn: çözüm süresinde %10-15'lik iyileştirme)
+- **Orta etki (0.5 ≤ d < 0.8)**: Organizasyonel süreçlerde gözlemlenebilir iyileştirmeler ve kullanıcı deneyiminde somut gelişmeler
+- **Büyük etki (d ≥ 0.8)**: Organizasyonel süreçlerde transformatif etkiler ve sistem adoptasyonunda dramatik artışlar
 
 **Sistem Sınırları ve Test Kapsamı:**
 
@@ -1252,7 +1342,7 @@ Birinci aşama olan baseline performans ölçümü, sistemin referans koşullar 
 
 Üçüncü aşama olan istatistiksel anlamlılık testleri, gözlenen farkların rastlantısal olmadığının matematiksel doğrulamasını gerçekleştirmektedir. Bu aşamada, uygun istatistiksel testlerin seçimi (t-test, ANOVA, Mann-Whitney U) veri dağılımının özelliklerine göre yapılmakta ve Bonferroni düzeltmesi ile çoklu karşılaştırma probleminin kontrolü sağlanmaktadır.
 
-Dördüncü aşama olan etki büyüklüğü hesaplaması, istatistiksel anlamlılığın pratik öneminin değerlendirilmesini içermektedir. Cohen's d, eta-squared veya Cliff's delta gibi uygun etki büyüklüğü metrikleri kullanılarak, farkların gerçek dünya uygulamalarındaki anlamı quantify edilmektedir.
+Dördüncü aşama olan etki büyüklüğü hesaplaması, istatistiksel anlamlılığın pratik öneminin değerlendirilmesini içermektedir. 3.3.4 kısmında detaylandırılan Cohen's d metodolojisi başta olmak üzere, eta-squared veya Cliff's delta gibi uygun etki büyüklüğü metrikleri kullanılarak, farkların gerçek dünya uygulamalarındaki anlamı quantify edilmektedir.
 
 Beşinci aşama olan pratik anlamlılık değerlendirmesi, istatistiksel sonuçların operasyonel bağlamdaki öneminin analiz edilmesini kapsamaktadır. Bu aşamada, elde edilen iyileştirmelerin maliyet-fayda analizi, kullanıcı deneyimi üzerindeki etkisi ve organizasyonel süreçlerdeki pratik değeri değerlendirilmektedir.
 
@@ -1268,7 +1358,7 @@ Bu karşılaştırmalı analiz çerçevesi, sistemin performansını objektif ve
 
 #### 4.1.1. Çok Katmanlı Mimari Genel Bakışı
 
-Geliştirilen sistem, modern yazılım mimarisi standartlarında, esneklik ve uyarlanabilirlik sağlamak amacıyla dört ana katmanlı modüler bir mimari üzerine kurulmuştur. Bu mimari, Separation of Concerns prensibini uygulayarak her katmanın belirli sorumluluklara odaklanmasını sağlamaktadır.
+Geliştirilen sistem, modern yazılım mimarisi standartlarında, esneklik ve uyarlanabilirlik sağlamak amacıyla üç ana katmanlı modüler bir mimari üzerine kurulmuştur. Bu mimari, Separation of Concerns prensibini uygulayarak her katmanın belirli sorumluluklara odaklanmasını sağlamaktadır.
 
 **Sistem Mimarisi Diyagramı:**
 
@@ -1276,11 +1366,20 @@ Geliştirilen sistem, modern yazılım mimarisi standartlarında, esneklik ve uy
 
 **Mimari Katmanları ve Sorumlulukları:**
 
-Kullanıcı katmanı, React tabanlı web arayüzü ile kullanıcı etkileşimlerini yönetmekte ve TypeScript ile tip güvenliği sağlamaktadır. API Gateway katmanı, FastAPI framework'ü kullanarak RESTful servisler sunmakta, JWT tabanlı kimlik doğrulama ve yetkilendirme işlemlerini koordine etmektedir. İş mantık katmanı, CP-SAT optimizasyon çekirdeği ve n8n workflow automation platformu ile veri işleme ve optimizasyon süreçlerini yürütmektedir. Veri katmanı ise MySQL veritabanı, YAML konfigürasyon dosyaları ve CSV veri dosyaları ile sistem verilerinin kalıcı saklanmasını sağlamaktadır.
+Geliştirilen sistem, yukarıdaki şemada gösterildiği üzere üç ana katmanlı modüler mimari üzerine kurulmuştur. Her katman belirli sorumlulukları üstlenerek sistem bütünlüğünü sağlamaktadır.
+
+**Frontend Katmanı (Mavi Bölge):**
+Frontend katmanı, React tabanlı kullanıcı arayüzü ile sistem etkileşiminin merkezini oluşturmaktadır. Bu katman, YAML konfigürasyon editörü ile optimizasyon parametrelerinin dinamik düzenlenmesini, sonuç gösterimi ile optimizasyon çıktılarının görselleştirilmesini ve dashboard ile sistem durumunun izlenmesini sağlamaktadır. TypeScript entegrasyonu ile tip güvenliği garanti edilirken, Material UI bileşenleri ile modern kullanıcı deneyimi sunulmaktadır. Vite geliştirme sunucusu üzerinden çalışan bu katman, proxy konfigürasyonu ile backend ve n8n servislerine güvenli erişim sağlamaktadır.
+
+**Backend Katmanı (Sarı Bölge):**
+Backend katmanı, FastAPI Gateway üzerinde organize edilmiş RESTful API servisleri ile sistem iş mantığını yürütmektedir. Bu katman, JWT Authentication ile güvenli kimlik doğrulama, CORS Middleware ile çapraz kaynak paylaşımı kontrolü ve çeşitli API endpoint'leri ile frontend-backend iletişimini koordine etmektedir. Optimizasyon motoru entegrasyonu bu katmanda gerçekleştirilmekte olup, CP-SAT Model Builder ile Google OR-Tools Solver arasındaki köprü görevi görmektedir. Kurallar ve veriler bu katmanda işlenerek optimizasyon sonuçları üretilmektedir.
+
+**Veri Servisleri Katmanı (Yeşil Bölge):**
+Veri servisleri katmanı, sistemin veri yönetimi ve kalıcılığından sorumludur. Bu katman, MySQL veritabanı ile kullanıcı yönetimi, kimlik doğrulama ve audit log işlemlerini Docker konteyner ortamında yürütmektedir. CSV dosya sistemi ile optimizasyon veri setlerinin yönetimi sağlanırken, n8n Workflow Docker servisi ile veri işleme otomasyonu gerçekleştirilmektedir. Bu hibrit veri mimarisi, performans optimizasyonu ile veri tutarlılığı arasında optimal denge kurmaktadır.
 
 **Teknoloji Yığını ve Seçim Gerekçeleri:**
 
-Frontend geliştirmede React 18.2.0 ve TypeScript kombinasyonu, modern web standartları ve tip güvenliği sağlamaktadır. Backend'de FastAPI 0.2.0 seçimi, yüksek performanslı asenkron API geliştirme ve otomatik dokümantasyon özellikleri nedeniyledir. MySQL 8.0 veritabanı, ACID uyumluluğu ve güvenilir ilişkisel veri yönetimi için tercih edilmiştir. n8n platformu, kod yazmadan workflow automation sağlayarak veri işleme süreçlerinin görsel olarak yönetilmesini mümkün kılmaktadır.
+Frontend geliştirmede React 18.2.0 ve TypeScript kombinasyonu, modern web standartları ve tip güvenliği sağlamaktadır. Backend'de FastAPI 0.109.0 seçimi, yüksek performanslı asenkron API geliştirme ve otomatik dokümantasyon özellikleri nedeniyledir. MySQL 8.0 veritabanı, ACID uyumluluğu ve güvenilir ilişkisel veri yönetimi için tercih edilmiştir. n8n platformu, kod yazmadan workflow automation sağlayarak veri işleme süreçlerinin görsel olarak yönetilmesini mümkün kılmaktadır.
 
 #### 4.1.2. Bileşen Tasarımı ve Etkileşimler
 
@@ -1302,9 +1401,9 @@ Frontend geliştirme sürecinde kullanılan teknoloji yığını modern web geli
 
 **Modüler Uygulama Yapısı:**
 
-Uygulama mimarisi, Domain-Driven Design prensipleri doğrultusunda organize edilmiştir. Frontend yapısı altı ana klasörde organize edilmiş olup, her klasör belirli bir sorumluluk alanını temsil etmektedir. Components klasörü yeniden kullanılabilir UI bileşenlerini, contexts klasörü React Context API yapılarını, hooks klasörü özel React hook'larını, layouts klasörü sayfa düzenlerini, pages klasörü ana sayfa bileşenlerini, services klasörü API iletişim katmanını, types klasörü TypeScript tip tanımlarını ve utils klasörü yardımcı fonksiyonları içermektedir.
+Uygulama mimarisi, Domain-Driven Design prensipleri doğrultusunda organize edilmiştir. Frontend yapısı sekiz ana klasörde organize edilmiş olup, her klasör belirli bir sorumluluk alanını temsil etmektedir. Components klasörü yeniden kullanılabilir UI bileşenlerini (ProtectedRoute), contexts klasörü React Context API yapılarını (AuthContext), hooks klasörü özel React hook'larını (usePermissions), layouts klasörü sayfa düzenlerini (MainLayout), pages klasörü ana sayfa bileşenlerini, services klasörü API iletişim katmanını (api.ts, adminService.ts, auditService.ts, sessionService.ts), types klasörü TypeScript tip tanımlarını ve styles klasörü stil dosyalarını içermektedir.
 
-Bu yapısal organizasyon, Separation of Concerns prensibini uygulayarak her bileşenin tek bir sorumluluğa odaklanmasını sağlamaktadır. Özellikle pages klasöründe yer alan LoginPage, Dashboard, AdminPage, OptimizationParams, Results ve ScheduleView bileşenleri, sistemin ana işlevsel modüllerini temsil etmektedir.
+Bu yapısal organizasyon, Separation of Concerns prensibini uygulayarak her bileşenin tek bir sorumluluğa odaklanmasını sağlamaktadır. Pages klasöründe yer alan LoginPage, Dashboard, AdminPage, DatasetConfig, OptimizationParams, Results, ScheduleView, Settings, SessionManagement ve AuditLogs bileşenleri, sistemin kapsamlı işlevsel modüllerini temsil etmektedir. Bu bileşenler, kullanıcı kimlik doğrulamadan sistem yönetimine, optimizasyon parametrelerinden sonuç analizine kadar tüm sistem işlevlerini kapsamaktadır.
 
 **2. FastAPI Arka Uç (API Katmanı)**
 
@@ -1319,7 +1418,7 @@ FastAPI framework'ünün seçimi, performans gereksinimleri ile geliştirici den
 Sistem, HTTP protokolünün semantiğini doğru şekilde kullanarak resource-oriented architecture benimser. Bu yaklaşım, API endpoints'lerinin sezgisel ve öngörülebilir olmasını sağlarken, gelecekteki genişlemelere açık modüler yapı kurmaktadır.
 
 **Teknoloji Yığını:**
-- **FastAPI 0.2.0:** Modern Python web çatısı
+- **FastAPI 0.109.0:** Modern Python web çatısı
 - **SQLAlchemy:** ORM ve veritabanı soyutlaması
 - **MySQL Bağlayıcısı:** MySQL veritabanı sürücüsü
 - **Pydantic:** Veri doğrulama ve serileştirme
@@ -1328,19 +1427,25 @@ Sistem, HTTP protokolünün semantiğini doğru şekilde kullanarak resource-ori
 
 **Modüler API Mimarisi:**
 
-Monolithic yapıdan kaçınarak, her API modülü belirli bir domain alanına odaklanmaktadır. Bu yaklaşım, Single Responsibility Principle'ı uygulayarak kodun sürdürülebilirliğini artırmaktadır:
+Backend mimarisi, Domain-Driven Design prensipleri doğrultusunda organize edilmiş modüler yapıda tasarlanmıştır. Her modül belirli bir iş alanına odaklanarak, yüksek kohezyon ve düşük bağımlılık (high cohesion, low coupling) prensiplerini uygulamaktadır. Monolithic yapıdan kaçınarak, her API modülü belirli bir domain alanına odaklanmaktadır. Bu yaklaşım, Single Responsibility Principle'ı uygulayarak kodun sürdürülebilirliğini artırmaktadır:
 
 ```
 optimization_core/
 ├── main.py                 # Ana FastAPI uygulaması
 ├── auth_api.py            # Kimlik doğrulama uç noktaları
 ├── auth_middleware.py     # JWT ara yazılım ve yetkilendirme
+├── auth_utils.py          # JWT ve parola yardımcı fonksiyonları
 ├── database.py            # SQLAlchemy modelleri ve VT bağlantısı
 ├── dashboard_api.py       # Panel uç noktaları
+├── dashboard_models.py    # Dashboard veri modelleri
 ├── management_api.py      # Kullanıcı/Kurum yönetimi
 ├── cp_model_builder.py    # CP-SAT model oluşturucu (1147 satır)
 ├── results_api.py         # Optimizasyon sonuçları uç noktaları
-└── webhook_api.py         # n8n webhook entegrasyonu
+├── webhook_api.py         # n8n webhook entegrasyonu
+├── audit_utils.py         # Denetim kaydı yardımcı fonksiyonları
+├── activity_logger.py     # Sistem aktivite kayıt modülü
+├── migration_script.py    # Veritabanı migrasyon scriptleri
+└── utils.py               # Genel yardımcı fonksiyonlar
 ```
 
 Bu modüler yaklaşım, kodun test edilebilirliğini artırırken, farklı araştırma bağlamlarına uyarlanabilirlik sağlamaktadır.
@@ -1381,7 +1486,7 @@ Veritabanı şeması, üçüncü normal form (3NF) prensipleri doğrultusunda ta
 
 *[Veritabanı ER Diyagramı - Kompakt yukarıda gösterilmiştir]*
 
-Veritabanı şeması beş ana tablodan oluşmaktadır. Organizations tablosu kurumsal hiyerarşinin temelini oluşturmakta, her kurumun kendine özgü konfigürasyon dosyası ve organizasyon tipini saklamaktadır. Users tablosu kullanıcı bilgilerini ve organizasyonel bağlantıları yönetmekte, güvenli parola hash'leme ve son giriş takibi sağlamaktadır. Roles tablosu rol tabanlı erişim kontrolü için gerekli yetki tanımlarını JSON formatında saklamakta, esnek yetkilendirme sistemi sunmaktadır. User_sessions tablosu JWT token yönetimi ve oturum kontrolü için gerekli bilgileri tutmakta, güvenlik denetimi ve çoklu oturum yönetimi sağlamaktadır. Audit_logs tablosu ise tüm kullanıcı aktivitelerini ve sistem olaylarını kaydetmektedir.
+Veritabanı şeması yedi ana tablodan oluşmaktadır. Organizations tablosu kurumsal hiyerarşinin temelini oluşturmakta, her kurumun kendine özgü konfigürasyon dosyası ve organizasyon tipini saklamaktadır. Users tablosu kullanıcı bilgilerini ve organizasyonel bağlantıları yönetmekte, güvenli parola hash'leme ve son giriş takibi sağlamaktadır. Roles tablosu rol tabanlı erişim kontrolü için gerekli yetki tanımlarını JSON formatında saklamakta, esnek yetkilendirme sistemi sunmaktadır. User_sessions tablosu JWT token yönetimi ve oturum kontrolü için gerekli bilgileri tutmakta, güvenlik denetimi ve çoklu oturum yönetimi sağlamaktadır. Audit_logs tablosu tüm kullanıcı aktivitelerini ve sistem olaylarını kaydetmektedir. Optimization_results tablosu optimizasyon çıktılarını, performans metriklerini ve çözüm verilerini saklamaktadır. Dataset_files tablosu yüklenen veri dosyalarının meta bilgilerini ve doğrulama sonuçlarını tutmaktadır.
 
 Foreign Key kısıtları kullanılarak referans tutarlılığı (referential integrity) garanti edilmektedir. Bu sayede veri bütünlüğü korunmakta ve ilişkisel veritabanının avantajları tam olarak kullanılmaktadır.
 
@@ -1447,15 +1552,23 @@ Sert kısıtlar, problem formülasyonunun yapısal bütünlüğünü korumakta v
 Bu kısıt, zamansal kısıt memnuniyetinin (temporal constraint satisfaction) temel örneğini oluşturmaktadır. Çalışanların zaman tabanlı müsaitlik durumlarının modellenmesi, ikili değişkenler (binary variables) üzerinde doğrusal kısıtlar olarak formüle edilmektedir:
 
 ```python
-def _add_availability_constraints(self):
-    for emp_id in self.employee_ids:
-        for shift in self.shifts:
-            date = shift['date']
-            if not self._is_employee_available(emp_id, date):
-                constraint_name = f"availability_{emp_id}_{shift['shift_id']}"
-                self.model.Add(
-                    self.assignment_vars[(emp_id, shift['shift_id'])] == 0
-                ).OnlyEnforceIf(constraint_name)
+def _add_basic_constraints(self):
+    # Uygunluk kısıtları: Çalışan müsait değilse atama yapılamaz
+    for employee in employees:
+        employee_id = employee.get('employee_id')
+        if not employee_id or employee_id not in availability_map:
+            continue
+
+        for shift in shifts:
+            shift_id = shift.get('shift_id')
+            shift_date_obj = date.fromisoformat(str(shift.get('date')))
+
+            # Eğer çalışan bu tarihte uygun değilse, atama yapılamaz
+            if (shift_date_obj in availability_map[employee_id] and
+                not availability_map[employee_id][shift_date_obj]):
+                assignment_var = self.assignment_vars.get((employee_id, shift_id))
+                if assignment_var is not None:
+                    self.model.Add(assignment_var == 0)
 ```
 
 **2. Günlük Çakışma Kısıtı:**
@@ -1463,18 +1576,24 @@ def _add_availability_constraints(self):
 Bu kısıt, kaynak tahsisi teorisinin temel prensiplerini uygulayarak, aynı kaynağın (çalışan) eş zamanlı çoklu kullanımını engellemektedir:
 
 ```python
-def _add_daily_overlap_constraints(self):
-    for emp_id in self.employee_ids:
-        for date in self.unique_dates:
-            shifts_on_date = [s for s in self.shifts if s['date'] == date]
-            overlapping_assignments = []
-            
-            for shift in shifts_on_date:
-                overlapping_assignments.append(
-                    self.assignment_vars[(emp_id, shift['shift_id'])]
-                )
-            
-            self.model.Add(sum(overlapping_assignments) <= 1)
+def _add_basic_constraints(self):
+    # Çakışma kısıtları: Aynı çalışan aynı gün çakışan vardiyalara atanamaz
+    for employee in employees:
+        employee_id = employee.get('employee_id')
+        if not employee_id:
+            continue
+
+        for shift_date_obj, shift_ids_on_date in shifts_by_date.items():
+            # Bu tarihteki vardiyalara atanma değişkenleri
+            date_vars = []
+            for s_id in shift_ids_on_date:
+                var = self.assignment_vars.get((employee_id, s_id))
+                if var is not None:
+                    date_vars.append(var)
+
+            # Toplamları en fazla 1 olmalı (aynı gün en fazla bir vardiya)
+            if len(date_vars) > 1:
+                self.model.Add(sum(date_vars) <= 1)
 ```
 
 **3. Yetenek Gereksinimleri:**
@@ -1482,16 +1601,31 @@ def _add_daily_overlap_constraints(self):
 Bu kısıt sistemi, eşleştirme teorisinin iki parçalı grafik eşleştirme problemlerine uygulanmasını temsil etmektedir. Her vardiya için gerekli yeteneklerin, yeterli sayıda nitelikli personel tarafından karşılanması garanti edilmektedir:
 
 ```python
-def _add_skill_constraints(self):
-    for shift in self.shifts:
-        required_skills = self._get_required_skills(shift)
-        for skill in required_skills:
-            qualified_employees = self._get_employees_with_skill(skill)
-            skill_assignments = [
-                self.assignment_vars[(emp_id, shift['shift_id'])]
-                for emp_id in qualified_employees
-            ]
-            self.model.Add(sum(skill_assignments) >= 1)
+def _add_skill_requirements_constraints(self, skill_requirements):
+    # Çalışanların yeteneklerini hazırla
+    employee_skills_map = {}
+    for skill_entry in skills_data:
+        emp_id = skill_entry.get('employee_id')
+        skill = skill_entry.get('skill')
+        if emp_id and skill:
+            if emp_id not in employee_skills_map:
+                employee_skills_map[emp_id] = set()
+            employee_skills_map[emp_id].add(skill)
+
+    # Her yetenek gereksinimi için kısıtları ekle
+    for requirement in skill_requirements:
+        required_skill = requirement.get('skill')
+        min_count = requirement.get('min_count', 1)
+
+        # Gerekli yeteneğe sahip çalışanları bul
+        skilled_employee_ids = {emp_id for emp_id, emp_skills in employee_skills_map.items()
+                               if required_skill in emp_skills}
+
+        # Vardiya için yetenek kısıtı ekle
+        skilled_assignment_vars = [self.assignment_vars.get((emp_id, shift_id))
+                                  for emp_id in skilled_employee_ids]
+        if skilled_assignment_vars:
+            self.model.Add(sum(skilled_assignment_vars) >= min_count)
 ```
 
 Bu kısıt formülasyonu, küme kapsama probleminin bir varyantını oluşturarak, her gerekli yeteneğin en az bir nitelikli çalışan tarafından karşılanmasını sağlamaktadır.
@@ -1506,54 +1640,150 @@ Skalarlaştırma (scalarization) yaklaşımının benimsenmesi, Pareto optimalli
 
 **Ağırlıklı Hedef Fonksiyonu Matematiği:**
 
-Sistemin benimsediği beş boyutlu hedef uzayı, vardiya çizelgeleme probleminin kapsamlı optimizasyonu için gerekli tüm kriterleri içermektedir. Her hedef bileşeninin ağırlıklandırılması, çok kriterli karar verme (multi-criteria decision making) teorisinin pratik uygulanmasını göstermektedir.
+Çok amaçlı optimizasyon teorisi, birden fazla ve çoğunlukla çelişkili hedeflerin eş zamanlı optimizasyonunu ele alan matematiksel yaklaşımdır. Vardiya çizelgeleme probleminde, operasyonel verimlilik (fazla personel minimizasyonu), hizmet kalitesi (eksik personel minimizasyonu), çalışan memnuniyeti (tercih maksimizasyonu), organizasyonel adalet (iş yükü dengesi) ve hizmet sürekliliği (vardiya kapsama) hedefleri arasında optimal denge kurulması gerekmektedir.
 
-**Çok Amaçlı Ağırlıklı Optimizasyon:**
-```python
-def _set_objective(self):
-    weights = self.config.get('objective_weights', {})
-    
-    # f1: Fazla personel cezası
-    overstaffing_penalty = sum(
-        weights.get('minimize_overstaffing', 1) * self.overstaffing_vars[shift_id]
-        for shift_id in self.shift_ids
-    )
-    
-    # f2: Eksik personel cezası (daha yüksek ağırlık)
-    understaffing_penalty = sum(
-        weights.get('minimize_understaffing', 10) * self.understaffing_vars[shift_id]
-        for shift_id in self.shift_ids
-    )
-    
-    # f3: Tercih memnuniyeti (negatif = maksimize et)
-    preference_score = -sum(
-        weights.get('maximize_preferences', 2) * 
-        self._get_preference_score(emp_id, shift_id) *
-        self.assignment_vars[(emp_id, shift_id)]
-        for emp_id in self.employee_ids
-        for shift_id in self.shift_ids
-    )
-    
-    # f4: İş yükü dengesi
-    workload_balance = weights.get('balance_workload', 0.5) * self.workload_balance_var
-    
-    # f5: Vardiya kapsama
-    coverage_penalty = sum(
-        weights.get('maximize_shift_coverage', 1) * (1 - self.coverage_vars[shift_id])
-        for shift_id in self.shift_ids
-    )
-    
-    total_objective = (overstaffing_penalty + understaffing_penalty + 
-                      preference_score + workload_balance + coverage_penalty)
-    
-    self.model.Minimize(total_objective)
+Sistemin benimsediği beş boyutlu hedef uzayı, Pareto optimizasyonu prensipleri doğrultusunda ağırlıklı toplam yaklaşımı (weighted sum approach) ile tek bir skaler hedef fonksiyonuna dönüştürülmektedir. Bu yaklaşım, çok kriterli karar verme (multi-criteria decision making) teorisinin pratik uygulanmasını göstermekte ve karar vericilerin tercihlerini ağırlık katsayıları aracılığıyla sisteme entegre etmektedir.
+
+**Matematiksel Formülasyon:**
+
+Hedef fonksiyonu aşağıdaki matematiksel formülle ifade edilmektedir:
+
+```
+f(x) = w₁ · Σᵢ(fazla_personelᵢ) + w₂ · Σᵢ(eksik_personelᵢ) +
+       w₃ · Σᵢⱼ(-tercih_puanᵢⱼ · atamaᵢⱼ) + w₄ · (max_iş_yükü - min_iş_yükü) +
+       w₅ · Σᵢ(boş_vardiyaᵢ)
 ```
 
-**Hedef Bileşenleri Analizi:**
+Bu formülasyonda wₖ ağırlık katsayıları, xᵢⱼ ikili atama değişkenleri ve her terim belirli bir optimizasyon hedefini temsil etmektedir.
 
-Çok amaçlı optimizasyon sisteminin beş temel bileşeni farklı organizasyonel hedefleri dengelemektedir. Fazla personel cezası (f₁) maliyet optimizasyonu prensibini uygulayarak fazla personel atamalarını minimize etmekte ve kaynak verimliliğini artırmaktadır. Eksik personel cezası (f₂) hizmet kalitesi garantisi sağlamak amacıyla eksik personel durumlarına yüksek ceza atfederek (w₂=10) operasyonel süreklilik önceliğini vurgulamaktadır. Tercih puanı (f₃) personel memnuniyeti optimizasyonu için tercih entegrasyonu sağlayarak çalışan motivasyonunu desteklemektedir. İş yükü dengesi (f₄) eşitlik teorisinin uygulanması ile adil iş yükü dağılımını hedefleyerek organizasyonel adaleti güçlendirmektedir. Kapsama cezası (f₅) hizmet erişilebilirliği garantisi için vardiya kapsama optimizasyonu yaparak müşteri memnuniyetini öncelemektedir.
+**Çok Amaçlı Ağırlıklı Optimizasyon Implementasyonu:**
+```python
+def _define_objective_function(self):
+    """Çok amaçlı ağırlıklı hedef fonksiyonunu tanımlar."""
+    self._objective_terms_list = []  # Her çalıştırmada sıfırla
+    objective_config = self.config.get('optimization_core', {}).get('objective_weights', {})
 
-Bu çok boyutlu hedef yapısı, örgütsel davranış teorisi ile yöneylem araştırması metodolojilerinin başarılı sentezini göstermektedir.
+    if not objective_config:
+        logger.info("Konfigürasyonda 'objective_weights' bulunamadı")
+        return
+
+    employees = self.input_data.get('employees', [])
+
+    # f1: Fazla personel minimizasyonu (Maliyet Optimizasyonu)
+    if 'minimize_overstaffing' in objective_config:
+        weight = float(objective_config['minimize_overstaffing'])
+        if weight > 0:
+            overstaffing_terms = []
+            for shift_id, count_var in self.shift_employee_counts.items():
+                shift_info = self.shifts_dict.get(shift_id)
+                if shift_info:
+                    optimal_count = int(shift_info.get('required_staff', 1))
+                    # Fazla personel = max(0, atanan_sayısı - optimal_sayı)
+                    overstaffing = self.model.NewIntVar(0, len(employees), f"overstaffing_{shift_id}")
+                    self.model.Add(count_var - optimal_count <= overstaffing)
+                    overstaffing_terms.append(overstaffing)
+
+            if overstaffing_terms:
+                self._add_objective_term(weight * sum(overstaffing_terms))
+
+    # f2: Eksik personel minimizasyonu (Hizmet Kalitesi - En Yüksek Öncelik)
+    if 'minimize_understaffing' in objective_config:
+        weight = float(objective_config['minimize_understaffing'])
+        if weight > 0:
+            understaffing_terms = []
+            for shift_id, count_var in self.shift_employee_counts.items():
+                shift_info = self.shifts_dict.get(shift_id)
+                if shift_info:
+                    optimal_count = int(shift_info.get('required_staff', 1))
+                    # Eksik personel = max(0, optimal_sayı - atanan_sayısı)
+                    understaffing = self.model.NewIntVar(0, optimal_count, f"understaffing_{shift_id}")
+                    self.model.Add(optimal_count - count_var <= understaffing)
+                    understaffing_terms.append(understaffing)
+
+            if understaffing_terms:
+                self._add_objective_term(weight * sum(understaffing_terms))
+
+    # f3: Tercih maksimizasyonu (Çalışan Memnuniyeti)
+    if 'maximize_preferences' in objective_config:
+        weight = float(objective_config['maximize_preferences'])
+        if weight != 0:
+            preferences = self.input_data.get('preferences', [])
+            preference_terms = []
+            for pref in preferences:
+                emp_id = pref.get('employee_id')
+                shift_id = pref.get('shift_id')
+                score = int(pref.get('preference_score', 0))
+
+                assignment_var = self.assignment_vars.get((emp_id, shift_id))
+                if assignment_var is not None and score != 0:
+                    # Minimizasyon için negatif skor kullanılır
+                    preference_terms.append(-score * assignment_var)
+
+            if preference_terms:
+                self._add_objective_term(weight * sum(preference_terms))
+
+    # f4: İş yükü dengesi (Organizasyonel Adalet)
+    if 'balance_workload' in objective_config:
+        weight = float(objective_config['balance_workload'])
+        if weight > 0:
+            employee_shift_counts_list = list(self.employee_shift_counts.values())
+            if len(employee_shift_counts_list) > 1:
+                max_shifts = self.model.NewIntVar(0, len(self.shifts_dict), "max_shifts")
+                min_shifts = self.model.NewIntVar(0, len(self.shifts_dict), "min_shifts")
+
+                self.model.AddMaxEquality(max_shifts, employee_shift_counts_list)
+                self.model.AddMinEquality(min_shifts, employee_shift_counts_list)
+
+                workload_balance_var = self.model.NewIntVar(0, len(self.shifts_dict), "workload_balance")
+                self.model.Add(workload_balance_var == max_shifts - min_shifts)
+
+                self._add_objective_term(weight * workload_balance_var)
+
+    # f5: Vardiya kapsama maksimizasyonu (Hizmet Sürekliliği)
+    if 'maximize_shift_coverage' in objective_config:
+        weight = float(objective_config['maximize_shift_coverage'])
+        if weight > 0:
+            empty_shift_terms = []
+            for shift_id, count_var in self.shift_employee_counts.items():
+                is_empty = self.model.NewBoolVar(f"is_empty_{shift_id}")
+                self.model.Add(count_var == 0).OnlyEnforceIf(is_empty)
+                self.model.Add(count_var > 0).OnlyEnforceIf(is_empty.Not())
+                empty_shift_terms.append(is_empty)
+
+            if empty_shift_terms:
+                self._add_objective_term(weight * sum(empty_shift_terms))
+
+    # Toplam hedef fonksiyonunu modele ekle
+    if self._objective_terms_list:
+        total_objective = sum(self._objective_terms_list)
+        self.model.Minimize(total_objective)
+        logger.info(f"Hedef fonksiyonu {len(self._objective_terms_list)} terimle tanımlandı")
+```
+
+**Kod Analizi ve Hedef Bileşenleri Açıklaması:**
+
+Yukarıdaki kod implementasyonu, çok amaçlı optimizasyon teorisinin pratik uygulanmasını göstermektedir. Her hedef bileşeni, belirli bir organizasyonel önceliği temsil etmekte ve ağırlık katsayıları aracılığıyla karar vericilerin tercihlerini sisteme yansıtmaktadır.
+
+**f₁ - Fazla Personel Minimizasyonu (Maliyet Optimizasyonu):**
+Bu bileşen, kaynak verimliliği teorisinin uygulanmasını sağlamaktadır. CP-SAT çözücüsünde `NewIntVar` ile tanımlanan fazla personel değişkenleri, her vardiya için optimal personel sayısını aşan atamaları cezalandırmaktadır. `self.model.Add(count_var - optimal_count <= overstaffing)` kısıtı, fazla personel miktarının doğru hesaplanmasını garanti etmektedir. Varsayılan ağırlık değeri (w₁=1), bu hedefin orta düzeyde önceliğe sahip olduğunu göstermektedir.
+
+**f₂ - Eksik Personel Minimizasyonu (Hizmet Kalitesi Garantisi):**
+Hizmet kalitesi teorisinin temel prensibi olan yeterli personel sağlama hedefi, en yüksek ağırlık değeri (w₂=10) ile önceliklendirilmektedir. `understaffing = self.model.NewIntVar(0, optimal_count, f"understaffing_{shift_id}")` tanımlaması, eksik personel miktarını sınırlandırırken, `self.model.Add(optimal_count - count_var <= understaffing)` kısıtı eksik personel hesaplamasının doğruluğunu sağlamaktadır.
+
+**f₃ - Tercih Maksimizasyonu (Çalışan Memnuniyeti):**
+Motivasyon teorisi ve iş tatmini literatürünün pratik uygulanması olan tercih entegrasyonu, `preference_terms.append(-score * assignment_var)` formülasyonu ile gerçekleştirilmektedir. Negatif skor kullanımı, minimizasyon probleminde maksimizasyon hedefinin elde edilmesini sağlamaktadır. Bu yaklaşım, çalışan tercihlerinin sistem kararlarına doğrudan etkisini mümkün kılmaktadır.
+
+**f₄ - İş Yükü Dengesi (Organizasyonel Adalet):**
+Eşitlik teorisinin (equity theory) uygulanması olan iş yükü dengesi, `AddMaxEquality` ve `AddMinEquality` kısıtları ile maksimum ve minimum iş yükü arasındaki farkın minimize edilmesini hedeflemektedir. Bu yaklaşım, organizasyonel adaleti güçlendirerek çalışan motivasyonunu artırmaktadır.
+
+**f₅ - Vardiya Kapsama (Hizmet Sürekliliği):**
+Hizmet erişilebilirliği teorisinin uygulanması olan vardiya kapsama optimizasyonu, `is_empty = self.model.NewBoolVar(f"is_empty_{shift_id}")` ile boş vardiya durumlarını tespit etmekte ve minimize etmektedir. `OnlyEnforceIf` kısıtları, boolean mantığın doğru uygulanmasını sağlamaktadır.
+
+**Ağırlık Katsayıları ve Karar Verici Tercihleri:**
+
+Varsayılan ağırlık değerleri (w₁=1, w₂=10, w₃=2, w₄=0.5, w₅=1), hizmet kalitesinin maliyet optimizasyonundan daha önemli olduğunu yansıtmaktadır. Bu ağırlık dağılımı, sağlık sektörü ve çağrı merkezi gibi hizmet odaklı organizasyonların önceliklerini temsil etmektedir. YAML konfigürasyon sistemi aracılığıyla bu ağırlıkların dinamik olarak ayarlanabilmesi, farklı organizasyonel bağlamlara uyarlanabilirlik sağlamaktadır.
+
+Bu çok boyutlu hedef yapısı, örgütsel davranış teorisi ile yöneylem araştırması metodolojilerinin başarılı sentezini göstermekte ve akademik optimizasyon literatüründe çok kriterli karar verme uygulamalarına katkı sağlamaktadır.
 
 ### 4.3. API ve Arka Uç Servisleri
 
@@ -1573,42 +1803,79 @@ REST tabanlı API tasarım prensiplerinin benimsenmesi, Roy Fielding'in Temsili 
 
 **Optimizasyon Uç Noktası ve İstek-Yanıt Döngüsü:**
 
-Ana optimizasyon uç noktası, akademik araştırmanın deneysel metodolojisini destekleyecek şekilde tasarlanmıştır. Her optimizasyon isteği, girdi doğrulaması, model yapılandırma, çözme ve sonuç işleme aşamalarından geçmektedir:
+Ana optimizasyon uç noktası, akademik araştırmanın deneysel metodolojisini destekleyecek şekilde tasarlanmıştır. Bu endpoint, RESTful API tasarım prensiplerinin temel özelliklerini uygulayarak HTTP POST metoduyla optimizasyon isteklerini kabul etmekte ve JSON formatında yapılandırılmış yanıtlar döndürmektedir.
+
+**Teorik Temeller ve Asenkron İşleme Paradigması:**
+
+FastAPI'nin asenkron programlama modeli, I/O bağlı işlemlerin engelleyici olmayan (non-blocking) şekilde yürütülmesini sağlamaktadır. Bu yaklaşım, özellikle yoğun hesaplama gerektiren optimizasyon işlemlerinde sistem yanıt verme yeteneğini korumak için kritik önemdedir. Asenkron işleme, Python'un asyncio kütüphanesi üzerine kurulmuş olup, event loop mekanizması ile eş zamanlı istek işleme kapasitesi sağlamaktadır.
+
+**İstek-Yanıt Döngüsünün Aşamaları:**
+
+Optimizasyon süreci dört temel aşamadan oluşmaktadır. İlk aşama olan girdi doğrulaması (input validation), Pydantic model validation ile gelen verilerin şema uyumluluğunu kontrol etmektedir. İkinci aşama model yapılandırma (model configuration), YAML tabanlı konfigürasyon dosyalarının yüklenmesi ve CP-SAT model builder'ın başlatılmasını içermektedir. Üçüncü aşama çözme süreci (solving process), thread pool kullanılarak ana event loop'u bloke etmeden optimizasyon algoritmasının yürütülmesini sağlamaktadır. Son aşama sonuç işleme (result processing), çözüm verilerinin API yanıt formatına dönüştürülmesi ve performans metriklerinin hesaplanmasını kapsamaktadır.
+
+Her optimizasyon isteği, bu aşamaların sistematik olarak yürütülmesi ile akademik araştırma gereksinimlerini karşılayacak detaylı veri toplama imkanı sunmaktadır:
 
 ```python
 # main.py - Optimizasyon uç noktası
 @app.post("/optimize", response_model=OptimizationResponse)
 async def run_optimization(request_data: OptimizationRequest = Body(...)):
+    """
+    Gelen veriyi ve konfigürasyonu alır, optimizasyonu çalıştırır
+    ve sonucu döner.
+    """
+    start_time = time.time()
+    logger.info("Optimizasyon isteği alındı.")
+
     try:
-        # Girdi doğrulaması
+        # Konfigürasyonu yükle
+        config = load_config(request_data.configuration_ref, request_data.configuration)
         input_data = request_data.input_data
-        configuration = load_config(
-            request_data.configuration_ref, 
-            request_data.configuration
+
+        # ShiftSchedulingModelBuilder sınıfını kullanarak modeli oluştur
+        model_builder = ShiftSchedulingModelBuilder(
+            config=config,
+            input_data=input_data.model_dump()  # Pydantic modellerini dict'e çevir
         )
-        
-        # Modeli oluştur ve çöz
-        model_builder = ShiftSchedulingModelBuilder(input_data, configuration)
-        model = model_builder.build_model()
-        status, solution = model_builder.solve_model()
-        
-        # Sonuçları işle ve döndür
+
+        # Modeli oluştur
+        model_builder.build_model()
+
+        # Modeli çöz (thread havuzunda)
+        status, result = await run_in_threadpool(model_builder.solve_model)
+
+        # Sonuçları API yanıtına dönüştür
+        solution_data = None
+        if result.get('solution') and result['solution'].get('assignments'):
+            validated_assignments = [Assignment(**a) for a in result['solution']['assignments']]
+            solution_data = OptimizationSolution(assignments=validated_assignments)
+
         return OptimizationResponse(
             status=status,
-            solution=solution,
-            processing_time_seconds=model_builder.solving_time,
-            objective_value=model_builder.objective_value,
-            metrics=model_builder.calculate_metrics()
+            solver_status_message=result.get('solver_status_message'),
+            processing_time_seconds=time.time() - start_time,
+            objective_value=result.get('objective_value'),
+            solution=solution_data,
+            metrics=result.get('metrics')
         )
-        
+
     except Exception as e:
-        logger.error(f"Optimizasyon hatası: {str(e)}")
+        logger.error(f"Optimizasyon sırasında kritik hata: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 ```
 
+**Optimizasyon Endpoint'inin İşlevsel Analizi:**
+
+Yukarıdaki implementasyon, akademik optimizasyon araştırmasının gereksinimlerini karşılayacak şekilde tasarlanmış kapsamlı bir web servisi endpoint'ini temsil etmektedir. Bu endpoint, gelen optimizasyon isteklerini sistematik olarak işleyerek, kısıt programlama algoritmasının yürütülmesini koordine etmekte ve sonuçları akademik analiz için uygun formatta döndürmektedir.
+
+İşlevsel açıdan endpoint, dört ana sorumluluğu yerine getirmektedir. İlk olarak, gelen HTTP isteklerindeki optimizasyon parametrelerini ve veri setlerini doğrulayarak sistem güvenilirliğini sağlamaktadır. İkinci olarak, YAML tabanlı konfigürasyon dosyalarını yükleyerek CP-SAT model builder'ın başlatılmasını koordine etmektedir. Üçüncü olarak, yoğun hesaplama gerektiren optimizasyon sürecini asenkron olarak yürüterek sistem performansını optimize etmektedir. Son olarak, elde edilen çözüm verilerini akademik araştırma gereksinimlerine uygun JSON formatında yapılandırarak döndürmektedir.
+
+Bu yaklaşım, akademik araştırmanın tekrarlanabilirlik ve şeffaflık prensiplerini desteklemekte, her optimizasyon işlemi için detaylı performans metrikleri, çözüm kalitesi göstergeleri ve işlem süresi bilgilerini sağlamaktadır. Asenkron işleme mimarisi, eş zamanlı araştırma senaryolarının desteklenmesini mümkün kılarken, kapsamlı hata yönetimi sistemi araştırma sürecinin güvenilirliğini garanti etmektedir.
+
 **API Yanıt Yapısı ve Akademik Gereksinimler:**
 
-Yanıt modeli, akademik araştırmanın veri toplama gereksinimlerini karşılayacak şekilde tasarlanmıştır. İşlem zamanı, hedef değer ve detaylı metrik bilgileri, performans analizi ve algoritmik değerlendirme için gerekli veri noktalarını sağlamaktadır.
+Yanıt modeli, akademik araştırmanın veri toplama gereksinimlerini karşılayacak şekilde tasarlanmıştır. `OptimizationResponse` modeli, çözüm durumu (status), çözücü mesajı (solver_status_message), işlem süresi (processing_time_seconds), hedef değer (objective_value), çözüm verileri (solution) ve performans metrikleri (metrics) alanlarını içermektedir. Bu kapsamlı veri yapısı, algoritmik performans analizi, çözüm kalitesi değerlendirmesi ve karşılaştırmalı çalışmalar için gerekli tüm bilgileri sağlamaktadır.
+
+İşlem zamanı ölçümü, algoritma karmaşıklığı analizleri için kritik veri noktası sunmakta, hedef değer bilgisi optimizasyon kalitesinin objektif değerlendirmesini mümkün kılmakta, detaylı metrik bilgileri ise çok boyutlu performans analizlerini desteklemektedir. Bu yaklaşım, akademik yayın standartlarına uygun deneysel sonuçların elde edilmesini ve tekrarlanabilir araştırma metodolojisinin uygulanmasını sağlamaktadır.
 
 #### 4.3.2. Kimlik Doğrulama ve Güvenlik Mimarisi
 
@@ -1618,49 +1885,129 @@ JSON Web Token (JWT) tabanlı kimlik doğrulama sisteminin benimsenmesi, durumsu
 
 **Güvenlik Ara Katmanı ve Yetkilendirme Çerçevesi:**
 
-Güvenlik katmanı, derinlemesine savunma stratejisini benimseyer çok katmanlı koruma mekanizması sunar. Kimlik doğrulama ara katmanı, her HTTP isteğinde (request) token doğrulaması gerçekleştirerek yetkisiz erişimi engellemektedir:
+Güvenlik katmanı, derinlemesine savunma stratejisini benimseyer çok katmanlı koruma mekanizması sunar. Sistem, FastAPI'nin dependency injection mekanizmasını kullanarak JWT tabanlı kimlik doğrulama ve rol tabanlı erişim kontrolü sağlamaktadır.
+
+**JWT Token Doğrulama ve Kullanıcı Kimlik Tespiti:**
+
+Aşağıdaki kod örneği, sistemin JWT token doğrulama sürecini ve kullanıcı kimlik tespiti mekanizmasını göstermektedir. Bu implementasyon, HTTP Bearer token'ların güvenli şekilde işlenmesi ve kullanıcı bilgilerinin veritabanından doğrulanması süreçlerini kapsamaktadır:
 
 ```python
-# auth_middleware.py
-class JWTAuthMiddleware:
-    def __init__(self, app: FastAPI):
-        self.app = app
-    
-    async def __call__(self, request: Request, call_next):
-        if request.url.path in ["/auth/login", "/health", "/docs"]:
-            return await call_next(request)
-            
-        token = self._extract_token(request)
-        if not token or not self._validate_token(token):
-            raise HTTPException(status_code=401, detail="Geçersiz kimlik doğrulama")
-            
-        request.state.user = self._get_user_from_token(token)
-        return await call_next(request)
+# auth_middleware.py - JWT Token Doğrulama Sistemi
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """JWT token'dan mevcut kullanıcıyı al"""
+    try:
+        token = credentials.credentials
+        payload = verify_token(token)
+
+        if payload is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Geçersiz token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token'da kullanıcı ID'si bulunamadı",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Kullanıcıyı veritabanından al
+        db = next(get_db())
+        user = get_user_by_token(db, token)
+
+        if user is None or not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Kullanıcı bulunamadı veya hesap deaktif",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        return user
+
+    except JWTError as e:
+        logger.error(f"JWT doğrulama hatası: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token doğrulanamadı",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 ```
+
+Bu implementasyon, akademik araştırma ortamlarında kritik olan güvenlik gereksinimlerini karşılamaktadır. JWT token doğrulama süreci, token geçerliliği kontrolü, kullanıcı durumu doğrulaması ve kapsamlı hata yönetimi aşamalarından oluşmaktadır. Dependency injection yaklaşımı, kod tekrarını önleyerek sürdürülebilir güvenlik mimarisi sağlamaktadır.
 
 **Rol Tabanlı Erişim Kontrolü Uygulaması:**
 
-Rol tabanlı erişim kontrolü (RBAC) sisteminin uygulanması, en az yetki prensibi (principle of least privilege) yaklaşımını benimseyerek her kullanıcının sadece gerekli kaynaklara erişimini sağlamaktadır. Bu yaklaşım, akademik ortamlarda önemli olan veri gizliliği (data privacy) ve araştırma etiği (research ethics) gereksinimlerini karşılamaktadır:
+Rol tabanlı erişim kontrolü (RBAC) sisteminin uygulanması, en az yetki prensibi (principle of least privilege) yaklaşımını benimseyerek her kullanıcının sadece gerekli kaynaklara erişimini sağlamaktadır. Bu yaklaşım, akademik ortamlarda önemli olan veri gizliliği (data privacy) ve araştırma etiği (research ethics) gereksinimlerini karşılamaktadır.
+
+**Hiyerarşik Rol Yapısı ve Yetki Seviyeleri:**
+
+Aşağıdaki kod örneği, sistemin gerçek rol hiyerarşisini ve endpoint bazlı yetkilendirme mekanizmasını göstermektedir. Bu yapı, akademik kurumların organizasyonel hiyerarşisini yansıtacak şekilde tasarlanmış olup, beş farklı yetki seviyesi tanımlamaktadır:
 
 ```python
-# Veritabanında rol tanımları
-roles = {
-    "admin": {
-        "permissions": ["all"],
-        "can_access": ["all_endpoints"]
-    },
-    "manager": {
-        "permissions": ["read", "write", "optimize"],
-        "can_access": ["dashboard", "optimization", "results"]
-    },
-    "user": {
-        "permissions": ["read"],
-        "can_access": ["dashboard", "results"]
-    }
+# auth_middleware.py - Rol Hiyerarşisi ve Endpoint Yetkileri
+ROLE_HIERARCHY = {
+    'super_admin': 5,    # Sistem Yöneticisi - Tüm yetkiler
+    'org_admin': 4,      # Kurum Yöneticisi - Kurum içi tam yetki
+    'manager': 3,        # Vardiya Yöneticisi - Departman yönetimi
+    'planner': 2,        # Planlamacı - Vardiya planlama
+    'staff': 1           # Personel - Sadece görüntüleme
 }
+
+# Endpoint bazlı yetkilendirme matrisi
+ENDPOINT_PERMISSIONS = {
+    # Kimlik doğrulama endpoint'leri
+    '/auth/login': [],  # Herkese açık
+    '/auth/logout': ['staff', 'planner', 'manager', 'org_admin', 'super_admin'],
+    '/auth/profile': ['staff', 'planner', 'manager', 'org_admin', 'super_admin'],
+    '/auth/register': ['org_admin', 'super_admin'],
+
+    # Dashboard endpoint'leri
+    '/dashboard': ['staff', 'planner', 'manager', 'org_admin', 'super_admin'],
+    '/health': [],  # Herkese açık
+
+    # Kullanıcı yönetimi
+    '/users': ['org_admin', 'super_admin'],
+    '/users/create': ['org_admin', 'super_admin'],
+    '/users/update': ['org_admin', 'super_admin'],
+    '/users/delete': ['org_admin', 'super_admin'],
+
+    # Optimizasyon endpoint'leri
+    '/optimize': ['planner', 'manager', 'org_admin', 'super_admin'],
+    '/optimization/results': ['staff', 'planner', 'manager', 'org_admin', 'super_admin'],
+    '/optimization/history': ['planner', 'manager', 'org_admin', 'super_admin']
+}
+
+def require_minimum_role(minimum_role: str):
+    """Minimum rol seviyesi gerektiren decorator"""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            current_user = kwargs.get('current_user')
+            if not current_user:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Kimlik doğrulaması gerekli"
+                )
+
+            user_role = current_user.role.name if current_user.role else None
+            user_level = ROLE_HIERARCHY.get(user_role, 0)
+            required_level = ROLE_HIERARCHY.get(minimum_role, 0)
+
+            if user_level < required_level:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Bu işlem için minimum {minimum_role} yetkisi gerekli"
+                )
+
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator
 ```
 
-Bu rol yapısı, akademik hiyerarşiyi yansıtarak araştırmacılar, yöneticiler ve son kullanıcılar arasında uygun erişim seviyelerini tanımlamaktadır.
+Bu rol yapısı, akademik hiyerarşiyi yansıtarak araştırmacılar, yöneticiler ve son kullanıcılar arasında uygun erişim seviyelerini tanımlamaktadır. Hiyerarşik yapı, üst seviye rollerin alt seviye yetkilerini de içermesini sağlayarak yönetim kolaylığı sunmaktadır. Endpoint bazlı yetkilendirme matrisi, her API endpoint'inin hangi roller tarafından erişilebileceğini net şekilde tanımlayarak güvenlik politikalarının tutarlı uygulanmasını garanti etmektedir.
 
 #### 4.3.3. Veritabanı Tasarımı ve Veri Modeli
 
@@ -1742,9 +2089,14 @@ App.tsx
 │       │   ├── Sidebar
 │       │   └── Content
 │       ├── Dashboard
+│       ├── AdminPage
+│       ├── DatasetConfig
 │       ├── OptimizationParams
 │       ├── Results
-│       └── ScheduleView
+│       ├── ScheduleView
+│       ├── Settings
+│       ├── SessionManagement
+│       └── AuditLogs
 ```
 
 **Durum Yönetimi Stratejisi ve Context API:**
@@ -1753,32 +2105,106 @@ Küresel durum yönetimi (global state management) için React Context API'sinin
 
 ```typescript
 // AuthContext.tsx - Kimlik doğrulama durum yönetimi
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  logout: () => void;
+  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  login: (credentials: LoginCredentials) => Promise<boolean>;
+  logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const login = async (credentials: LoginCredentials) => {
-    const response = await api.post('/auth/login', credentials);
-    const { access_token } = response.data;
-    localStorage.setItem('token', access_token);
-    setUser(await fetchUserProfile());
+  // Initialize auth state from localStorage
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        const savedToken = localStorage.getItem('auth_token');
+        if (savedToken) {
+          setToken(savedToken);
+          axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+          await refreshProfile();
+        }
+      } catch (error) {
+        localStorage.removeItem('auth_token');
+        delete axios.defaults.headers.common['Authorization'];
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    initializeAuth();
+  }, []);
+
+  const login = async (credentials: LoginCredentials): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
+      const { access_token, user: userData } = response.data;
+
+      if (access_token && userData) {
+        setToken(access_token);
+        localStorage.setItem('auth_token', access_token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+        setUser(userData);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async (): Promise<void> => {
+    try {
+      await axios.post(`${API_BASE_URL}/auth/logout`);
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem('auth_token');
+      delete axios.defaults.headers.common['Authorization'];
+    }
+  };
+
+  const refreshProfile = async (): Promise<void> => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/auth/profile`);
+      setUser(response.data);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const isAuthenticated = !!user && !!token;
+
+  const value: AuthContextType = {
+    user, token, isAuthenticated, isLoading,
+    login, logout, refreshProfile,
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
 ```
 
@@ -1887,15 +2313,15 @@ Sistem, Docker konteynerizasyon teknolojisi kullanılarak dağıtım ve ölçekl
 
 *[Docker Konteyner Mimarisi diyagramı yukarıda gösterilmiştir]*
 
-Sistem, Docker Compose kullanılarak çoklu konteyner orkestrasyon yaklaşımı benimser. Bu mimari, her servisin izole edilmiş ortamda çalışmasını sağlarken, servisler arası iletişimi güvenli ağ konfigürasyonu ile koordine etmektedir.
+Sistem, Docker Compose kullanılarak iki ana servisin orkestrasyon yaklaşımı benimser. Bu mimari, her servisin izole edilmiş ortamda çalışmasını sağlarken, servisler arası iletişimi optimization_network adlı özel bridge network ile koordine etmektedir.
 
 **Konteyner Konfigürasyonu:**
 
-MySQL 8.0 konteyner, optimization_db veritabanı ile 3306 portunda çalışmakta, UTF-8 karakter desteği için utf8mb4 charset kullanmaktadır. Kalıcı veri saklama için mysql_data volume'u ve başlangıç scriptleri için database/init klasörü mount edilmektedir.
+MySQL 8.0 konteyner, optimization_db veritabanı ile 3306 portunda çalışmakta, UTF-8 karakter desteği için utf8mb4_unicode_ci collation kullanmaktadır. Veritabanı kullanıcısı optimization_user olarak tanımlanmış, güvenli parola yönetimi (optimization_pass_2024) sağlanmaktadır. Kalıcı veri saklama için mysql_data volume'u ve başlangıç scriptleri için database/init klasörü mount edilmektedir. MySQL native password authentication plugin'i kullanılarak güvenlik sağlanmaktadır.
 
-n8n konteyner, 5678 portunda çalışmakta, İstanbul timezone'u kullanmakta ve js-yaml, yaml, fs-extra kütüphanelerine erişim sağlamaktadır. Workflow verileri için n8n_data volume'u, konfigürasyon dosyaları için configs klasörü ve CSV veri dosyaları için veri_kaynaklari klasörü mount edilmektedir.
+n8n konteyner, 5678 portunda çalışmakta, Europe/Istanbul timezone ayarı ile yerel saat desteği sağlamaktadır. Konfigürasyon dosyaları için /mnt/workflow_configs, kurallar için /configs/kurallar, veri kaynakları için /mnt/workflow_data volume mount'ları yapılmaktadır. JSON ve YAML işleme için js-yaml, yaml, fs-extra kütüphaneleri NODE_FUNCTION_ALLOW_EXTERNAL ortam değişkeni ile etkinleştirilmektedir. Workflow verileri için n8n_data volume'u kullanılmaktadır.
 
-FastAPI backend harici olarak çalışmakta, 8000 portunda hizmet vermekte ve optimization_network üzerinden diğer servislerle iletişim kurmaktadır.
+FastAPI backend servisi, geliştirme ortamında Docker dışında çalıştırılmakta, bu yaklaşım kod değişikliklerinin hızlı test edilmesini ve debug işlemlerinin kolaylaştırılmasını sağlamaktadır. Backend servisi 8000 portunda çalışmakta ve optimization_network üzerinden MySQL ve n8n servislerine erişim sağlamaktadır.
 
 **Servis Bağımlılıkları ve Başlatma Sırası:**
 

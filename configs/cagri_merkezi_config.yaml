@@ -1,83 +1,77 @@
-institution_id: "cagri_merkezi_config"
-
-institution_name: "Test Çağrı Merkezi"
-
+institution_id: "112_cagri_merkezi_bolge_x"Add commentMore actions
+institution_name: "Bölge X - 112 Acil Çağrı Merkezi"
 problem_type: "shift_scheduling"
 
 optimization_core:
-  solver_time_limit_seconds: 60
+  solver_time_limit_seconds: 120
   objective_weights:
-    minimize_overstaffing: 1
-    minimize_understaffing: 10
-    maximize_preferences: 2
-    balance_workload: 0.5
-    maximize_shift_coverage: 1
+    minimize_overstaffing: 0.5
+    minimize_understaffing: 100
+    maximize_preferences: 1
+    balance_workload: 2
+    maximize_shift_coverage: 50
 
 rules:
   min_staffing_requirements:
-    # Müşteri Hizmetleri Gereksinimleri
-    - shift_pattern: "*Gündüz*Hafta*İçi*"
-      role: "Temsilci"
-      department: "Müşteri Hizmetleri"
-      min_count: 2
-      penalty_if_violated: 100
-    - shift_pattern: "*Gece*Hafta*İçi*"
-      role: "Temsilci"
-      department: "Müşteri Hizmetleri"
-      min_count: 1
+    - shift_pattern: "*Sabah*Hafta*İçi*"
+      role: "Çağrı Alıcı"
+      department: "Genel Çağrı"
+      min_count: 8
+      penalty_if_violated: 200
+    - shift_pattern: "*Gece*Hafta*Sonu*"
+      role: "Çağrı Alıcı"
+      department: "Genel Çağrı"
+      min_count: 4
+      penalty_if_violated: 200
+    - shift_pattern: "*Polis Yönlendirme"
+      role: "Yönlendirici"
+      department: "Polis Yönlendirme"
+      min_count: 3
       penalty_if_violated: 150
-    - shift_pattern: "*Gündüz*Hafta*Sonu*"
-      role: "Temsilci"
-      department: "Müşteri Hizmetleri"
-      min_count: 1
-      penalty_if_violated: 80
-
-    # Teknik Destek Gereksinimleri
-    - shift_pattern: "*Gündüz*Hafta*İçi*"
-      role: "Uzman Temsilci"
-      department: "Teknik Destek"
-      min_count: 1
-      penalty_if_violated: 120
-    - shift_pattern: "*Mesai*Hafta*İçi*"
-      role: "Temsilci"
-      department: "Teknik Destek"
-      min_count: 1
-      penalty_if_violated: 100
-
-    # Satış Departmanı Gereksinimleri
-    - shift_pattern: "*Gündüz*Hafta*İçi*"
-      role: "Uzman Temsilci"
-      department: "Satış"
-      min_count: 1
-      penalty_if_violated: 90
-
-    # Yönetim Gözetimi
-    - shift_pattern: "*Gündüz*Hafta*İçi*"
-      role: "Süpervizör"
-      department: "Yönetim"
+    - shift_pattern: "*İtfaiye Yönlendirme"
+      role: "Yönlendirici"
+      department: "İtfaiye Yönlendirme"
+      min_count: 2
+      penalty_if_violated: 150
+    - shift_pattern: "*Sağlık Yönlendirme"
+      role: "Yönlendirici"
+      department: "Sağlık Yönlendirme"
+      min_count: 2
+      penalty_if_violated: 150
+    - shift_pattern: "*"
+      role: "Vardiya Amiri"
       min_count: 1
       penalty_if_violated: 200
 
   max_consecutive_shifts: 3
-  min_rest_time_hours: 10
+  min_rest_time_hours: 12
 
-  # Yetenek/Sertifika Gereksinimleri
   skill_requirements:
-    - shift_pattern: "*Gündüz*Hafta*İçi*"
-      skill: "Çoklu Dil"
-      department: "Müşteri Hizmetleri"
+    - shift_pattern: "*Polis Yönlendirme"
+      skill: "Polis Kriz Protokolleri"
+      department: "Polis Yönlendirme"
+      role: "Yönlendirici"
       min_count: 1
-      penalty_if_violated: 80
-    - shift_pattern: "*Gündüz*Hafta*İçi*"
-      skill: "Teknik Bilgi"
-      department: "Teknik Destek"
-      min_count: 1
+      penalty_if_violated: 150
+    - shift_pattern: "*Genel Çağrı"
+      skill: "İleri Düzey Stres Yönetimi"
+      department: "Genel Çağrı"
+      role: "Çağrı Alıcı"
+      min_count: 2
       penalty_if_violated: 100
-    - shift_pattern: "*Gündüz*Hafta*İçi*"
-      skill: "Satış Deneyimi"
-      department: "Satış"
+    - shift_pattern: "*Sağlık Yönlendirme"
+      skill: "Temel Tıbbi Triyaj Bilgisi"
+      department: "Sağlık Yönlendirme"
+      role: "Yönlendirici"
       min_count: 1
-      penalty_if_violated: 70
+      penalty_if_violated: 150
+    - shift_pattern: "*"
+      skill: "Liderlik ve Koordinasyon"
+      role: "Vardiya Amiri"
+      min_count: 1
+      penalty_if_violated: 200
 
-
-
+n8n_parameters:
+  notification_emails:
+    - "112koordinator@bolgex.gov.tr"
+  report_template: "cagri_merkezi_standart_rapor.tpl"

@@ -14,6 +14,7 @@ import ScheduleView from './pages/ScheduleView'
 import Settings from './pages/Settings'
 import SessionManagement from './pages/SessionManagement'
 import AuditLogs from './pages/AuditLogs'
+
 import theme from './theme'
 
 function App() {
@@ -77,6 +78,7 @@ function App() {
                 <AuditLogs />
               </ProtectedRoute>
             } />
+
           </Route>
 
           {/* Catch all route */}

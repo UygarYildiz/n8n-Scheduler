@@ -428,20 +428,20 @@ const DatasetConfig = () => {
   ];
 
   // Dropdown seçenekleri
-  const departments = selectedConfig.includes("hospital") 
+  const departments = selectedConfig.includes("hospital")
     ? ['Acil', 'Yoğun Bakım', 'Kardiyoloji', 'Pediatri', 'Dahiliye', 'Cerrahi']
-    : ['Müşteri Hizmetleri', 'Teknik Destek', 'Satış', 'Yönetim'];
+    : ['Genel Çağrı', 'Polis Yönlendirme', 'Sağlık Yönlendirme', 'İtfaiye Yönlendirme', 'Teknik Operasyonlar', 'Yönetim'];
 
   const roles = selectedConfig.includes("hospital")
     ? ['Doktor', 'Hemşire', 'Teknisyen', 'Temizlik Personeli', 'Güvenlik']
-    : ['Temsilci', 'Uzman Temsilci', 'Takım Lideri', 'Süpervizör'];
+    : ['Çağrı Alıcı', 'Yönlendirici', 'Vardiya Amiri', 'Teknik Destek'];
 
   const shifts = ['Gündüz', 'Gece', 'Mesai'];
   const weekTypes = ['Hafta İçi', 'Hafta Sonu', 'Tümü'];
 
   const skills = selectedConfig.includes("hospital")
     ? ['Acil Servis Deneyimi', 'Yoğun Bakım Sertifikası', 'Pediatri Deneyimi', 'Kardiyoloji Deneyimi']
-    : ['Satış Deneyimi', 'Teknik Bilgi', 'Çoklu Dil', 'Müşteri İlişkileri'];
+    : ['Çoklu Dil Desteği', 'Polis Kriz Protokolleri', 'Temel Tıbbi Triyaj Bilgisi', 'Sistem Yönetimi', 'Liderlik ve Koordinasyon'];
 
   // Örnek senaryolar
   const exampleScenarios = {
@@ -534,11 +534,11 @@ const DatasetConfig = () => {
     callcenter: {
       customer_service: [
         {
-          name: "Müşteri hizmetlerinde uzman",
-          description: "Müşteri hizmetlerinde deneyimli temsilci bulunması",
+          name: "Genel çağrıda deneyimli personel",
+          description: "Genel çağrı masasında deneyimli çağrı alıcı bulunması",
           rule: {
-            department: 'Müşteri Hizmetleri',
-            role: 'Uzman Temsilci',
+            department: 'Genel Çağrı',
+            role: 'Çağrı Alıcı',
             shift: 'Gündüz',
             weekType: 'Hafta İçi',
             minCount: 2,
@@ -547,11 +547,11 @@ const DatasetConfig = () => {
           type: 'staffing'
         },
         {
-          name: "Çoklu dil bilen personel",
-          description: "Müşteri hizmetlerinde yabancı dil bilen personel",
+          name: "Çoklu dil desteği",
+          description: "Genel çağrı masasında çoklu dil bilen personel",
           rule: {
-            department: 'Müşteri Hizmetleri',
-            skill: 'Çoklu Dil',
+            department: 'Genel Çağrı',
+            skill: 'Çoklu Dil Desteği',
             shift: 'Gündüz',
             weekType: 'Tümü',
             minCount: 1,
@@ -562,11 +562,24 @@ const DatasetConfig = () => {
       ],
       technical: [
         {
-          name: "Teknik uzman bulunması",
-          description: "Teknik destek vardiyasında uzman personel",
+          name: "Polis yönlendirme uzmanı",
+          description: "Polis yönlendirme masasında deneyimli personel",
           rule: {
-            department: 'Teknik Destek',
-            role: 'Uzman Temsilci',
+            department: 'Polis Yönlendirme',
+            role: 'Yönlendirici',
+            shift: 'Gündüz',
+            weekType: 'Hafta İçi',
+            minCount: 1,
+            penalty: 120
+          },
+          type: 'staffing'
+        },
+        {
+          name: "Sağlık yönlendirme uzmanı",
+          description: "Sağlık yönlendirme masasında tıbbi bilgili personel",
+          rule: {
+            department: 'Sağlık Yönlendirme',
+            role: 'Yönlendirici',
             shift: 'Gündüz',
             weekType: 'Hafta İçi',
             minCount: 1,
@@ -582,11 +595,11 @@ const DatasetConfig = () => {
   const tooltipTexts = {
     department: {
       title: "🏥 Departman Nedir?",
-      content: "Kurumunuzun bölümleri. Hastane için: Acil Servis, Yoğun Bakım, Kardiyoloji vb. Çağrı merkezi için: Müşteri Hizmetleri, Teknik Destek vb. Yeni bölüm eklemek için sistem yöneticinizi arayın."
+      content: "Kurumunuzun bölümleri. Hastane için: Acil Servis, Yoğun Bakım, Kardiyoloji vb. Çağrı merkezi için: Genel Çağrı, Polis Yönlendirme, Sağlık Yönlendirme vb. Yeni bölüm eklemek için sistem yöneticinizi arayın."
     },
     role: {
       title: "👤 Rol Nedir?",
-      content: "Çalışanın pozisyonu. Hastane için: Doktor, Hemşire, Teknisyen vb. Çağrı merkezi için: Temsilci, Uzman Temsilci, Süpervizör vb."
+      content: "Çalışanın pozisyonu. Hastane için: Doktor, Hemşire, Teknisyen vb. Çağrı merkezi için: Çağrı Alıcı, Yönlendirici, Vardiya Amiri vb."
     },
     shift: {
       title: "🕐 Vardiya Nedir?",
@@ -774,7 +787,7 @@ const DatasetConfig = () => {
         <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#f57c00' }}>
           🎯 Kurumunuzun Önceliği Nedir?
         </Typography>
-        <Typography variant="body2" color="text.secondary" paragraph>
+        <Typography variant="body2" color="text.secondary" component="div" sx={{ mb: 2 }}>
           Size uygun yaklaşımı seçin, sistem otomatik olarak en iyi ayarları yapacak:
         </Typography>
         
@@ -877,7 +890,7 @@ const DatasetConfig = () => {
         <Typography variant="subtitle1" fontWeight="600" gutterBottom sx={{ color: '#f57c00' }}>
           🛠️ Gelişmiş Ayarlar (İsteğe Bağlı)
         </Typography>
-        <Typography variant="body2" color="text.secondary" paragraph>
+        <Typography variant="body2" color="text.secondary" component="div" sx={{ mb: 2 }}>
           Özel ihtiyaçlarınız için ince ayar yapabilirsiniz:
         </Typography>
         
@@ -899,7 +912,7 @@ const DatasetConfig = () => {
                     {setting.title}
                   </Typography>
                 </Box>
-                <Typography variant="body2" color="text.secondary" paragraph>
+                <Typography variant="body2" color="text.secondary" component="div" sx={{ mb: 2 }}>
                   {setting.description}
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
@@ -2068,7 +2081,7 @@ const DatasetConfig = () => {
                         Veri Dosyaları Hakkında Bilgi
                       </Typography>
                     </Box>
-                    <Typography variant="body2" paragraph>
+                    <Typography variant="body2" component="div" sx={{ mb: 2 }}>
                       Veri dosyalarını güncelledikten sonra, çizelgeleme işlemi sırasında yeni veriler otomatik olarak kullanılacaktır.
                       Dosya formatları hakkında daha fazla bilgi için sistem yöneticinize başvurun.
                     </Typography>
@@ -2909,10 +2922,10 @@ const DatasetConfig = () => {
                             1️⃣ İlk Kurulum Adımları
                           </Typography>
                           <Box component="ul" sx={{ pl: 3, mt: 2 }}>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}><strong>Veri Kaynağı Seçimi:</strong> Kurumunuza uygun veri setini (Hastane/Çağrı Merkezi) seçin</Typography></li>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}><strong>Temel Dosyalar:</strong> Çalışanlar ve Vardiyalar dosyalarını öncelikle yükleyin</Typography></li>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}><strong>Kural Seti:</strong> Kurumunuza uygun konfigürasyonu seçin</Typography></li>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}><strong>Test Çalıştırması:</strong> Basit bir kural ile ilk testinizi yapın</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}><strong>Veri Kaynağı Seçimi:</strong> Kurumunuza uygun veri setini (Hastane/Çağrı Merkezi) seçin</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}><strong>Temel Dosyalar:</strong> Çalışanlar ve Vardiyalar dosyalarını öncelikle yükleyin</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}><strong>Kural Seti:</strong> Kurumunuza uygun konfigürasyonu seçin</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}><strong>Test Çalıştırması:</strong> Basit bir kural ile ilk testinizi yapın</Typography></li>
                           </Box>
                         </Card>
                       </Grid>
@@ -2928,10 +2941,10 @@ const DatasetConfig = () => {
                             </Typography>
                           </Alert>
                           <Box component="ul" sx={{ pl: 3 }}>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}>Değişiklikler anında kaydedilir</Typography></li>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}>Test ortamında deneme yapın</Typography></li>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}>Yedekleme düzenli yapın</Typography></li>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}>Personel bilgilendirmesi unutmayın</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>Değişiklikler anında kaydedilir</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>Test ortamında deneme yapın</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>Yedekleme düzenli yapın</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>Personel bilgilendirmesi unutmayın</Typography></li>
                           </Box>
                         </Card>
                       </Grid>
@@ -2997,11 +3010,11 @@ const DatasetConfig = () => {
                             🔧 Dosya Formatı İpuçları
                           </Typography>
                           <Box component="ul" sx={{ pl: 3 }}>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}>UTF-8 kodlama kullanın</Typography></li>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}>Virgülle ayrılmış değerler (CSV)</Typography></li>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}>İlk satır başlık olmalı</Typography></li>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}>Boş hücre bırakmayın</Typography></li>
-                            <li><Typography variant="body2" sx={{ mb: 1 }}>Tarih formatı: GG/AA/YYYY</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>UTF-8 kodlama kullanın</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>Virgülle ayrılmış değerler (CSV)</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>İlk satır başlık olmalı</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>Boş hücre bırakmayın</Typography></li>
+                            <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>Tarih formatı: GG/AA/YYYY</Typography></li>
                           </Box>
                         </Card>
                       </Grid>
@@ -3035,9 +3048,9 @@ const DatasetConfig = () => {
                               📋 Örnekler:
                             </Typography>
                             <Box component="ul" sx={{ pl: 3 }}>
-                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Acil Serviste gece en az 2 hemşire"</Typography></li>
-                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Çağrı merkezinde gündüz en az 5 temsilci"</Typography></li>
-                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Yoğun bakımda 7/24 en az 1 doktor"</Typography></li>
+                              <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>"Acil Serviste gece en az 2 hemşire"</Typography></li>
+                              <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>"Çağrı merkezinde gündüz en az 5 temsilci"</Typography></li>
+                              <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>"Yoğun bakımda 7/24 en az 1 doktor"</Typography></li>
                             </Box>
                           </Box>
                           
@@ -3078,9 +3091,9 @@ const DatasetConfig = () => {
                               📋 Örnekler:
                             </Typography>
                             <Box component="ul" sx={{ pl: 3 }}>
-                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Acilde BLS sertifikalı personel"</Typography></li>
-                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Teknik destek ekibinde sertifikalı uzman"</Typography></li>
-                              <li><Typography variant="body2" sx={{ mb: 1 }}>"Çoklu dil bilen müşteri temsilcisi"</Typography></li>
+                              <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>"Acilde BLS sertifikalı personel"</Typography></li>
+                              <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>"Teknik destek ekibinde sertifikalı uzman"</Typography></li>
+                              <li><Typography variant="body2" component="span" sx={{ mb: 1 }}>"Çoklu dil bilen müşteri temsilcisi"</Typography></li>
                             </Box>
                           </Box>
                           
@@ -3095,9 +3108,9 @@ const DatasetConfig = () => {
                               📈 Başarı Faktörleri:
                             </Typography>
                             <Box component="ul" sx={{ pl: 3 }}>
-                              <li><Typography variant="caption">Mevcut personel profilini analiz edin</Typography></li>
-                              <li><Typography variant="caption">Eğitim ihtiyaçlarını belirleyin</Typography></li>
-                              <li><Typography variant="caption">Adil dağılım sağlayın</Typography></li>
+                              <li><Typography variant="caption" component="span">Mevcut personel profilini analiz edin</Typography></li>
+                              <li><Typography variant="caption" component="span">Eğitim ihtiyaçlarını belirleyin</Typography></li>
+                              <li><Typography variant="caption" component="span">Adil dağılım sağlayın</Typography></li>
                             </Box>
                           </Box>
                         </Card>
@@ -3121,9 +3134,9 @@ const DatasetConfig = () => {
                             "Genel amaçlı, çoğu kurum için uygun"
                           </Typography>
                           <Box component="ul" sx={{ pl: 2 }}>
-                            <li><Typography variant="caption">Yeni başlayan kurumlar için</Typography></li>
-                            <li><Typography variant="caption">Standart operasyonlar</Typography></li>
-                            <li><Typography variant="caption">Risk almak istemeyenler</Typography></li>
+                            <li><Typography variant="caption" component="span">Yeni başlayan kurumlar için</Typography></li>
+                            <li><Typography variant="caption" component="span">Standart operasyonlar</Typography></li>
+                            <li><Typography variant="caption" component="span">Risk almak istemeyenler</Typography></li>
                           </Box>
                         </Card>
                       </Grid>
@@ -3137,9 +3150,9 @@ const DatasetConfig = () => {
                             "Bütçe kısıtı olan kurumlar"
                           </Typography>
                           <Box component="ul" sx={{ pl: 2 }}>
-                            <li><Typography variant="caption">Fazla personel maliyetini minimize eder</Typography></li>
-                            <li><Typography variant="caption">Ekonomik zorluk dönemleri</Typography></li>
-                            <li><Typography variant="caption">Verimliliği öncelendirir</Typography></li>
+                            <li><Typography variant="caption" component="span">Fazla personel maliyetini minimize eder</Typography></li>
+                            <li><Typography variant="caption" component="span">Ekonomik zorluk dönemleri</Typography></li>
+                            <li><Typography variant="caption" component="span">Verimliliği öncelendirir</Typography></li>
                           </Box>
                         </Card>
                       </Grid>
@@ -3153,9 +3166,9 @@ const DatasetConfig = () => {
                             "Personel bağlılığı odaklı"
                           </Typography>
                           <Box component="ul" sx={{ pl: 2 }}>
-                            <li><Typography variant="caption">Personel tercihlerini dikkate alır</Typography></li>
-                            <li><Typography variant="caption">İş-yaşam dengesini öncelendirir</Typography></li>
-                            <li><Typography variant="caption">Devir hızını azaltır</Typography></li>
+                            <li><Typography variant="caption" component="span">Personel tercihlerini dikkate alır</Typography></li>
+                            <li><Typography variant="caption" component="span">İş-yaşam dengesini öncelendirir</Typography></li>
+                            <li><Typography variant="caption" component="span">Devir hızını azaltır</Typography></li>
                           </Box>
                         </Card>
                       </Grid>
@@ -3169,9 +3182,9 @@ const DatasetConfig = () => {
                             "Müşteri memnuniyeti kritik"
                           </Typography>
                           <Box component="ul" sx={{ pl: 2 }}>
-                            <li><Typography variant="caption">Eksik personeli önler</Typography></li>
-                            <li><Typography variant="caption">7/24 hizmet sunan kurumlar</Typography></li>
-                            <li><Typography variant="caption">Acil durum hazırlığı</Typography></li>
+                            <li><Typography variant="caption" component="span">Eksik personeli önler</Typography></li>
+                            <li><Typography variant="caption" component="span">7/24 hizmet sunan kurumlar</Typography></li>
+                            <li><Typography variant="caption" component="span">Acil durum hazırlığı</Typography></li>
                           </Box>
                         </Card>
                       </Grid>
@@ -3321,12 +3334,12 @@ const DatasetConfig = () => {
                             📋 İlk Kurulum (Zorunlu)
                           </Typography>
                           <Box component="ul" sx={{ pl: 3, '& li': { mb: 1 } }}>
-                            <li><Typography variant="body2">[ ] Kurum tipini seçtim (Hastane/Çağrı Merkezi)</Typography></li>
-                            <li><Typography variant="body2">[ ] employees.csv dosyasını yükledim</Typography></li>
-                            <li><Typography variant="body2">[ ] shifts.csv dosyasını yükledim</Typography></li>
-                            <li><Typography variant="body2">[ ] İlk personel kuralımı oluşturdum</Typography></li>
-                            <li><Typography variant="body2">[ ] Kurumsal önceliği belirledim</Typography></li>
-                            <li><Typography variant="body2">[ ] Test çizelgesi oluşturdum</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] Kurum tipini seçtim (Hastane/Çağrı Merkezi)</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] employees.csv dosyasını yükledim</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] shifts.csv dosyasını yükledim</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] İlk personel kuralımı oluşturdum</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] Kurumsal önceliği belirledim</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] Test çizelgesi oluşturdum</Typography></li>
                           </Box>
                         </Grid>
                         
@@ -3335,12 +3348,12 @@ const DatasetConfig = () => {
                             🚀 İyileştirmeler (Önerilen)
                           </Typography>
                           <Box component="ul" sx={{ pl: 3, '& li': { mb: 1 } }}>
-                            <li><Typography variant="body2">[ ] skills.csv dosyasını yükledim</Typography></li>
-                            <li><Typography variant="body2">[ ] preferences.csv dosyasını yükledim</Typography></li>
-                            <li><Typography variant="body2">[ ] Yetenek kuralları oluşturdum</Typography></li>
-                            <li><Typography variant="body2">[ ] Personel geri bildirimi aldım</Typography></li>
-                            <li><Typography variant="body2">[ ] Kuralları optimize ettim</Typography></li>
-                            <li><Typography variant="body2">[ ] Yedekleme planı oluşturdum</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] skills.csv dosyasını yükledim</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] preferences.csv dosyasını yükledim</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] Yetenek kuralları oluşturdum</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] Personel geri bildirimi aldım</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] Kuralları optimize ettim</Typography></li>
+                            <li><Typography variant="body2" component="span">[ ] Yedekleme planı oluşturdum</Typography></li>
                           </Box>
                         </Grid>
                       </Grid>

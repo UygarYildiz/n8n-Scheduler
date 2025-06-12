@@ -527,21 +527,32 @@ const ScheduleView = () => {
         let department = '';
         let role = '';
 
-        // Çağrı merkezi çalışanları için
+        // Çağrı merkezi çalışanları için - gerçek departman dağılımı
         if (datasetType === 'cagri_merkezi' || employeeId.startsWith('CM_')) {
-          // Çağrı merkezi çalışanları için gerçekçi isimler
           const firstNameIndex = index % callCenterFirstNames.length;
           const lastNameIndex = Math.floor(index / callCenterFirstNames.length) % callCenterLastNames.length;
-
           name = `${callCenterFirstNames[firstNameIndex]} ${callCenterLastNames[lastNameIndex]}`;
-          department = 'Genel Çağrı';
-          role = 'Çağrı Alıcı';
 
-          // Bazı çalışanlara farklı roller ata
-          if (index % 5 === 0) {
-            role = 'Teknisyen';
-          } else if (index % 7 === 0) {
-            role = 'Yönetici';
+          // Gerçek departman dağılımına göre atama (CSV'deki oranlar)
+          const rand = Math.random();
+          if (rand < 0.45) {
+            department = 'Genel Çağrı';
+            role = 'Çağrı Alıcı';
+          } else if (rand < 0.65) {
+            department = 'Polis Yönlendirme';
+            role = 'Yönlendirici';
+          } else if (rand < 0.80) {
+            department = 'Yönetim';
+            role = 'Vardiya Amiri';
+          } else if (rand < 0.90) {
+            department = 'Sağlık Yönlendirme';
+            role = 'Yönlendirici';
+          } else if (rand < 0.95) {
+            department = 'Teknik Operasyonlar';
+            role = 'Teknik Destek';
+          } else {
+            department = 'İtfaiye Yönlendirme';
+            role = 'Yönlendirici';
           }
         }
         // Hastane çalışanları için
@@ -579,8 +590,28 @@ const ScheduleView = () => {
         // Çağrı merkezi çalışanları için
         if (datasetType === 'cagri_merkezi' || employeeId.startsWith('CM_')) {
           name = `Çalışan ${employeeId.replace('CM_E', '').replace('CM_', '')}`;
-          department = 'Genel Çağrı';
-          role = 'Çağrı Alıcı';
+
+          // Gerçek departman dağılımına göre atama (CSV'deki oranlar)
+          const rand = Math.random();
+          if (rand < 0.45) {
+            department = 'Genel Çağrı';
+            role = 'Çağrı Alıcı';
+          } else if (rand < 0.65) {
+            department = 'Polis Yönlendirme';
+            role = 'Yönlendirici';
+          } else if (rand < 0.80) {
+            department = 'Yönetim';
+            role = 'Vardiya Amiri';
+          } else if (rand < 0.90) {
+            department = 'Sağlık Yönlendirme';
+            role = 'Yönlendirici';
+          } else if (rand < 0.95) {
+            department = 'Teknik Operasyonlar';
+            role = 'Teknik Destek';
+          } else {
+            department = 'İtfaiye Yönlendirme';
+            role = 'Yönlendirici';
+          }
         }
         // Hastane çalışanları için
         else {

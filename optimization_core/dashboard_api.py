@@ -63,15 +63,45 @@ def calculate_workload_balance_score(std_dev):
         return int(round(score))  # Tam sayıya yuvarla
 
 def load_optimization_result():
-    """Son optimizasyon sonucunu yükler."""
+    """Son optimizasyon sonucunu database'den yükler."""
     try:
-        result_path = os.path.join(get_project_root(), "optimization_result.json")
-        if os.path.exists(result_path):
-            with open(result_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        return None
+        from database import OptimizationResult, get_db
+        db = next(get_db())
+        
+        # Database'den en son optimization sonucunu al
+        latest_result = db.query(OptimizationResult).order_by(
+            OptimizationResult.created_at.desc()
+        ).first()
+
+        if latest_result:
+            # Database sonucunu JSON formatına dönüştür
+            return {
+                "status": latest_result.status,
+                "solver_status_message": latest_result.solver_status_message,
+                "processing_time_seconds": float(latest_result.processing_time_seconds) if latest_result.processing_time_seconds else None,
+                "objective_value": float(latest_result.objective_value) if latest_result.objective_value else None,
+                "solution": latest_result.solution_data,
+                "metrics": latest_result.metrics,
+                "error_details": None
+            }
+        else:
+            # Fallback: JSON dosyasından oku
+            logger.warning("Database'de sonuç yok, JSON fallback deneniyor")
+            result_path = os.path.join(get_project_root(), "optimization_result.json")
+            if os.path.exists(result_path):
+                with open(result_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            return None
     except Exception as e:
-        logger.error(f"Optimizasyon sonucu yüklenirken hata: {e}")
+        logger.error(f"Database'den optimizasyon sonucu yüklenirken hata: {e}")
+        # Fallback: JSON dosyasından oku
+        try:
+            result_path = os.path.join(get_project_root(), "optimization_result.json")
+            if os.path.exists(result_path):
+                with open(result_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except Exception as fallback_error:
+            logger.error(f"JSON fallback da başarısız: {fallback_error}")
         return None
 
 # API Endpoint'leri

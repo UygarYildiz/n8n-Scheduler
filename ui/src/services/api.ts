@@ -138,61 +138,40 @@ export const api = {
   // Optimizasyon sonuçlarını alma
   getOptimizationResults: async () => {
     try {
-      // Önce localStorage'dan sonuçları kontrol et
-      const savedResults = localStorage.getItem('optimizationResults');
-      if (savedResults) {
-        console.log('Optimizasyon sonuçları localStorage\'dan alındı');
-        return JSON.parse(savedResults);
-      }
-
-      // Eğer localStorage'da sonuç yoksa, API'den almayı dene
-      try {
-        // API'den sonuçları al (backend'den)
-        const response = await axios.get('/api/results');
-        console.log('Optimizasyon sonuçları API\'den alındı');
-        return response.data;
-      } catch (apiError) {
-        console.error('API\'den optimizasyon sonuçlarını alma hatası:', apiError);
-
-        // Son çare olarak, kök dizindeki optimization_result.json dosyasını kontrol et
-        try {
-          // Kök dizindeki dosyayı kontrol et (API tarafından oluşturulan)
-          const response = await axios.get('/optimization_result.json');
-          console.log('Optimizasyon sonuçları kök dizindeki dosyadan alındı');
-          return response.data;
-        } catch (fileError) {
-          console.error('Dosyadan optimizasyon sonuçlarını alma hatası:', fileError);
-          throw new Error('Optimizasyon sonuçları bulunamadı. Lütfen önce bir optimizasyon çalıştırın.');
-        }
-      }
+      // Doğrudan database-based API'den sonuçları al
+      const response = await axios.get('/api/results');
+      console.log('Optimizasyon sonuçları database API\'den alındı');
+      return response.data;
     } catch (error) {
-      console.error('Optimizasyon sonuçlarını alma hatası:', error);
-      throw error;
+      console.error('Database API\'den optimizasyon sonuçlarını alma hatası:', error);
+      throw new Error('Optimizasyon sonuçları bulunamadı. Lütfen önce bir optimizasyon çalıştırın.');
     }
   },
 
   // Results sayfası için optimizasyon sonuçlarını alma
   getResults: async () => {
     try {
-      // Doğrudan API'den sonuçları al
+      // Doğrudan database-based API'den sonuçları al
       const response = await axios.get('/api/results');
-      console.log('Results sayfası için optimizasyon sonuçları API\'den alındı');
+      console.log('Results sayfası için optimizasyon sonuçları database API\'den alındı');
       return response.data;
     } catch (error) {
-      console.error('Results sayfası için optimizasyon sonuçlarını alma hatası:', error);
+      console.error('Results sayfası için database API hatası:', error);
       throw new Error('Optimizasyon sonuçları bulunamadı. Lütfen önce bir optimizasyon çalıştırın.');
     }
   },
 
-  // Optimizasyon sonuçlarını kaydetme
-  saveOptimizationResults: (results: any) => {
+
+
+  // En son optimization sonucunu ID ile al
+  getLatestOptimizationResult: async () => {
     try {
-      localStorage.setItem('optimizationResults', JSON.stringify(results));
-      console.log('Optimizasyon sonuçları localStorage\'a kaydedildi');
-      return true;
+      const response = await axios.get('/api/results/latest');
+      console.log('Latest optimization result database\'den alındı');
+      return response.data;
     } catch (error) {
-      console.error('Optimizasyon sonuçlarını kaydetme hatası:', error);
-      return false;
+      console.error('Latest optimization result alma hatası:', error);
+      throw new Error('En son optimization sonucu bulunamadı.');
     }
   },
 

@@ -93,6 +93,8 @@ export interface OptimizationResponse {
   error_details?: string;
 }
 
+
+
 // Veri seti tipi
 export interface Dataset {
   id: string;

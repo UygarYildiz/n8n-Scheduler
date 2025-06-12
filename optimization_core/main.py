@@ -416,13 +416,54 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
             metrics=metrics_data # +++ Metrikleri yanıta ekle +++
         )
 
-        # Sonuçları optimization_result.json dosyasına kaydet
+        # JSON dosyası artık kullanılmıyor - Sadece database kullanılıyor
+        logger.info("Optimizasyon sonuçları database'e kaydedilecek (JSON dosyası oluşturulmayacak)")
+
+        # YENI: Database'e de kaydet (güvenli migration)
         try:
-            script_dir = os.path.dirname(os.path.dirname(__file__))
-            result_path = os.path.join(script_dir, "optimization_result.json")
-            with open(result_path, 'w', encoding='utf-8') as f:
-                json.dump(response.model_dump(), f, indent=2, ensure_ascii=False)
-            logger.info(f"Optimizasyon sonuçları {result_path} dosyasına kaydedildi.")
+            from database import OptimizationResult, get_db
+            from datetime import date, datetime
+            
+            def json_serializer(obj):
+                """Custom JSON serializer for date/datetime/time objects"""
+                from datetime import date, datetime, time
+                if isinstance(obj, (date, datetime)):
+                    return obj.isoformat()
+                elif isinstance(obj, time):
+                    return obj.strftime("%H:%M:%S")
+                raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+            
+            db = next(get_db())
+            
+            # Default user_id (anonymous) - şimdilik authentication olmadığı için
+            # Gerçek uygulamada current_user'dan alınacak
+            DEFAULT_USER_ID = 1  # admin user
+            
+            # JSON-serializable veri hazırla
+            input_params_serializable = json.loads(json.dumps(request_data.model_dump(), default=json_serializer))
+            solution_data_serializable = json.loads(json.dumps(response.solution.model_dump(), default=json_serializer)) if response.solution else None
+            metrics_data_serializable = json.loads(json.dumps(response.metrics.model_dump(), default=json_serializer)) if response.metrics else None
+            
+            db_result = OptimizationResult(
+                user_id=DEFAULT_USER_ID,
+                organization_id=1,  # Default organization
+                input_parameters=input_params_serializable,
+                solution_data=solution_data_serializable,
+                metrics=metrics_data_serializable,
+                status=status,
+                solver_status_message=response.solver_status_message,
+                processing_time_seconds=float(response.processing_time_seconds) if response.processing_time_seconds else None,
+                objective_value=float(response.objective_value) if response.objective_value else None
+            )
+            
+            db.add(db_result)
+            db.commit()
+            db.refresh(db_result)
+            logger.info(f"Optimizasyon sonuçları database'e kaydedildi (ID: {db_result.id})")
+            
+        except Exception as db_error:
+            logger.error(f"Database'e kaydetme hatası: {db_error}", exc_info=True)
+            # Database kaydetme hatası - sistem tümüyle database'e bağımlı
 
             # Aktivite log dosyasına kayıt ekle
             try:
@@ -481,24 +522,29 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
     except Exception as e:
         logger.error(f"Optimizasyon sırasında kritik hata: {e}", exc_info=True)
 
-        # Hata durumunda da sonuçları dosyaya kaydet
+        # Hata durumunda database'e kaydetmeye çalış (eğer mümkünse)
         try:
-            error_response = OptimizationResponse(
-                status="ERROR",
-                solver_status_message=None,
-                processing_time_seconds=None,
-                objective_value=None,
-                solution=None,
+            from database import OptimizationResult, get_db
+            
+            db = next(get_db())
+            
+            error_result = OptimizationResult(
+                user_id=1,  # Default user
+                organization_id=1,
+                input_parameters=request_data.model_dump() if 'request_data' in locals() else {},
+                solution_data=None,
                 metrics=None,
-                error_details=str(e)
+                status="ERROR",
+                solver_status_message=str(e),
+                processing_time_seconds=None,
+                objective_value=None
             )
-            script_dir = os.path.dirname(os.path.dirname(__file__))
-            result_path = os.path.join(script_dir, "optimization_result.json")
-            with open(result_path, 'w', encoding='utf-8') as f:
-                json.dump(error_response.model_dump(), f, indent=2, ensure_ascii=False)
-            logger.info(f"Hata durumu optimization_result.json dosyasına kaydedildi.")
+            
+            db.add(error_result)
+            db.commit()
+            logger.info(f"Hata durumu database'e kaydedildi (ID: {error_result.id})")
         except Exception as save_error:
-            logger.error(f"Hata durumu dosyaya kaydedilirken ikincil hata: {save_error}", exc_info=True)
+            logger.error(f"Hata durumu database'e kaydedilirken ikincil hata: {save_error}", exc_info=True)
 
         # Hata durumunda istemciye detaylı hata mesajı gönderme (güvenlik)
         # Sadece genel bir hata mesajı ve loglarda detay kalsın
@@ -509,6 +555,8 @@ async def run_optimization(request_data: OptimizationRequest = Body(...)):
     total_api_time = end_time - start_time
     logger.info(f"Optimizasyon isteği tamamlandı. Toplam API süresi: {total_api_time:.2f}s")
     return response
+
+
 
 # --- API Router'larını Include Et ---
 # Authentication router'ı ekle

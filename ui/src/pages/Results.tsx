@@ -250,30 +250,32 @@ const Results = () => {
         if (isCallCenter) {
           // Çağrı merkezi için departman ve rol dağılımları
           setDepartmentChartData({
-            labels: ['Genel Çağrı', 'Teknik Destek', 'Müşteri Hizmetleri', 'Satış'],
+            labels: ['Genel Çağrı', 'Polis Yönlendirme', 'Sağlık Yönlendirme', 'İtfaiye Yönlendirme', 'Teknik Operasyonlar', 'Yönetim'],
             datasets: [
               {
                 ...departmentChartData.datasets[0],
                 data: [
-                  Math.floor(data.solution.assignments.length * 0.4),
-                  Math.floor(data.solution.assignments.length * 0.3),
-                  Math.floor(data.solution.assignments.length * 0.2),
-                  Math.floor(data.solution.assignments.length * 0.1)
+                  Math.floor(data.solution.assignments.length * 0.25),
+                  Math.floor(data.solution.assignments.length * 0.20),
+                  Math.floor(data.solution.assignments.length * 0.20),
+                  Math.floor(data.solution.assignments.length * 0.17),
+                  Math.floor(data.solution.assignments.length * 0.10),
+                  Math.floor(data.solution.assignments.length * 0.08)
                 ]
               }
             ]
           });
 
           setRoleChartData({
-            labels: ['Çağrı Alıcı', 'Takım Lideri', 'Süpervizör', 'Yönetici'],
+            labels: ['Çağrı Alıcı', 'Yönlendirici', 'Vardiya Amiri', 'Teknik Destek'],
             datasets: [
               {
                 ...roleChartData.datasets[0],
                 data: [
-                  Math.floor(data.solution.assignments.length * 0.7),
+                  Math.floor(data.solution.assignments.length * 0.45),
+                  Math.floor(data.solution.assignments.length * 0.30),
                   Math.floor(data.solution.assignments.length * 0.15),
-                  Math.floor(data.solution.assignments.length * 0.1),
-                  Math.floor(data.solution.assignments.length * 0.05)
+                  Math.floor(data.solution.assignments.length * 0.10)
                 ]
               }
             ]

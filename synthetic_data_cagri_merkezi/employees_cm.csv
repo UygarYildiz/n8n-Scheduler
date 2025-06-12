@@ -1,81 +1,89 @@
 employee_id,name,role,department
-CM_E001,Canan Aydın,Vardiya Amiri,Yönetim
-CM_E002,Mert Alp,Yönlendirici,Sağlık Yönlendirme
-CM_E003,Ahmet Koç,Çağrı Alıcı,Genel Çağrı
-CM_E004,Emre Güler,Çağrı Alıcı,Genel Çağrı
-CM_E005,Eda Kılıç,Yönlendirici,Polis Yönlendirme
-CM_E006,Zeynep Taş,Çağrı Alıcı,Genel Çağrı
-CM_E007,Osman Bulut,Yönlendirici,Polis Yönlendirme
-CM_E008,Deniz Yıldırım,Teknik Destek,Teknik Operasyonlar
-CM_E009,Hatice Koç,Vardiya Amiri,Yönetim
-CM_E010,Yasemin Yüksel,Vardiya Amiri,Yönetim
-CM_E011,İsmail Kaya,Çağrı Alıcı,Genel Çağrı
-CM_E012,Ayşe Yılmaz,Vardiya Amiri,Yönetim
-CM_E013,Tuğba Tekin,Vardiya Amiri,Yönetim
-CM_E014,Nalan Yüksel,Yönlendirici,Polis Yönlendirme
-CM_E015,Gökhan Yılmaz,Çağrı Alıcı,Genel Çağrı
-CM_E016,Hüseyin Avcı,Yönlendirici,Polis Yönlendirme
-CM_E017,Merve Aslan,Çağrı Alıcı,Genel Çağrı
-CM_E018,Hasan Şimşek,Çağrı Alıcı,Genel Çağrı
-CM_E019,Deniz Şimşek,Vardiya Amiri,Yönetim
-CM_E020,Hande Demir,Çağrı Alıcı,Genel Çağrı
-CM_E021,Melek Kılıç,Çağrı Alıcı,Genel Çağrı
-CM_E022,Yasin Yalçın,Yönlendirici,Sağlık Yönlendirme
-CM_E023,Hüseyin Özdemir,Yönlendirici,İtfaiye Yönlendirme
-CM_E024,Ali Yıldırım,Çağrı Alıcı,Genel Çağrı
-CM_E025,Mert Polat,Çağrı Alıcı,Genel Çağrı
-CM_E026,Hülya Erdoğan,Çağrı Alıcı,Genel Çağrı
-CM_E027,Bahar Şimşek,Çağrı Alıcı,Genel Çağrı
-CM_E028,Ali Özdemir,Çağrı Alıcı,Genel Çağrı
-CM_E029,Gül Aksoy,Yönlendirici,İtfaiye Yönlendirme
-CM_E030,Baran Akbaş,Çağrı Alıcı,Genel Çağrı
-CM_E031,Zeynep Polat,Çağrı Alıcı,Genel Çağrı
-CM_E032,Meltem Korkmaz,Teknik Destek,Teknik Operasyonlar
-CM_E033,Ömer Yücel,Çağrı Alıcı,Genel Çağrı
-CM_E034,Volkan Polat,Yönlendirici,Sağlık Yönlendirme
-CM_E035,Ömer Yıldırım,Çağrı Alıcı,Genel Çağrı
-CM_E036,Cihan Aktaş,Yönlendirici,Polis Yönlendirme
-CM_E037,Kader Avcı,Vardiya Amiri,Yönetim
-CM_E038,Ebru Arslan,Yönlendirici,Polis Yönlendirme
-CM_E039,Volkan Taş,Yönlendirici,İtfaiye Yönlendirme
-CM_E040,Cem Öztürk,Çağrı Alıcı,Genel Çağrı
-CM_E041,Necati Korkmaz,Yönlendirici,İtfaiye Yönlendirme
-CM_E042,Cihan Kara,Yönlendirici,İtfaiye Yönlendirme
-CM_E043,Hüseyin Korkmaz,Çağrı Alıcı,Genel Çağrı
-CM_E044,Nalan Özdemir,Yönlendirici,Polis Yönlendirme
-CM_E045,Gamze Şimşek,Çağrı Alıcı,Genel Çağrı
-CM_E046,Hülya Yılmaz,Teknik Destek,Teknik Operasyonlar
-CM_E047,Zafer Kaya,Çağrı Alıcı,Genel Çağrı
-CM_E048,Levent Bulut,Çağrı Alıcı,Genel Çağrı
-CM_E049,İlknur Yılmaz,Çağrı Alıcı,Genel Çağrı
-CM_E050,Gökhan Özdemir,Çağrı Alıcı,Genel Çağrı
-CM_E051,Cem Yalçın,Çağrı Alıcı,Genel Çağrı
-CM_E052,Melek Kurt,Yönlendirici,Polis Yönlendirme
-CM_E053,Pınar Yılmaz,Vardiya Amiri,Yönetim
-CM_E054,Ferhat Polat,Teknik Destek,Teknik Operasyonlar
-CM_E055,Fatih Kaplan,Yönlendirici,Sağlık Yönlendirme
-CM_E056,Tarık Aslan,Çağrı Alıcı,Genel Çağrı
-CM_E057,Cihan Koç,Yönlendirici,Polis Yönlendirme
-CM_E058,İlknur Yüksel,Yönlendirici,İtfaiye Yönlendirme
-CM_E059,Lale Alp,Yönlendirici,Sağlık Yönlendirme
-CM_E060,Burak Alp,Yönlendirici,Polis Yönlendirme
-CM_E061,Hasan Öztürk,Çağrı Alıcı,Genel Çağrı
-CM_E062,Lale Erdoğan,Yönlendirici,İtfaiye Yönlendirme
-CM_E063,Cem Yalçın,Çağrı Alıcı,Genel Çağrı
-CM_E064,Polat Erdoğan,Vardiya Amiri,Yönetim
-CM_E065,Burak Çelik,Çağrı Alıcı,Genel Çağrı
-CM_E066,Zeliha Çelik,Vardiya Amiri,Yönetim
-CM_E067,Aslı Şahin,Çağrı Alıcı,Genel Çağrı
-CM_E068,Ali Çelik,Çağrı Alıcı,Genel Çağrı
-CM_E069,Ufuk Aksoy,Vardiya Amiri,Yönetim
-CM_E070,Ümit Taş,Çağrı Alıcı,Genel Çağrı
-CM_E071,Mehmet Yılmaz,Yönlendirici,Polis Yönlendirme
-CM_E072,Alper Ateş,Vardiya Amiri,Yönetim
-CM_E073,Zeynep Arslan,Çağrı Alıcı,Genel Çağrı
-CM_E074,Serkan Polat,Teknik Destek,Teknik Operasyonlar
-CM_E075,Gamze Korkmaz,Çağrı Alıcı,Genel Çağrı
-CM_E076,Vildan Avcı,Yönlendirici,Sağlık Yönlendirme
-CM_E077,Mert Yücel,Çağrı Alıcı,Genel Çağrı
-CM_E078,Yasin Yıldız,Çağrı Alıcı,Genel Çağrı
-CM_E079,Meltem Demir,Çağrı Alıcı,Genel Çağrı
-CM_E080,Gül Ateş,Yönlendirici,Sağlık Yönlendirme
+CM_E001,Elif Taş,Çağrı Alıcı,Genel Çağrı
+CM_E002,Gürkan Kurt,Çağrı Alıcı,Genel Çağrı
+CM_E003,Osman Kılıç,Vardiya Amiri,Yönetim
+CM_E004,Fatih Kaya,Vardiya Amiri,Yönetim
+CM_E005,Pınar Aktaş,Çağrı Alıcı,Polis Yönlendirme
+CM_E006,Hülya Kurt,Çağrı Alıcı,Polis Yönlendirme
+CM_E007,Elif Kılıç,Çağrı Alıcı,Genel Çağrı
+CM_E008,Recep Şimşek,Vardiya Amiri,Yönetim
+CM_E009,Gürkan Erdoğan,Çağrı Alıcı,Genel Çağrı
+CM_E010,Erdem Özdemir,Teknik Destek,Teknik Operasyonlar
+CM_E011,Meltem Korkmaz,Çağrı Alıcı,Polis Yönlendirme
+CM_E012,Leyla Yüksel,Yönlendirici,İtfaiye Yönlendirme
+CM_E013,Alper Avcı,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E014,Gökhan Kara,Yönlendirici,Polis Yönlendirme
+CM_E015,Hüseyin Özkan,Çağrı Alıcı,İtfaiye Yönlendirme
+CM_E016,Mustafa Şahin,Yönlendirici,İtfaiye Yönlendirme
+CM_E017,Zafer Aktaş,Yönlendirici,İtfaiye Yönlendirme
+CM_E018,Ayşe Aksoy,Yönlendirici,İtfaiye Yönlendirme
+CM_E019,Elif Şahin,Çağrı Alıcı,İtfaiye Yönlendirme
+CM_E020,Alper Alp,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E021,Ferhat Bulut,Yönlendirici,İtfaiye Yönlendirme
+CM_E022,Erdem Şimşek,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E023,Emre Aydın,Yönlendirici,Sağlık Yönlendirme
+CM_E024,Esra Erdoğan,Teknik Destek,Teknik Operasyonlar
+CM_E025,Zafer Güler,Çağrı Alıcı,Teknik Operasyonlar
+CM_E026,Leyla Aktaş,Yönlendirici,Sağlık Yönlendirme
+CM_E027,Rabia Demir,Çağrı Alıcı,Genel Çağrı
+CM_E028,Mert Yılmaz,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E029,Volkan Arslan,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E030,Volkan Akbaş,Çağrı Alıcı,Teknik Operasyonlar
+CM_E031,Vildan Öztürk,Çağrı Alıcı,Polis Yönlendirme
+CM_E032,Aslı Yüksel,Vardiya Amiri,Yönetim
+CM_E033,Kübra Ateş,Yönlendirici,İtfaiye Yönlendirme
+CM_E034,Yasemin Arslan,Yönlendirici,Sağlık Yönlendirme
+CM_E035,Jülide Koç,Çağrı Alıcı,Polis Yönlendirme
+CM_E036,Jale Güler,Yönlendirici,Sağlık Yönlendirme
+CM_E037,Seda Kara,Yönlendirici,Polis Yönlendirme
+CM_E038,İnci Şimşek,Çağrı Alıcı,İtfaiye Yönlendirme
+CM_E039,Bahar Çakır,Vardiya Amiri,Yönetim
+CM_E040,Mustafa Çelik,Teknik Destek,Teknik Operasyonlar
+CM_E041,Polat Güneş,Çağrı Alıcı,Teknik Operasyonlar
+CM_E042,Kader Aktaş,Vardiya Amiri,Yönetim
+CM_E043,İsmail Aksoy,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E044,Recep Güneş,Yönlendirici,Polis Yönlendirme
+CM_E045,Polat Öztürk,Çağrı Alıcı,Genel Çağrı
+CM_E046,Ufuk Yıldız,Yönlendirici,İtfaiye Yönlendirme
+CM_E047,Tarık Avcı,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E048,Figen Aydın,Teknik Destek,Teknik Operasyonlar
+CM_E049,Merve Aksoy,Vardiya Amiri,Yönetim
+CM_E050,İbrahim Taş,Vardiya Amiri,Yönetim
+CM_E051,Aslı Çelik,Çağrı Alıcı,İtfaiye Yönlendirme
+CM_E052,Leyla Kara,Yönlendirici,Sağlık Yönlendirme
+CM_E053,Elif Yılmaz,Çağrı Alıcı,İtfaiye Yönlendirme
+CM_E054,Emre Akbaş,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E055,Mustafa Doğan,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E056,Kübra Çetin,Vardiya Amiri,Yönetim
+CM_E057,Fatih Kara,Yönlendirici,Sağlık Yönlendirme
+CM_E058,Doğan Yüksel,Yönlendirici,Sağlık Yönlendirme
+CM_E059,İlknur Yalçın,Çağrı Alıcı,Genel Çağrı
+CM_E060,Zafer Bulut,Teknik Destek,Teknik Operasyonlar
+CM_E061,Mehmet Şahin,Yönlendirici,Sağlık Yönlendirme
+CM_E062,Merve Özkan,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E063,İnci Kartal,Çağrı Alıcı,Yönetim
+CM_E064,Melek Bulut,Çağrı Alıcı,Polis Yönlendirme
+CM_E065,Serkan Aktaş,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E066,Figen Çakır,Çağrı Alıcı,Polis Yönlendirme
+CM_E067,Seda Aydın,Yönlendirici,Sağlık Yönlendirme
+CM_E068,Ercan Ateş,Vardiya Amiri,Yönetim
+CM_E069,İnci Akbaş,Yönlendirici,İtfaiye Yönlendirme
+CM_E070,Ferhat Alp,Yönlendirici,Polis Yönlendirme
+CM_E071,Zeliha Kaya,Çağrı Alıcı,Genel Çağrı
+CM_E072,İnci Şahin,Vardiya Amiri,Yönetim
+CM_E073,Figen Kaya,Vardiya Amiri,Yönetim
+CM_E074,Rabia Güler,Çağrı Alıcı,İtfaiye Yönlendirme
+CM_E075,Ebru Kurt,Vardiya Amiri,Yönetim
+CM_E076,Baran Demir,Çağrı Alıcı,Genel Çağrı
+CM_E077,Ali Şahin,Çağrı Alıcı,Yönetim
+CM_E078,Zeynep Güler,Vardiya Amiri,Yönetim
+CM_E079,Elif Kara,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E080,Özge Özkan,Çağrı Alıcı,Sağlık Yönlendirme
+CM_E_cfg_minstaff_081,Kübra Akbaş,Temsilci,Müşteri Hizmetleri
+CM_E_cfg_minstaff_082,Nalan Aydın,Temsilci,Müşteri Hizmetleri
+CM_E_cfg_minstaff_083,Kemal Yıldırım,Temsilci,Müşteri Hizmetleri
+CM_E_cfg_minstaff_084,Recep Özkan,Temsilci,Müşteri Hizmetleri
+CM_E_cfg_minstaff_085,Yasemin Yıldız,Uzman Temsilci,Teknik Destek
+CM_E_cfg_minstaff_086,Cem Aydın,Temsilci,Teknik Destek
+CM_E_cfg_minstaff_087,Ahmet Çakır,Uzman Temsilci,Satış
+CM_E_cfg_minstaff_088,Ali Kılıç,Süpervizör,Yönetim

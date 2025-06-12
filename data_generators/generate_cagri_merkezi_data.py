@@ -33,14 +33,14 @@ ROLES = {
 }
 
 # Departman Tanımları (Çağrı Merkezi Masaları/Fonksiyonları)
-# Konfigürasyon dosyasındaki gereksinimlere göre departman dağılımları ayarlandı
+# Optimizasyon için daha dengeli dağılım - Genel Çağrı oranı düşürüldü
 DEPARTMENTS = {
-    "Genel Çağrı": 0.35,  # 0.4'ten düşürüldü
-    "Polis Yönlendirme": 0.18,  # 0.15'ten artırıldı - Polis Kriz Protokolleri için
-    "Sağlık Yönlendirme": 0.18,  # 0.15'ten artırıldı - Temel Tıbbi Triyaj Bilgisi için
-    "İtfaiye Yönlendirme": 0.15,
-    "Teknik Operasyonlar": 0.08,  # 0.1'den düşürüldü
-    "Yönetim": 0.06  # 0.05'ten artırıldı - Vardiya Amiri sayısını artırmak için
+    "Genel Çağrı": 0.25,  # 0.35'ten düşürüldü - Daha dengeli dağılım için
+    "Polis Yönlendirme": 0.20,  # 0.18'den artırıldı
+    "Sağlık Yönlendirme": 0.20,  # 0.18'den artırıldı 
+    "İtfaiye Yönlendirme": 0.17,  # 0.15'ten artırıldı
+    "Teknik Operasyonlar": 0.10,  # 0.08'den artırıldı
+    "Yönetim": 0.08  # 0.06'dan artırıldı
 }
 
 # Yetenekler (Rol Bazlı - Çağrı Merkezi)
@@ -335,10 +335,8 @@ def generate_employees(num_employees, roles_distribution, departments_distributi
         emp_id = f"CM_E{str(i).zfill(3)}" # CM: Çağrı Merkezi
         role = random.choices(roles_list, role_probabilities, k=1)[0]
 
-        department = ""
-        if role == "Çağrı Alıcı":
-            department = "Genel Çağrı"
-        elif role == "Yönlendirici":
+        # Departman atamasını rol bazlı sınırlamadan çıkarıp, daha esnek hale getiriyoruz
+        if role == "Yönlendirici":
             # Yönlendiricileri belirli masalara ata
             possible_desks = ["Polis Yönlendirme", "Sağlık Yönlendirme", "İtfaiye Yönlendirme"]
             department = random.choice(possible_desks)
@@ -346,7 +344,7 @@ def generate_employees(num_employees, roles_distribution, departments_distributi
             department = "Yönetim"
         elif role == "Teknik Destek":
             department = "Teknik Operasyonlar"
-        else: # Diğer roller için genel bir atama
+        else: # Çağrı Alıcı ve diğer roller için departman dağılımını kullan
             department = random.choices(dept_list, dept_probabilities, k=1)[0]
 
         # Gerçekçi Türkçe isim üret

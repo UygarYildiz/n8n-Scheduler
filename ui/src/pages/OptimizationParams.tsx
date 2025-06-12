@@ -134,22 +134,12 @@ const OptimizationParams = () => {
           setResultMessage(`Çizelge oluşturuldu. Çözüm durumu: ${result.status}`);
         }
 
-        // Sonuçları localStorage'a kaydet
+        // Sonuçlar artık backend tarafından otomatik olarak database'e kaydediliyor
         if (result.solution && result.solution.assignments) {
-          // Veri setini belirle
-          const datasetType = selectedDataset === 'cagri_merkezi' ? 'cagri_merkezi' : 'hastane';
-
-          // Sonuçları kaydet
-          api.saveOptimizationResults({
-            status: result.status,
-            solution: result.solution,
-            datasetType: datasetType
-          });
-
-          console.log('Optimizasyon sonuçları kaydedildi:', {
+          console.log('Optimizasyon sonuçları backend tarafından database\'e kaydedildi:', {
             status: result.status,
             assignmentsCount: result.solution.assignments.length,
-            datasetType: datasetType
+            datasetType: selectedDataset === 'cagri_merkezi' ? 'cagri_merkezi' : 'hastane'
           });
         }
 
