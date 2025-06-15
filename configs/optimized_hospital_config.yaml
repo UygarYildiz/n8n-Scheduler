@@ -2,16 +2,16 @@ institution_id: "optimized_hospital_test"
 institution_name: "Optimized Test Hastanesi"
 problem_type: "shift_scheduling"
 
-# Optimizasyon Çekirdeği Parametreleri - İyileştirilmiş Ağırlıklar
+# Optimizasyon Çekirdeği Parametreleri - Dengeli Ağırlıklar
 optimization_core:
   solver_time_limit_seconds: 60
-  # Preference Focused - En iyi performans için optimize edilmiş ağırlıklar
+  # Balanced Multi-Objective - Gerçek çok amaçlı optimizasyon için dengeli ağırlıklar
   objective_weights:
-    minimize_overstaffing: 2        # Preference Focused (1 → 2)
-    minimize_understaffing: 6       # Azaltıldı (10 → 6)
-    maximize_preferences: 8         # Maksimum artırıldı (2 → 8)
-    balance_workload: 3             # Artırıldı (0.5 → 3)
-    maximize_shift_coverage: 2      # Artırıldı (1 → 2)
+    minimize_understaffing: 10      # Hasta güvenliği için en yüksek öncelik
+    maximize_shift_coverage: 5      # Operasyonel süreklilik
+    maximize_preferences: 4         # Çalışan memnuniyeti, makul seviye
+    minimize_overstaffing: 3        # Maliyet kontrolü
+    balance_workload: 2             # Uzun vadeli sürdürülebilirlik
 
 # Modele Eklenecek Dinamik Kısıtlar ve Kurallar
 rules:

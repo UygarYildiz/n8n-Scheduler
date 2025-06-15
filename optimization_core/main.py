@@ -12,6 +12,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator, ValidationError
 from datetime import date, datetime, time as dt_time # time ile çakışmaması için dt_time
 
+# Uvicorn access log filtreleme için
+class EndpointFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        # /v1/models endpoint'ine yapılan istekleri loglamayı engelle
+        return record.getMessage().find("/v1/models") == -1
+
+# Uvicorn access logger'ına filtreyi ekle
+logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
+
 # Authentication ve Database modüllerini içe aktar
 import os
 import sys
@@ -232,6 +241,44 @@ async def health_check():
         "message": "Optimizasyon API çalışıyor!",
         "timestamp": datetime.now().isoformat(),
         "database_connection": test_connection()
+    }
+
+# Void.exe editörü için dummy AI models endpoint'i
+@app.get("/v1/models")
+async def get_models():
+    """AI model listesi (Void.exe editörü için dummy endpoint)"""
+    return {
+        "object": "list",
+        "data": [
+            {
+                "id": "optimization-model",
+                "object": "model",
+                "created": 1677610602,
+                "owned_by": "optimization-core",
+                "permission": [],
+                "root": "optimization-model",
+                "parent": None
+            }
+        ]
+    }
+
+# Void.exe editörü için dummy AI models endpoint'i
+@app.get("/v1/models")
+async def get_models():
+    """AI model listesi (Void.exe editörü için dummy endpoint)"""
+    return {
+        "object": "list",
+        "data": [
+            {
+                "id": "optimization-model",
+                "object": "model",
+                "created": 1677610602,
+                "owned_by": "optimization-core",
+                "permission": [],
+                "root": "optimization-model",
+                "parent": None
+            }
+        ]
     }
 
 # --- Startup Event ---
